@@ -1,10 +1,67 @@
-<div class="layout">
+@if (!isLoggedIn) {
+  <div class="login-wrapper">
+    <div class="login-card animate-slide-up">
+      <div class="login-header">
+        <div class="login-logo-container">
+          <!-- Logo Congreso (Futura ruta: assets/img/congreso-logo.png) -->
+          <img src="assets/img/congreso-logo.png" alt="Congreso del Estado de México" class="brand-logo-img hide-img" onload="this.classList.remove('hide-img')" onerror="this.classList.add('hide-img')">
+          <div class="brand-logo-placeholder">
+            <i class="bi bi-building-fill-gear"></i>
+            <div class="brand-logo-text">
+              CONGRESO<br />
+              <span>ESTADO DE MÉXICO</span>
+            </div>
+          </div>
+        </div>
+        <h2>Sistema Institucional</h2>
+        <p>Inicie sesión para acceder a la Intranet</p>
+      </div>
+
+      <form (submit)="hacerLogin($event)" class="login-form">
+        <div class="login-row">
+          <label for="login_user">Usuario o Correo:</label>
+          <div class="input-with-icon">
+            <i class="bi bi-person-fill"></i>
+            <input id="login_user" name="loginUsuario" type="text" [(ngModel)]="loginUsuario" placeholder="Ingrese su usuario..." required />
+          </div>
+        </div>
+
+        <div class="login-row">
+          <label for="login_pass">Contraseña:</label>
+          <div class="input-with-icon">
+            <i class="bi bi-lock-fill"></i>
+            <input id="login_pass" name="loginPassword" type="password" [(ngModel)]="loginPassword" placeholder="Ingrese su contraseña..." required />
+          </div>
+        </div>
+
+        <button type="submit" class="btn-login">
+          <span>Ingresar al Sistema</span>
+          <i class="bi bi-box-arrow-in-right"></i>
+        </button>
+      </form>
+
+      <div class="login-footer">
+        <div class="saf-logo-container flex-center">
+          <!-- Logo SAF (Futura ruta: assets/img/saf-logo.png) -->
+          <img src="assets/img/saf-logo.png" alt="Secretaría de Administración y Finanzas" class="saf-logo-img hide-img" onload="this.classList.remove('hide-img')" onerror="this.classList.add('hide-img')">
+          <div class="saf-placeholder justify-center">
+            <i class="bi bi-wallet2"></i>
+            <div>
+              Secretaría de Administración y Finanzas
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+} @else {
+  <div class="layout">
 
   <header class="top-navbar">
     <div class="brand-section">
       <div class="brand-logo-container">
         <!-- Logo Congreso (Futura ruta: assets/img/congreso-logo.png) -->
-        <img src="assets/img/congreso-logo.png" alt="Congreso del Estado de México" class="brand-logo-img" onerror="this.classList.add('hide-img')">
+        <img src="assets/img/congreso-logo.png" alt="Congreso del Estado de México" class="brand-logo-img hide-img" onload="this.classList.remove('hide-img')" onerror="this.classList.add('hide-img')">
         <div class="brand-logo-placeholder">
           <i class="bi bi-building-fill-gear"></i>
           <div class="brand-logo-text">
@@ -50,7 +107,7 @@
     <div class="navbar-right">
       <div class="saf-logo-container">
         <!-- Logo SAF (Futura ruta: assets/img/saf-logo.png) -->
-        <img src="assets/img/saf-logo.png" alt="Secretaría de Administración y Finanzas" class="saf-logo-img" onerror="this.classList.add('hide-img')">
+        <img src="assets/img/saf-logo.png" alt="Secretaría de Administración y Finanzas" class="saf-logo-img hide-img" onload="this.classList.remove('hide-img')" onerror="this.classList.add('hide-img')">
         <div class="saf-placeholder">
           <i class="bi bi-wallet2"></i>
           <div>
@@ -69,7 +126,7 @@
         <p>{{ descripcionModulo }}</p>
       </div>
 
-      <div class="hero-user-badge">
+      <div class="hero-user-badge clickable" (click)="verPerfilUsuario()" title="Ver detalles de perfil">
         <i class="bi bi-person-circle"></i>
         <div class="user-info-text">
           <span class="user-name">{{ usuarioActual.nombre }}</span>
@@ -96,7 +153,6 @@
               </div>
 
               <div class="message-meta">
-                <span class="message-date">{{ msg.fecha }}</span>
                 @if (msg.estado === 'Nuevo') {
                 <span class="status status-new-sm"><i class="bi bi-star-fill"></i> Nuevo</span>
                 } @else if (msg.estado === 'Pendiente') {
@@ -440,7 +496,7 @@
                 <div class="document-row">
                   <span>Documento:</span>
                   <!-- Ruta de ejemplo para documentos reales: assets/documentos/{{ msg.documento }} -->
-                  <a href="#" target="_blank" rel="noopener noreferrer" (click)="marcarComoVisto(msg)">
+                  <a href="#" (click)="marcarComoVisto(msg); $event.preventDefault(); mostrarNotificacion('Abriendo vista previa del documento...', 'info')">
                     <i class="bi" [class.bi-file-earmark-pdf-fill]="msg.documento.endsWith('.pdf')"
                       [class.bi-file-earmark-word-fill]="msg.documento.endsWith('.docx')"
                       [class.bi-files]="!msg.documento.endsWith('.pdf') && !msg.documento.endsWith('.docx')">
@@ -573,7 +629,7 @@
           <span class="detail-label">Documento Adjunto</span>
           <div class="detail-doc-link">
             <!-- Ruta de ejemplo para documentos reales: assets/documentos/{{ mensajeSeleccionado.documento }} -->
-            <a href="#" target="_blank" rel="noopener noreferrer" (click)="marcarComoVisto(mensajeSeleccionado)">
+            <a href="#" (click)="marcarComoVisto(mensajeSeleccionado); $event.preventDefault(); mostrarNotificacion('Abriendo vista previa del documento...', 'info')">
               <i class="bi" [class.bi-file-earmark-pdf-fill]="mensajeSeleccionado.documento.endsWith('.pdf')"
                 [class.bi-file-earmark-word-fill]="mensajeSeleccionado.documento.endsWith('.docx')"
                 [class.bi-files]="!mensajeSeleccionado.documento.endsWith('.pdf') && !mensajeSeleccionado.documento.endsWith('.docx')">
@@ -599,24 +655,93 @@
   </div>
   }
 
-  <!-- Notificación en pantalla (reemplaza alert() nativo) -->
-  @if (notificacion) {
-  <div class="notificacion-banner" [class.notif-error]="notificacion.tipo === 'error'"
-    [class.notif-exito]="notificacion.tipo === 'exito'" [class.notif-info]="notificacion.tipo === 'info'">
-    <div class="notif-content">
-      @if (notificacion.tipo === 'error') {
-        <i class="bi bi-exclamation-circle-fill"></i>
-      } @else if (notificacion.tipo === 'exito') {
-        <i class="bi bi-check-circle-fill"></i>
-      } @else {
-        <i class="bi bi-info-circle-fill"></i>
-      }
-      <span>{{ notificacion.mensaje }}</span>
+  <!-- Modal de Perfil de Usuario -->
+  @if (mostrarPerfilModal) {
+  <div class="modal-backdrop" (click)="cerrarPerfilUsuario()">
+    <div class="modal-card profile-modal animate-slide-up" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3><i class="bi bi-person-badge-fill"></i> Perfil de Usuario</h3>
+        <button type="button" class="btn-close" (click)="cerrarPerfilUsuario()" title="Cerrar">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="profile-card-header">
+          <div class="profile-avatar">
+            <i class="bi bi-person-circle"></i>
+          </div>
+          <div class="profile-title-block">
+            <h4>{{ usuarioActual.nombre }}</h4>
+            <span class="profile-badge">{{ usuarioActual.rol }}</span>
+          </div>
+        </div>
+
+        <div class="profile-details-grid">
+          <div class="detail-row">
+            <span class="detail-label">Adscripción / Área</span>
+            <div class="detail-value">
+              <i class="bi bi-building"></i>
+              <span>Pendiente de vincular</span>
+            </div>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-label">Puesto / Cargo</span>
+            <div class="detail-value">
+              <i class="bi bi-briefcase-fill"></i>
+              <span>Pendiente de vincular</span>
+            </div>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-label">Correo Institucional</span>
+            <div class="detail-value text-accent">
+              <i class="bi bi-envelope-fill"></i>
+              <span>usuario.intranet@congreso.gob.mx</span>
+            </div>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-label">Número de Empleado</span>
+            <div class="detail-value">
+              <i class="bi bi-hash"></i>
+              <span>Pendiente</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer profile-modal-footer">
+        <button type="button" class="btn-logout" (click)="cerrarSesion()">
+          <i class="bi bi-box-arrow-left"></i>
+          <span>Cerrar Sesión</span>
+        </button>
+        <button type="button" class="btn-modal-close" (click)="cerrarPerfilUsuario()">
+          <span>Cerrar</span>
+        </button>
+      </div>
     </div>
-    <button type="button" class="notif-close" (click)="cerrarNotificacion()" title="Cerrar">
-      <i class="bi bi-x-lg"></i>
-    </button>
   </div>
   }
 
+  </div>
+}
+
+<!-- Notificación en pantalla (reemplaza alert() nativo) -->
+@if (notificacion) {
+<div class="notificacion-banner" [class.notif-error]="notificacion.tipo === 'error'"
+  [class.notif-exito]="notificacion.tipo === 'exito'" [class.notif-info]="notificacion.tipo === 'info'">
+  <div class="notif-content">
+    @if (notificacion.tipo === 'error') {
+      <i class="bi bi-exclamation-circle-fill"></i>
+    } @else if (notificacion.tipo === 'exito') {
+      <i class="bi bi-check-circle-fill"></i>
+    } @else {
+      <i class="bi bi-info-circle-fill"></i>
+    }
+    <span>{{ notificacion.mensaje }}</span>
+  </div>
+  <button type="button" class="notif-close" (click)="cerrarNotificacion()" title="Cerrar">
+    <i class="bi bi-x-lg"></i>
+  </button>
 </div>
+}

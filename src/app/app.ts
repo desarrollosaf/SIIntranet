@@ -31,6 +31,14 @@ export class App {
     if (this.notificacionTimeout) clearTimeout(this.notificacionTimeout);
   }
 
+  // Estado de sesión y login
+  isLoggedIn = false;
+  loginUsuario = '';
+  loginPassword = '';
+
+  // Estado del modal de perfil de usuario
+  mostrarPerfilModal = false;
+
   // Configuración del usuario activo
   usuarioActual = {
     nombre: 'Usuario del sistema',
@@ -231,6 +239,7 @@ export class App {
 
     // Limpiar formulario de redacción
     this.resetearFormulario();
+    this.actualizarFechaHora();
   }
 
   cancelarEnvio(id: number): void {
@@ -315,7 +324,10 @@ export class App {
     event.preventDefault();
     event.stopPropagation();
     msg.estado = 'Eliminado';
-    alert(`El documento "${msg.titulo}" ha sido movido a la Papelera.`);
+    if (this.mensajeSeleccionado && this.mensajeSeleccionado.id === msg.id) {
+      this.mensajeSeleccionado = null;
+    }
+    this.mostrarNotificacion(`El documento "${msg.titulo}" ha sido movido a la Papelera.`, 'info');
   }
 
   // Responder redireccionando
@@ -346,6 +358,40 @@ export class App {
     if (msg.estado !== 'Eliminado' && msg.estado !== 'Cancelado') {
       msg.estado = 'Respondido';
     }
+  }
+
+  // Métodos de autenticación y perfil (Frontend)
+  hacerLogin(event: Event): void {
+    event.preventDefault();
+    if (!this.loginUsuario.trim()) {
+      this.mostrarNotificacion('Por favor ingrese su usuario o correo.', 'error');
+      return;
+    }
+    if (!this.loginPassword.trim()) {
+      this.mostrarNotificacion('Por favor ingrese su contraseña.', 'error');
+      return;
+    }
+
+    // Login exitoso (mock frontend)
+    this.isLoggedIn = true;
+    this.usuarioActual.nombre = this.loginUsuario.trim();
+    this.usuarioActual.rol = 'Usuario Activo';
+  }
+
+  cerrarSesion(): void {
+    this.isLoggedIn = false;
+    this.mostrarPerfilModal = false;
+    this.loginUsuario = '';
+    this.loginPassword = '';
+    this.resetearFormulario();
+  }
+
+  verPerfilUsuario(): void {
+    this.mostrarPerfilModal = true;
+  }
+
+  cerrarPerfilUsuario(): void {
+    this.mostrarPerfilModal = false;
   }
 
 }
