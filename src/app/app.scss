@@ -196,31 +196,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   display: block;
 }
 
-.user-badge {
-  background: white;
-  color: $texto;
-  padding: 8px 16px;
-  border-radius: 12px;
-  font-size: 13px;
-  font-weight: 700;
-  white-space: nowrap;
-  border: 1px solid $borde;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
-  transition: $transition;
 
-  i {
-    font-size: 16px;
-    color: $vino;
-  }
-
-  &:hover {
-    border-color: $vino;
-    box-shadow: 0 4px 12px rgba(133, 0, 63, 0.06);
-  }
-}
 
 // 2. HERO SECTION
 .main-area {
@@ -1074,9 +1050,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   gap: 8px;
 }
 
-.action-link,
-.archive-button,
-.reply-details summary {
+.action-link {
   border: 1px solid $borde;
   background: white;
   color: $texto-suave;
@@ -1102,133 +1076,6 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     background: $vino;
     color: white;
     border-color: $vino;
-  }
-}
-
-.archive-button {
-  width: 100%;
-}
-
-.reply-details {
-  position: relative;
-  width: 100%;
-
-  summary {
-    list-style: none;
-    
-    &::-webkit-details-marker {
-      display: none;
-    }
-  }
-
-  &[open] summary {
-    background: $vino;
-    color: white;
-    border-color: $vino;
-  }
-}
-
-// Formulario de respuestas
-.reply-panel {
-  margin-top: 10px;
-  background: #fafafa;
-  border: 1px solid $borde;
-  border-radius: 12px;
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
-
-  label {
-    color: $texto;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .file-label-small {
-    margin-top: 4px;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-  }
-
-  textarea {
-    width: 100%;
-    min-height: 80px;
-    border: 1px solid $borde;
-    border-radius: 8px;
-    padding: 10px;
-    resize: vertical;
-    font-size: 13px;
-    outline: none;
-    background: white;
-    transition: $transition;
-
-    &:focus {
-      border-color: $vino;
-      box-shadow: 0 0 0 3px rgba(133, 0, 63, 0.08);
-    }
-  }
-
-  input[type="file"] {
-    font-size: 12px;
-    color: $texto-suave;
-    
-    &::file-selector-button {
-      border: 1px solid $borde;
-      background: white;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 11px;
-      font-weight: 700;
-      cursor: pointer;
-      margin-right: 8px;
-      transition: $transition;
-
-      &:hover {
-        background: #f1f5f9;
-        color: $texto;
-      }
-    }
-  }
-}
-
-.reply-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 6px;
-
-  button {
-    border: 0;
-    background: $vino;
-    color: white;
-    border-radius: 6px;
-    padding: 7px 12px;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    transition: $transition;
-
-    &:hover {
-      background: $vino-oscuro;
-    }
-
-    &.btn-light {
-      background: white;
-      border: 1px solid $borde;
-      color: $texto-suave;
-
-      &:hover {
-        background: #f1f5f9;
-        color: $texto;
-      }
-    }
   }
 }
 
@@ -1804,109 +1651,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-// 11. BANNER DESHACER ENVÍO (UNDO SEND TOAST)
-.undo-toast {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 300;
-  background: #0f172a;
-  color: white;
-  border-radius: 14px;
-  padding: 14px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  min-width: 380px;
-  max-width: 520px;
-  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.35);
-  animation: slideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 
-  .undo-toast-content {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 14px;
-    font-weight: 600;
-
-    i {
-      font-size: 18px;
-      color: #34d399;
-    }
-  }
-
-  .undo-toast-actions {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    position: relative;
-  }
-
-  .undo-progress-bar {
-    position: absolute;
-    bottom: -14px;
-    left: -20px;
-    right: -20px;
-    height: 3px;
-    background: rgba(255, 255, 255, 0.12);
-    border-radius: 0 0 14px 14px;
-    overflow: hidden;
-
-    &::after {
-      content: '';
-      display: block;
-      height: 100%;
-      background: #34d399;
-      width: 100%;
-      animation: shrink 7s linear forwards;
-      transform-origin: left;
-    }
-  }
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(-16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-}
-
-@keyframes shrink {
-  from { transform: scaleX(1); }
-  to   { transform: scaleX(0); }
-}
-
-.btn-undo {
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: rgba(255, 255, 255, 0.08);
-  color: white;
-  padding: 8px 14px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: inherit;
-  transition: $transition;
-  white-space: nowrap;
-
-  i {
-    font-size: 14px;
-  }
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.16);
-    border-color: rgba(255, 255, 255, 0.32);
-  }
-}
 
 // 12. MENSAJES RECIENTES INTERACTIVOS EN INICIO
 .card-header-hint {
@@ -2059,4 +1804,294 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 .animate-spin {
   animation: spin 1.2s linear infinite;
   display: inline-block;
+}
+
+// 16. CONTENEDORES DE LOGOS E IMÁGENES CON FALLBACK EN NAVBAR
+.brand-logo-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 52px;
+
+  .brand-logo-img {
+    height: 52px;
+    width: auto;
+    max-width: 220px;
+    object-fit: contain;
+    display: block;
+
+    &.hide-img {
+      display: none;
+    }
+
+    // Si la imagen carga, ocultamos el fallback
+    &:not(.hide-img) ~ .brand-logo-placeholder {
+      display: none;
+    }
+  }
+}
+
+.saf-logo-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+
+  .saf-logo-img {
+    height: 48px;
+    width: auto;
+    max-width: 220px;
+    object-fit: contain;
+    display: block;
+
+    &.hide-img {
+      display: none;
+    }
+
+    // Si la imagen carga, ocultamos el fallback
+    &:not(.hide-img) ~ .saf-placeholder {
+      display: none;
+      border-right: none;
+      padding-right: 0;
+    }
+  }
+}
+
+// 17. DISTINTIVO DE USUARIO EN EL HERO SECTION
+.hero-user-badge {
+  margin-left: auto;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: white;
+  z-index: 2;
+  position: relative;
+  transition: $transition;
+
+  i {
+    font-size: 28px;
+    color: white;
+  }
+
+  .user-info-text {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+
+    .user-name {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+    }
+
+    .user-role {
+      font-size: 11px;
+      opacity: 0.75;
+      font-weight: 500;
+      margin-top: 1px;
+    }
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  }
+}
+
+// 18. SECCIÓN DE MENSAJES ENVIADOS AL FINAL DE LA REDACCIÓN
+.sent-messages-section {
+  margin-top: 32px;
+}
+
+.sent-messages-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.sent-message-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 18px 24px;
+  border-bottom: 1px solid $borde;
+  transition: $transition;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &.item-sending {
+    background: #f8fafc;
+    border-left: 4px solid $azul-linea;
+  }
+
+  &.item-cancelled {
+    background: #fffbfa;
+    border-left: 4px solid #ef4444;
+    opacity: 0.8;
+
+    strong {
+      text-decoration: line-through;
+      color: $texto-suave;
+    }
+  }
+
+  .sent-msg-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+
+    strong {
+      font-size: 15px;
+      color: $texto;
+      font-weight: 700;
+    }
+
+    .sent-msg-details {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .sent-msg-meta {
+      font-size: 12px;
+      color: $texto-suave;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: 500;
+
+      i {
+        color: $vino;
+      }
+    }
+  }
+
+  .sent-msg-status-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+}
+
+// Botón para cancelar envío
+.btn-cancel-send {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fee2e2;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: $transition;
+
+  i {
+    font-size: 13px;
+  }
+
+  &:hover {
+    background: #dc2626;
+    color: white;
+    border-color: #dc2626;
+  }
+}
+
+// Badge de éxito verde
+.status-success-badge {
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+// 19. SISTEMA DE NOTIFICACIONES EN PANTALLA (reemplaza alert() nativo)
+.notificacion-banner {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 400;
+  min-width: 340px;
+  max-width: 560px;
+  border-radius: 14px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.22);
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+  .notif-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    flex: 1;
+    line-height: 1.4;
+
+    i {
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+  }
+
+  .notif-close {
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border-radius: 50%;
+    font-size: 14px;
+    transition: $transition;
+    flex-shrink: 0;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  &.notif-error {
+    background: #1e1e1e;
+    color: white;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+
+    i { color: #f87171; }
+    .notif-close { color: #94a3b8; }
+  }
+
+  &.notif-info {
+    background: #1e293b;
+    color: white;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+
+    i { color: #818cf8; }
+    .notif-close { color: #94a3b8; }
+  }
+
+  &.notif-exito {
+    background: #14532d;
+    color: white;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+
+    i { color: #4ade80; }
+    .notif-close { color: #86efac; }
+  }
 }

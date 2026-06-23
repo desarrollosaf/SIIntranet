@@ -1,39 +1,21 @@
 <div class="layout">
 
-  <!-- Banner Deshacer Envío -->
-  @if (mostrarDeshacer) {
-    <div class="undo-toast">
-      <div class="undo-toast-content">
-        <i class="bi bi-send-check-fill"></i>
-        <span>Mensaje enviado correctamente.</span>
-      </div>
-      <div class="undo-toast-actions">
-        <div class="undo-progress-bar"></div>
-        <button type="button" class="btn-undo" (click)="deshacerEnvio()">
-          <i class="bi bi-arrow-counterclockwise"></i>
-          <span>Deshacer envío</span>
-        </button>
-      </div>
-    </div>
-  }
-
   <header class="top-navbar">
     <div class="brand-section">
-      <!-- Cuando tengas la imagen, usa esto:
-      <img src="assets/img/congreso-logo.png" alt="Congreso del Estado de México" class="brand-logo-img">
-      -->
-
-      <div class="brand-logo-placeholder">
-        <i class="bi bi-building-fill-gear"></i>
-        <div class="brand-logo-text">
-          CONGRESO<br />
-          <span>ESTADO DE MÉXICO</span>
+      <div class="brand-logo-container">
+        <!-- Logo Congreso (Futura ruta: assets/img/congreso-logo.png) -->
+        <img src="assets/img/congreso-logo.png" alt="Congreso del Estado de México" class="brand-logo-img" onerror="this.classList.add('hide-img')">
+        <div class="brand-logo-placeholder">
+          <i class="bi bi-building-fill-gear"></i>
+          <div class="brand-logo-text">
+            CONGRESO<br />
+            <span>ESTADO DE MÉXICO</span>
+          </div>
         </div>
       </div>
 
       <div class="brand-text">
         <strong>Intranet</strong>
-        <span>LXII Legislatura</span>
       </div>
     </div>
 
@@ -66,21 +48,16 @@
     </nav>
 
     <div class="navbar-right">
-      <!-- Cuando tengas la imagen, usa esto:
-      <img src="assets/img/saf-logo.png" alt="Secretaría de Administración y Finanzas" class="saf-logo-img">
-      -->
-
-      <div class="saf-placeholder">
-        <i class="bi bi-wallet2"></i>
-        <div>
-          Secretaría de Administración<br />
-          y Finanzas
+      <div class="saf-logo-container">
+        <!-- Logo SAF (Futura ruta: assets/img/saf-logo.png) -->
+        <img src="assets/img/saf-logo.png" alt="Secretaría de Administración y Finanzas" class="saf-logo-img" onerror="this.classList.add('hide-img')">
+        <div class="saf-placeholder">
+          <i class="bi bi-wallet2"></i>
+          <div>
+            Secretaría de Administración<br />
+            y Finanzas
+          </div>
         </div>
-      </div>
-
-      <div class="user-badge">
-        <i class="bi bi-person-circle"></i>
-        <span>USUARIO</span>
       </div>
     </div>
   </header>
@@ -88,9 +65,16 @@
   <main class="main-area">
     <section class="hero-section">
       <div class="hero-content">
-        <span class="hero-label"><i class="bi bi-shield-check"></i> Sistema institucional</span>
         <h1>{{ tituloModulo }}</h1>
         <p>{{ descripcionModulo }}</p>
+      </div>
+
+      <div class="hero-user-badge">
+        <i class="bi bi-person-circle"></i>
+        <div class="user-info-text">
+          <span class="user-name">{{ usuarioActual.nombre }}</span>
+          <span class="user-role">{{ usuarioActual.rol }}</span>
+        </div>
       </div>
     </section>
 
@@ -105,36 +89,36 @@
 
           <div class="recent-messages-scroll">
             @for (msg of mensajesRecientes; track msg.id) {
-              <div class="recent-message clickable" (click)="verDetallesMensaje(msg)">
-                <div class="message-info">
-                  <strong>{{ msg.titulo }}</strong>
-                  <p>{{ msg.remitente }} · {{ msg.fecha }}</p>
-                </div>
+            <div class="recent-message clickable" (click)="verDetallesMensaje(msg)">
+              <div class="message-info">
+                <strong>{{ msg.titulo }}</strong>
+                <p>{{ msg.remitente }} · {{ msg.fecha }}</p>
+              </div>
 
-                <div class="message-meta">
-                  <span class="message-date">{{ msg.fecha }}</span>
-                  @if (msg.estado === 'Nuevo') {
-                    <span class="status status-new-sm"><i class="bi bi-star-fill"></i> Nuevo</span>
-                  } @else if (msg.estado === 'Pendiente') {
-                    <span class="status status-pending"><i class="bi bi-hourglass-split"></i> Pendiente</span>
-                  } @else if (msg.estado === 'Visto') {
-                    <span class="status status-seen"><i class="bi bi-check2-all"></i> Visto</span>
-                  } @else if (msg.estado === 'Enviando') {
-                    <span class="status status-sending"><i class="bi bi-arrow-repeat"></i> Enviando</span>
-                  } @else if (msg.estado === 'Cancelado') {
-                    <span class="status status-cancelled"><i class="bi bi-x-circle-fill"></i> Cancelado</span>
-                  } @else if (msg.estado === 'Respondido') {
-                    <span class="status status-sent"><i class="bi bi-reply-fill"></i> Respondido</span>
-                  } @else {
-                    <span class="status status-sent"><i class="bi bi-send-fill"></i> {{ msg.estado }}</span>
-                  }
-                </div>
+              <div class="message-meta">
+                <span class="message-date">{{ msg.fecha }}</span>
+                @if (msg.estado === 'Nuevo') {
+                <span class="status status-new-sm"><i class="bi bi-star-fill"></i> Nuevo</span>
+                } @else if (msg.estado === 'Pendiente') {
+                <span class="status status-pending"><i class="bi bi-hourglass-split"></i> Pendiente</span>
+                } @else if (msg.estado === 'Visto') {
+                <span class="status status-seen"><i class="bi bi-check2-all"></i> Visto</span>
+                } @else if (msg.estado === 'Enviando') {
+                <span class="status status-sending"><i class="bi bi-arrow-repeat"></i> Enviando</span>
+                } @else if (msg.estado === 'Cancelado') {
+                <span class="status status-cancelled"><i class="bi bi-x-circle-fill"></i> Cancelado</span>
+                } @else if (msg.estado === 'Respondido') {
+                <span class="status status-sent"><i class="bi bi-reply-fill"></i> Respondido</span>
+                } @else {
+                <span class="status status-sent"><i class="bi bi-send-fill"></i> {{ msg.estado }}</span>
+                }
               </div>
+            </div>
             } @empty {
-              <div class="file-empty" style="margin: 16px; border-radius: 10px;">
-                <i class="bi bi-inbox"></i>
-                <p>No hay mensajes recientes.</p>
-              </div>
+            <div class="file-empty" style="margin: 16px; border-radius: 10px;">
+              <i class="bi bi-inbox"></i>
+              <p>No hay mensajes disponibles por el momento</p>
+            </div>
             }
           </div>
         </div>
@@ -145,30 +129,12 @@
               <h3><i class="bi bi-link-45deg"></i> Enlaces externos</h3>
             </div>
 
-            <a href="#" target="_blank" rel="noopener noreferrer">
-              <span>Cámara de Diputados del Estado de México</span>
-              <i class="bi bi-box-arrow-up-right"></i>
-            </a>
-
-            <a href="#" target="_blank" rel="noopener noreferrer">
-              <span>Instituto de Estudios Legislativos</span>
-              <i class="bi bi-box-arrow-up-right"></i>
-            </a>
-
-            <a href="#" target="_blank" rel="noopener noreferrer">
-              <span>Órgano Superior de Fiscalización</span>
-              <i class="bi bi-box-arrow-up-right"></i>
-            </a>
-
-            <a href="#" target="_blank" rel="noopener noreferrer">
-              <span>Secretaría de Asuntos Parlamentarios</span>
-              <i class="bi bi-box-arrow-up-right"></i>
-            </a>
-
-            <a href="#" target="_blank" rel="noopener noreferrer">
-              <span>Contraloría del Poder Legislativo</span>
-              <i class="bi bi-box-arrow-up-right"></i>
-            </a>
+            @for (link of enlacesExternos; track link.nombre) {
+              <a [href]="link.url" target="_blank" rel="noopener noreferrer">
+                <span>{{ link.nombre }}</span>
+                <i class="bi bi-box-arrow-up-right"></i>
+              </a>
+            }
           </div>
 
           <div class="visits-card">
@@ -177,7 +143,7 @@
             </div>
             <div class="visits-content">
               <span>Total de visitas</span>
-              <strong>5,490</strong>
+              <strong>{{ totalVisitas }}</strong>
               <small>Contador general del sistema.</small>
             </div>
           </div>
@@ -205,8 +171,8 @@
             <label for="fecha">Fecha de creación:</label>
             <div class="input-with-icon">
               <i class="bi bi-calendar3"></i>
-              <input id="fecha" name="fecha" type="date" [(ngModel)]="formFecha"
-                readonly class="readonly-input" title="Fecha automática de envío" />
+              <input id="fecha" name="fecha" type="date" [(ngModel)]="formFecha" readonly class="readonly-input"
+                title="Fecha automática de envío" />
             </div>
           </div>
 
@@ -214,8 +180,8 @@
             <label for="hora">Hora:</label>
             <div class="input-with-icon">
               <i class="bi bi-clock"></i>
-              <input id="hora" name="hora" type="time" [(ngModel)]="formHora"
-                readonly class="readonly-input" title="Hora automática de envío" />
+              <input id="hora" name="hora" type="time" [(ngModel)]="formHora" readonly class="readonly-input"
+                title="Hora automática de envío" />
             </div>
           </div>
 
@@ -234,21 +200,20 @@
             <div class="files-section">
               <!-- Lista de archivos ya cargados -->
               @if (formArchivos.length > 0) {
-                <div class="files-list">
-                  @for (archivo of formArchivos; track archivo.name; let i = $index) {
-                    <div class="file-selected-badge">
-                      <div class="file-name-info">
-                        <i class="bi bi-file-earmark-check-fill"></i>
-                        <span>{{ archivo.name }}</span>
-                        <span class="file-size">({{ (archivo.size / 1024).toFixed(1) }} KB)</span>
-                      </div>
-                      <button type="button" class="btn-clear-file" (click)="clearSelectedFile(i)"
-                        title="Remover archivo">
-                        <i class="bi bi-x-lg"></i>
-                      </button>
-                    </div>
-                  }
+              <div class="files-list">
+                @for (archivo of formArchivos; track archivo.name; let i = $index) {
+                <div class="file-selected-badge">
+                  <div class="file-name-info">
+                    <i class="bi bi-file-earmark-check-fill"></i>
+                    <span>{{ archivo.name }}</span>
+                    <span class="file-size">({{ (archivo.size / 1024).toFixed(1) }} KB)</span>
+                  </div>
+                  <button type="button" class="btn-clear-file" (click)="clearSelectedFile(i)" title="Remover archivo">
+                    <i class="bi bi-x-lg"></i>
+                  </button>
                 </div>
+                }
+              </div>
               }
               <!-- Botón para añadir más archivos -->
               <div class="file-input-container">
@@ -256,10 +221,10 @@
                 <input id="documento" name="documento" type="file" multiple (change)="onFileSelected($event)" />
               </div>
               @if (formArchivos.length > 0) {
-                <p class="files-count-hint">
-                  <i class="bi bi-paperclip"></i>
-                  {{ formArchivos.length }} {{ formArchivos.length === 1 ? 'archivo adjunto' : 'archivos adjuntos' }}
-                </p>
+              <p class="files-count-hint">
+                <i class="bi bi-paperclip"></i>
+                {{ formArchivos.length }} {{ formArchivos.length === 1 ? 'archivo adjunto' : 'archivos adjuntos' }}
+              </p>
               }
             </div>
           </div>
@@ -273,10 +238,12 @@
           <div class="recipients-container">
             <div class="select-box">
               <span class="select-title">Usuarios disponibles</span>
-              <select multiple aria-label="Usuarios disponibles"
-                [(ngModel)]="selectedDisponibles" name="selDisponibles">
+              <select multiple aria-label="Usuarios disponibles" [(ngModel)]="selectedDisponibles"
+                name="selDisponibles">
                 @for (usuario of usuariosDisponibles; track usuario) {
-                  <option [value]="usuario">{{ usuario }}</option>
+                <option [value]="usuario">{{ usuario }}</option>
+                } @empty {
+                  <option disabled>No hay destinatarios cargados</option>
                 }
               </select>
             </div>
@@ -302,10 +269,12 @@
 
             <div class="select-box">
               <span class="select-title">Usuarios seleccionados</span>
-              <select multiple aria-label="Usuarios seleccionados"
-                [(ngModel)]="selectedSeleccionados" name="selSeleccionados">
+              <select multiple aria-label="Usuarios seleccionados" [(ngModel)]="selectedSeleccionados"
+                name="selSeleccionados">
                 @for (usuario of usuariosSeleccionados; track usuario) {
-                  <option [value]="usuario">{{ usuario }}</option>
+                <option [value]="usuario">{{ usuario }}</option>
+                } @empty {
+                  <option disabled>No hay destinatarios cargados</option>
                 }
               </select>
             </div>
@@ -323,6 +292,56 @@
           </button>
         </div>
       </form>
+
+      <!-- Historial de Mensajes Enviados en la parte inferior del módulo -->
+      <div class="form-card sent-messages-section">
+        <div class="card-header">
+          <h3><i class="bi bi-send-check-fill"></i> Mensajes Enviados</h3>
+          <span class="card-header-hint"><i class="bi bi-clock-history"></i> Historial de envíos del usuario</span>
+        </div>
+
+        <div class="sent-messages-list">
+          @for (msg of mensajesEnviados; track msg.id) {
+            <div class="sent-message-item" [class.item-sending]="msg.estado === 'Enviando'" [class.item-cancelled]="msg.estado === 'Cancelado'">
+              <div class="sent-msg-info">
+                <strong>{{ msg.titulo }}</strong>
+                <div class="sent-msg-details">
+                  <span class="sent-msg-meta"><i class="bi bi-people-fill"></i> Para: {{ msg.destinatarios || 'Destinatarios' }}</span>
+                  <span class="sent-msg-meta"><i class="bi bi-calendar-event-fill"></i> {{ msg.fecha }} a las {{ msg.hora }}</span>
+                  @if (msg.documento !== 'Sin adjunto') {
+                    <span class="sent-msg-meta"><i class="bi bi-paperclip"></i> Adjunto: {{ msg.documento }}</span>
+                  }
+                </div>
+              </div>
+
+              <div class="sent-msg-status-actions">
+                @if (msg.estado === 'Enviando') {
+                  <span class="status-badge status-sending-badge">
+                    <i class="bi bi-arrow-repeat animate-spin"></i> Enviando...
+                  </span>
+                  <button type="button" class="btn-cancel-send" (click)="cancelarEnvio(msg.id)" title="Cancelar envío">
+                    <i class="bi bi-x-circle-fill"></i>
+                    <span>Cancelar envío</span>
+                  </button>
+                } @else if (msg.estado === 'Cancelado') {
+                  <span class="status-badge status-cancelled-badge">
+                    <i class="bi bi-x-circle-fill"></i> Cancelado
+                  </span>
+                } @else {
+                  <span class="status-badge status-success-badge">
+                    <i class="bi bi-check-circle-fill"></i> Enviado
+                  </span>
+                }
+              </div>
+            </div>
+          } @empty {
+            <div class="file-empty" style="margin: 20px; border-radius: 10px;">
+              <i class="bi bi-send-x-fill"></i>
+              <p>Aún no has enviado ningún mensaje en esta sesión.</p>
+            </div>
+          }
+        </div>
+      </div>
       }
 
       @if (moduloActual === 'bandeja') {
@@ -332,8 +351,8 @@
             <label for="buscarMensaje">Buscar documento</label>
             <div class="input-with-icon">
               <i class="bi bi-search"></i>
-              <input id="buscarMensaje" name="buscarMensaje" type="text"
-                [(ngModel)]="buscarTexto" placeholder="Buscar por remitente, título o descripción..." />
+              <input id="buscarMensaje" name="buscarMensaje" type="text" [(ngModel)]="buscarTexto"
+                placeholder="Buscar por remitente, título o descripción..." />
             </div>
           </div>
 
@@ -374,97 +393,92 @@
 
           <div class="inbox-list">
             @for (msg of mensajesFiltrados; track msg.id) {
-              <article class="inbox-item" [class.unread]="msg.estado === 'Nuevo'"
-                [class.item-sending]="msg.estado === 'Enviando'"
-                [class.item-cancelled]="msg.estado === 'Cancelado'">
-                <div class="sender-block">
-                  <span>Envía</span>
-                  <strong>{{ msg.remitente }}</strong>
-                  <span class="date-tag"><i class="bi bi-calendar"></i> {{ msg.fecha }}</span>
-                </div>
-
-                <div class="message-block">
-                  <div class="message-title-row">
-                    <h4>{{ msg.titulo }}</h4>
-                    @if (msg.estado === 'Nuevo') {
-                      <span class="status-badge status-new">
-                        <i class="bi bi-star-fill animate-pulse"></i> Nuevo
-                      </span>
-                    } @else if (msg.estado === 'Pendiente') {
-                      <span class="status-badge status-pending-inbox">
-                        <i class="bi bi-hourglass-split"></i> Pendiente
-                      </span>
-                    } @else if (msg.estado === 'Visto') {
-                      <span class="status-badge status-seen-inbox">
-                        <i class="bi bi-eye-fill"></i> Visto
-                      </span>
-                    } @else if (msg.estado === 'Respondido') {
-                      <span class="status-badge status-answered">
-                        <i class="bi bi-reply-fill"></i> Respondido
-                      </span>
-                    } @else if (msg.estado === 'Enviando') {
-                      <span class="status-badge status-sending-badge">
-                        <i class="bi bi-arrow-repeat animate-spin"></i> Enviando
-                      </span>
-                    } @else if (msg.estado === 'Cancelado') {
-                      <span class="status-badge status-cancelled-badge">
-                        <i class="bi bi-x-circle-fill"></i> Cancelado
-                      </span>
-                    } @else if (msg.estado === 'Eliminado') {
-                      <span class="status-badge status-archived">
-                        <i class="bi bi-trash3-fill"></i> Eliminado
-                      </span>
-                    }
-                  </div>
-
-                  <p>{{ msg.descripcion }}</p>
-
-                  <div class="document-row">
-                    <span>Documento:</span>
-                    <a href="#" target="_blank" rel="noopener noreferrer"
-                      (click)="marcarComoVisto(msg)">
-                      <i class="bi"
-                        [class.bi-file-earmark-pdf-fill]="msg.documento.endsWith('.pdf')"
-                        [class.bi-file-earmark-word-fill]="msg.documento.endsWith('.docx')"
-                        [class.bi-files]="!msg.documento.endsWith('.pdf') && !msg.documento.endsWith('.docx')">
-                      </i>
-                      <span>{{ msg.documento }}</span>
-                    </a>
-                  </div>
-                </div>
-
-                <div class="inbox-actions">
-                  <!-- Ver detalles (modal) -->
-                  <button type="button" class="action-link btn-view-message"
-                    (click)="verDetallesMensaje(msg)">
-                    <i class="bi bi-chat-square-text-fill"></i>
-                    <span>Ver detalles</span>
-                  </button>
-
-                  <!-- Responder (solo si no está eliminado ni cancelado) -->
-                  @if (msg.estado !== 'Eliminado' && msg.estado !== 'Cancelado') {
-                    <button type="button" class="action-link"
-                      (click)="responderMensaje(msg, $event)">
-                      <i class="bi bi-reply-fill"></i>
-                      <span>Responder</span>
-                    </button>
-                  }
-
-                  <!-- Eliminar (solo si no está ya en la papelera) -->
-                  @if (msg.estado !== 'Eliminado') {
-                    <button type="button" class="delete-button"
-                      (click)="eliminarMensaje(msg, $event)">
-                      <i class="bi bi-trash3-fill"></i>
-                      <span>Eliminar</span>
-                    </button>
-                  }
-                </div>
-              </article>
-            } @empty {
-              <div class="file-empty">
-                <i class="bi bi-chat-left-x-fill"></i>
-                <p>No se encontraron mensajes en esta vista.</p>
+            <article class="inbox-item" [class.unread]="msg.estado === 'Nuevo'"
+              [class.item-sending]="msg.estado === 'Enviando'" [class.item-cancelled]="msg.estado === 'Cancelado'">
+              <div class="sender-block">
+                <span>Envía</span>
+                <strong>{{ msg.remitente }}</strong>
+                <span class="date-tag"><i class="bi bi-calendar"></i> {{ msg.fecha }}</span>
               </div>
+
+              <div class="message-block">
+                <div class="message-title-row">
+                  <h4>{{ msg.titulo }}</h4>
+                  @if (msg.estado === 'Nuevo') {
+                  <span class="status-badge status-new">
+                    <i class="bi bi-star-fill animate-pulse"></i> Nuevo
+                  </span>
+                  } @else if (msg.estado === 'Pendiente') {
+                  <span class="status-badge status-pending-inbox">
+                    <i class="bi bi-hourglass-split"></i> Pendiente
+                  </span>
+                  } @else if (msg.estado === 'Visto') {
+                  <span class="status-badge status-seen-inbox">
+                    <i class="bi bi-eye-fill"></i> Visto
+                  </span>
+                  } @else if (msg.estado === 'Respondido') {
+                  <span class="status-badge status-answered">
+                    <i class="bi bi-reply-fill"></i> Respondido
+                  </span>
+                  } @else if (msg.estado === 'Enviando') {
+                  <span class="status-badge status-sending-badge">
+                    <i class="bi bi-arrow-repeat animate-spin"></i> Enviando
+                  </span>
+                  } @else if (msg.estado === 'Cancelado') {
+                  <span class="status-badge status-cancelled-badge">
+                    <i class="bi bi-x-circle-fill"></i> Cancelado
+                  </span>
+                  } @else if (msg.estado === 'Eliminado') {
+                  <span class="status-badge status-archived">
+                    <i class="bi bi-trash3-fill"></i> Eliminado
+                  </span>
+                  }
+                </div>
+
+                <p>{{ msg.descripcion }}</p>
+
+                <div class="document-row">
+                  <span>Documento:</span>
+                  <!-- Ruta de ejemplo para documentos reales: assets/documentos/{{ msg.documento }} -->
+                  <a href="#" target="_blank" rel="noopener noreferrer" (click)="marcarComoVisto(msg)">
+                    <i class="bi" [class.bi-file-earmark-pdf-fill]="msg.documento.endsWith('.pdf')"
+                      [class.bi-file-earmark-word-fill]="msg.documento.endsWith('.docx')"
+                      [class.bi-files]="!msg.documento.endsWith('.pdf') && !msg.documento.endsWith('.docx')">
+                    </i>
+                    <span>{{ msg.documento }}</span>
+                  </a>
+                </div>
+              </div>
+
+              <div class="inbox-actions">
+                <!-- Ver detalles (modal) -->
+                <button type="button" class="action-link btn-view-message" (click)="verDetallesMensaje(msg)">
+                  <i class="bi bi-chat-square-text-fill"></i>
+                  <span>Ver detalles</span>
+                </button>
+
+                <!-- Responder (solo si no está eliminado ni cancelado) -->
+                @if (msg.estado !== 'Eliminado' && msg.estado !== 'Cancelado') {
+                <button type="button" class="action-link" (click)="responderMensaje(msg, $event)">
+                  <i class="bi bi-reply-fill"></i>
+                  <span>Responder</span>
+                </button>
+                }
+
+                <!-- Eliminar (solo si no está ya en la papelera) -->
+                @if (msg.estado !== 'Eliminado') {
+                <button type="button" class="delete-button" (click)="eliminarMensaje(msg, $event)">
+                  <i class="bi bi-trash3-fill"></i>
+                  <span>Eliminar</span>
+                </button>
+                }
+              </div>
+            </article>
+            } @empty {
+            <div class="file-empty">
+              <i class="bi bi-chat-left-x-fill"></i>
+              <p>No hay documentos recibidos por el momento.</p>
+            </div>
             }
           </div>
         </div>
@@ -475,148 +489,21 @@
       <div class="formatos-module">
         <div class="formatos-list">
 
+          @for (categoria of categoriasFormatos; track categoria) {
           <details class="formato-category">
             <summary>
-              <span><i class="bi bi-folder2-open-fill"></i> Formatos</span>
+              <span><i class="bi bi-folder2-open-fill"></i> {{ categoria }}</span>
               <span class="accordion-icon"><i class="bi bi-chevron-down"></i></span>
             </summary>
             <div class="formato-content">
+              <!-- Ruta de ejemplo para formatos reales descárgables: assets/formatos/nombre-del-documento.pdf -->
               <div class="file-empty">
                 <i class="bi bi-folder-symlink"></i>
                 <p>No hay documentos disponibles por el momento.</p>
               </div>
             </div>
           </details>
-
-          <details class="formato-category">
-            <summary>
-              <span><i class="bi bi-folder2-open-fill"></i> Secretaría de Administración y Finanzas</span>
-              <span class="accordion-icon"><i class="bi bi-chevron-down"></i></span>
-            </summary>
-            <div class="formato-content">
-              <div class="file-empty">
-                <i class="bi bi-folder-symlink"></i>
-                <p>No hay documentos disponibles por el momento.</p>
-              </div>
-            </div>
-          </details>
-
-          <details class="formato-category">
-            <summary>
-              <span><i class="bi bi-folder2-open-fill"></i> Secretaría Particular</span>
-              <span class="accordion-icon"><i class="bi bi-chevron-down"></i></span>
-            </summary>
-            <div class="formato-content">
-              <div class="file-empty">
-                <i class="bi bi-folder-symlink"></i>
-                <p>No hay documentos disponibles por el momento.</p>
-              </div>
-            </div>
-          </details>
-
-          <details class="formato-category">
-            <summary>
-              <span><i class="bi bi-folder2-open-fill"></i> Secretaría Técnica</span>
-              <span class="accordion-icon"><i class="bi bi-chevron-down"></i></span>
-            </summary>
-            <div class="formato-content">
-              <div class="file-empty">
-                <i class="bi bi-folder-symlink"></i>
-                <p>No hay documentos disponibles por el momento.</p>
-              </div>
-            </div>
-          </details>
-
-          <details class="formato-category">
-            <summary>
-              <span><i class="bi bi-folder2-open-fill"></i> Unidad de Información, Planeación, Programación y Evaluación</span>
-              <span class="accordion-icon"><i class="bi bi-chevron-down"></i></span>
-            </summary>
-            <div class="formato-content">
-              <div class="file-empty">
-                <i class="bi bi-folder-symlink"></i>
-                <p>No hay documentos disponibles por el momento.</p>
-              </div>
-            </div>
-          </details>
-
-          <details class="formato-category">
-            <summary>
-              <span><i class="bi bi-folder2-open-fill"></i> Coordinación de Normatividad</span>
-              <span class="accordion-icon"><i class="bi bi-chevron-down"></i></span>
-            </summary>
-            <div class="formato-content">
-              <div class="file-empty">
-                <i class="bi bi-folder-symlink"></i>
-                <p>No hay documentos disponibles por el momento.</p>
-              </div>
-            </div>
-          </details>
-
-          <details class="formato-category">
-            <summary>
-              <span><i class="bi bi-folder2-open-fill"></i> Unidad de Igualdad de Género y Erradicación de la Violencia</span>
-              <span class="accordion-icon"><i class="bi bi-chevron-down"></i></span>
-            </summary>
-            <div class="formato-content">
-              <div class="file-empty">
-                <i class="bi bi-folder-symlink"></i>
-                <p>No hay documentos disponibles por el momento.</p>
-              </div>
-            </div>
-          </details>
-
-          <details class="formato-category">
-            <summary>
-              <span><i class="bi bi-folder2-open-fill"></i> Dirección de Administración y Desarrollo de Personal</span>
-              <span class="accordion-icon"><i class="bi bi-chevron-down"></i></span>
-            </summary>
-            <div class="formato-content">
-              <div class="file-empty">
-                <i class="bi bi-folder-symlink"></i>
-                <p>No hay documentos disponibles por el momento.</p>
-              </div>
-            </div>
-          </details>
-
-          <details class="formato-category">
-            <summary>
-              <span><i class="bi bi-folder2-open-fill"></i> Dirección de Recursos Materiales</span>
-              <span class="accordion-icon"><i class="bi bi-chevron-down"></i></span>
-            </summary>
-            <div class="formato-content">
-              <div class="file-empty">
-                <i class="bi bi-folder-symlink"></i>
-                <p>No hay documentos disponibles por el momento.</p>
-              </div>
-            </div>
-          </details>
-
-          <details class="formato-category">
-            <summary>
-              <span><i class="bi bi-folder2-open-fill"></i> Dirección de Finanzas</span>
-              <span class="accordion-icon"><i class="bi bi-chevron-down"></i></span>
-            </summary>
-            <div class="formato-content">
-              <div class="file-empty">
-                <i class="bi bi-folder-symlink"></i>
-                <p>No hay documentos disponibles por el momento.</p>
-              </div>
-            </div>
-          </details>
-
-          <details class="formato-category">
-            <summary>
-              <span><i class="bi bi-folder2-open-fill"></i> Dirección de Informática</span>
-              <span class="accordion-icon"><i class="bi bi-chevron-down"></i></span>
-            </summary>
-            <div class="formato-content">
-              <div class="file-empty">
-                <i class="bi bi-folder-symlink"></i>
-                <p>No hay documentos disponibles por el momento.</p>
-              </div>
-            </div>
-          </details>
+          }
 
         </div>
       </div>
@@ -628,7 +515,7 @@
           <i class="bi bi-shield-lock-fill"></i>
         </div>
         <h3>Módulo de Administración</h3>
-        <p>Este módulo de administración de usuarios y configuración del sistema se encuentra actualmente en desarrollo y mantenimiento técnico.</p>
+        <p>Este módulo de administración actualmente no se encuentra disponible.</p>
       </div>
       }
     </section>
@@ -640,76 +527,96 @@
 
   <!-- Modal de Detalles del Mensaje -->
   @if (mensajeSeleccionado) {
-    <div class="modal-backdrop" (click)="cerrarDetalles()">
-      <div class="modal-card animate-slide-up" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <h3><i class="bi bi-chat-square-text-fill"></i> Detalle del Mensaje</h3>
-          <button type="button" class="btn-close" (click)="cerrarDetalles()" title="Cerrar">
-            <i class="bi bi-x-lg"></i>
-          </button>
+  <div class="modal-backdrop" (click)="cerrarDetalles()">
+    <div class="modal-card animate-slide-up" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3><i class="bi bi-chat-square-text-fill"></i> Detalle del Mensaje</h3>
+        <button type="button" class="btn-close" (click)="cerrarDetalles()" title="Cerrar">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="detail-row">
+          <span class="detail-label">Remitente</span>
+          <div class="detail-value text-accent">
+            <i class="bi bi-person-fill"></i>
+            <strong>{{ mensajeSeleccionado.remitente }}</strong>
+          </div>
         </div>
-        <div class="modal-body">
+        <div class="detail-grid">
           <div class="detail-row">
-            <span class="detail-label">Remitente</span>
-            <div class="detail-value text-accent">
-              <i class="bi bi-person-fill"></i>
-              <strong>{{ mensajeSeleccionado.remitente }}</strong>
-            </div>
-          </div>
-          <div class="detail-grid">
-            <div class="detail-row">
-              <span class="detail-label">Fecha</span>
-              <div class="detail-value">
-                <i class="bi bi-calendar3"></i>
-                <span>{{ mensajeSeleccionado.fecha }}</span>
-              </div>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Hora</span>
-              <div class="detail-value">
-                <i class="bi bi-clock-history"></i>
-                <span>{{ mensajeSeleccionado.hora }}</span>
-              </div>
+            <span class="detail-label">Fecha</span>
+            <div class="detail-value">
+              <i class="bi bi-calendar3"></i>
+              <span>{{ mensajeSeleccionado.fecha }}</span>
             </div>
           </div>
           <div class="detail-row">
-            <span class="detail-label">Asunto / Título</span>
-            <div class="detail-value text-highlight">
-              <span>{{ mensajeSeleccionado.titulo }}</span>
-            </div>
-          </div>
-          <div class="detail-row text-block-row">
-            <span class="detail-label">Contenido / Descripción</span>
-            <div class="detail-text-content">{{ mensajeSeleccionado.descripcion }}</div>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Documento Adjunto</span>
-            <div class="detail-doc-link">
-              <a href="#" target="_blank" rel="noopener noreferrer"
-                (click)="marcarComoVisto(mensajeSeleccionado)">
-                <i class="bi"
-                  [class.bi-file-earmark-pdf-fill]="mensajeSeleccionado.documento.endsWith('.pdf')"
-                  [class.bi-file-earmark-word-fill]="mensajeSeleccionado.documento.endsWith('.docx')"
-                  [class.bi-files]="!mensajeSeleccionado.documento.endsWith('.pdf') && !mensajeSeleccionado.documento.endsWith('.docx')">
-                </i>
-                <span>{{ mensajeSeleccionado.documento }}</span>
-              </a>
+            <span class="detail-label">Hora</span>
+            <div class="detail-value">
+              <i class="bi bi-clock-history"></i>
+              <span>{{ mensajeSeleccionado.hora }}</span>
             </div>
           </div>
         </div>
-        <div class="modal-footer">
-          @if (mensajeSeleccionado.estado !== 'Eliminado' && mensajeSeleccionado.estado !== 'Cancelado') {
-            <button type="button" class="btn-modal-reply"
-              (click)="responderMensaje(mensajeSeleccionado, $event); cerrarDetalles()">
-              <i class="bi bi-reply-fill"></i>
-              <span>Redactar Respuesta</span>
-            </button>
-          }
-          <button type="button" class="btn-modal-close" (click)="cerrarDetalles()">
-            <span>Cerrar</span>
-          </button>
+        <div class="detail-row">
+          <span class="detail-label">Asunto / Título</span>
+          <div class="detail-value text-highlight">
+            <span>{{ mensajeSeleccionado.titulo }}</span>
+          </div>
+        </div>
+        <div class="detail-row text-block-row">
+          <span class="detail-label">Contenido / Descripción</span>
+          <div class="detail-text-content">{{ mensajeSeleccionado.descripcion }}</div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Documento Adjunto</span>
+          <div class="detail-doc-link">
+            <!-- Ruta de ejemplo para documentos reales: assets/documentos/{{ mensajeSeleccionado.documento }} -->
+            <a href="#" target="_blank" rel="noopener noreferrer" (click)="marcarComoVisto(mensajeSeleccionado)">
+              <i class="bi" [class.bi-file-earmark-pdf-fill]="mensajeSeleccionado.documento.endsWith('.pdf')"
+                [class.bi-file-earmark-word-fill]="mensajeSeleccionado.documento.endsWith('.docx')"
+                [class.bi-files]="!mensajeSeleccionado.documento.endsWith('.pdf') && !mensajeSeleccionado.documento.endsWith('.docx')">
+              </i>
+              <span>{{ mensajeSeleccionado.documento }}</span>
+            </a>
+          </div>
         </div>
       </div>
+      <div class="modal-footer">
+        @if (mensajeSeleccionado.estado !== 'Eliminado' && mensajeSeleccionado.estado !== 'Cancelado') {
+        <button type="button" class="btn-modal-reply"
+          (click)="responderMensaje(mensajeSeleccionado, $event); cerrarDetalles()">
+          <i class="bi bi-reply-fill"></i>
+          <span>Redactar Respuesta</span>
+        </button>
+        }
+        <button type="button" class="btn-modal-close" (click)="cerrarDetalles()">
+          <span>Cerrar</span>
+        </button>
+      </div>
     </div>
+  </div>
   }
+
+  <!-- Notificación en pantalla (reemplaza alert() nativo) -->
+  @if (notificacion) {
+  <div class="notificacion-banner" [class.notif-error]="notificacion.tipo === 'error'"
+    [class.notif-exito]="notificacion.tipo === 'exito'" [class.notif-info]="notificacion.tipo === 'info'">
+    <div class="notif-content">
+      @if (notificacion.tipo === 'error') {
+        <i class="bi bi-exclamation-circle-fill"></i>
+      } @else if (notificacion.tipo === 'exito') {
+        <i class="bi bi-check-circle-fill"></i>
+      } @else {
+        <i class="bi bi-info-circle-fill"></i>
+      }
+      <span>{{ notificacion.mensaje }}</span>
+    </div>
+    <button type="button" class="notif-close" (click)="cerrarNotificacion()" title="Cerrar">
+      <i class="bi bi-x-lg"></i>
+    </button>
+  </div>
+  }
+
 </div>

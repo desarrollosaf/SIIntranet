@@ -11,19 +11,46 @@ export class App {
 
   moduloActual = 'inicio';
 
-  // Base de destinatarios disponibles
-  usuariosDisponiblesBase: string[] = [
-    'Admin1 Admin Admin - Dir. de Informática',
-    'Javier Domínguez Morales - Secretaría de Asuntos Parlamentarios',
-    'José Gerardo Celestino Sánchez - Dir. de Auditoría Interna',
-    'Víctor Aguilera Mier - Coordinación Administrativa',
-    'Evelin Cuevas Dávila - Secretaría de Administración y Finanzas',
-    'Elena Karina Castañeda Pagaza - Unidad de Información',
-    'Pedro Alberto Ramírez Laguna - Dir. de Administración',
-    'Diana Pérez de la Cruz - Dir. de Recursos Materiales',
-    'Secretaría Técnica',
-    'Walfred José Gómez Vilchis - Órgano Superior de Fiscalización'
+  // Contador autoincrementable para IDs únicos (no depende del tamaño del array)
+  private nextId = 1;
+
+  // Sistema de notificaciones en pantalla (reemplaza alert() nativo)
+  notificacion: { mensaje: string; tipo: 'error' | 'exito' | 'info' } | null = null;
+  private notificacionTimeout: any = null;
+
+  mostrarNotificacion(mensaje: string, tipo: 'error' | 'exito' | 'info' = 'info'): void {
+    if (this.notificacionTimeout) clearTimeout(this.notificacionTimeout);
+    this.notificacion = { mensaje, tipo };
+    this.notificacionTimeout = setTimeout(() => {
+      this.notificacion = null;
+    }, 4500);
+  }
+
+  cerrarNotificacion(): void {
+    this.notificacion = null;
+    if (this.notificacionTimeout) clearTimeout(this.notificacionTimeout);
+  }
+
+  // Configuración del usuario activo
+  usuarioActual = {
+    nombre: 'Usuario del sistema',
+    rol: 'Usuario Activo'
+  };
+
+  // Contador de visitas (pendiente de backend)
+  totalVisitas = 'Total de visitas pendiente';
+
+  // Enlaces institucionales
+  enlacesExternos = [
+    { nombre: 'Cámara de Diputados del Estado de México', url: '#' },
+    { nombre: 'Instituto de Estudios Legislativos', url: '#' },
+    { nombre: 'Órgano Superior de Fiscalización', url: '#' },
+    { nombre: 'Secretaría de Asuntos Parlamentarios', url: '#' },
+    { nombre: 'Contraloría del Poder Legislativo', url: '#' }
   ];
+
+  // Base de destinatarios disponibles (inicialmente vacía para conexión posterior a API)
+  usuariosDisponiblesBase: string[] = [];
 
   usuariosDisponibles: string[] = [...this.usuariosDisponiblesBase];
   usuariosSeleccionados: string[] = [];
@@ -38,64 +65,11 @@ export class App {
   formHora = '';
   formArchivos: File[] = [];
 
-  // Variables para la funcionalidad de Deshacer Envío (Undo Send)
-  mostrarDeshacer = false;
-  mensajeEnviandoId: number | null = null;
-  deshacerTimeout: any = null;
+  // Temporizadores activos por id de mensaje
+  envioTimeouts: { [key: number]: any } = {};
 
-  // Datos de bandeja de entrada
-  mensajesRecibidos = [
-    {
-      id: 1,
-      remitente: 'Secretaría Técnica',
-      titulo: 'Invitación CAS 190626_1630',
-      descripcion: '19 de junio de 2026 a las 16:30 horas.',
-      fecha: '2026-06-19',
-      hora: '16:30',
-      documento: 'invitacion-cas-190626.pdf',
-      estado: 'Nuevo'
-    },
-    {
-      id: 2,
-      remitente: 'Walfred José Gómez Vilchis',
-      titulo: 'Contrato de Protektnet Consulting Services, S.A. de C.V.',
-      descripcion: 'Contrato de 800 licencias Sophos XDR para el Órgano Superior de Fiscalización del Estado de México.',
-      fecha: '2026-06-17',
-      hora: '12:45',
-      documento: 'contrato-protektnet.pdf',
-      estado: 'Pendiente'
-    },
-    {
-      id: 3,
-      remitente: 'Secretaría Técnica',
-      titulo: 'Acta CAS 150626_1700',
-      descripcion: 'Ampliación al contrato CAS-LPNP02/2025/LXII-LEM, relativo a la contratación de licencias de software Microsoft Office.',
-      fecha: '2026-06-15',
-      hora: '10:15',
-      documento: 'acta-cas-150626.pdf',
-      estado: 'Visto'
-    },
-    {
-      id: 4,
-      remitente: 'Elena Karina Castañeda Pagaza',
-      titulo: 'Solicitud programático-presupuestal',
-      descripcion: 'Actualización al formato de solicitud programático-presupuestal derivado de cambio de titulares de departamentos.',
-      fecha: '2026-06-14',
-      hora: '18:20',
-      documento: 'solicitud-presupuestal.docx',
-      estado: 'Respondido'
-    },
-    {
-      id: 5,
-      remitente: 'Secretaría de Administración y Finanzas',
-      titulo: 'Circular General 017',
-      descripcion: 'Comunicado interno de la Secretaría de Administración y Finanzas para conocimiento de las áreas administrativas.',
-      fecha: '2026-06-11',
-      hora: '09:00',
-      documento: 'circular-general-017.pdf',
-      estado: 'Visto'
-    }
-  ];
+  // Datos de bandeja de entrada (inicialmente vacía para conexión posterior a base de datos)
+  mensajesBandeja: any[] = [];
 
   // Filtros de bandeja
   buscarTexto = '';
@@ -104,6 +78,21 @@ export class App {
 
   // Mensaje seleccionado para el modal de detalles
   mensajeSeleccionado: any = null;
+
+  // Categorías de formatos institucionales
+  categoriasFormatos: string[] = [
+    'Formatos',
+    'Secretaría de Administración y Finanzas',
+    'Secretaría Particular',
+    'Secretaría Técnica',
+    'Unidad de Información, Planeación, Programación y Evaluación',
+    'Coordinación de Normatividad',
+    'Unidad de Igualdad de Género y Erradicación de la Violencia',
+    'Dirección de Administración y Desarrollo de Personal',
+    'Dirección de Recursos Materiales',
+    'Dirección de Finanzas',
+    'Dirección de Informática'
+  ];
 
   cambiarModulo(modulo: string): void {
     this.moduloActual = modulo;
@@ -160,13 +149,11 @@ export class App {
     const files = event.target.files;
     if (files && files.length > 0) {
       for (let i = 0; i < files.length; i++) {
-        // Evitar duplicados por nombre
         if (!this.formArchivos.some(f => f.name === files[i].name)) {
           this.formArchivos.push(files[i]);
         }
       }
     }
-    // Resetear valor del input para que se pueda volver a seleccionar el mismo archivo
     event.target.value = '';
   }
 
@@ -201,84 +188,68 @@ export class App {
     this.selectedSeleccionados = [];
   }
 
-  // 4. Mensaje nuevo - Enviar con temporizador Deshacer y Cancelar
+  // 4. Mensaje nuevo - Enviar con temporizador individual en el historial de abajo
   enviarMensaje(event: Event): void {
     event.preventDefault();
     if (!this.formTitulo.trim()) {
-      alert('Por favor ingrese un título para el documento.');
+      this.mostrarNotificacion('Por favor ingrese un título para el documento.', 'error');
       return;
     }
     if (this.usuariosSeleccionados.length === 0) {
-      alert('Por favor seleccione al menos un destinatario.');
+      this.mostrarNotificacion('Por favor seleccione al menos un destinatario.', 'error');
       return;
     }
 
-    // Cancelar cualquier temporizador pendiente por seguridad
-    if (this.deshacerTimeout) {
-      clearTimeout(this.deshacerTimeout);
-    }
-
-    const nuevoId = this.mensajesRecibidos.length + 1;
+    const nuevoId = this.nextId++;
     const documentosAdjuntos = this.formArchivos.length > 0
       ? this.formArchivos.map(f => f.name).join(', ')
       : 'Sin adjunto';
 
     const nuevoMsg = {
       id: nuevoId,
-      remitente: 'Usuario Actual (Tú)',
+      remitente: this.usuarioActual.nombre,
       titulo: this.formTitulo,
       descripcion: this.formDescripcion || 'Sin descripción adicional.',
       fecha: this.formFecha,
       hora: this.formHora,
       documento: documentosAdjuntos,
+      destinatarios: this.usuariosSeleccionados.join(', '),
       estado: 'Enviando'
     };
 
     // Insertar al inicio de la lista
-    this.mensajesRecibidos = [nuevoMsg, ...this.mensajesRecibidos];
+    this.mensajesBandeja = [nuevoMsg, ...this.mensajesBandeja];
 
-    this.mensajeEnviandoId = nuevoId;
-    this.mostrarDeshacer = true;
-
-    // Redirigir a inicio de inmediato para que vea el banner y el mensaje enviándose
-    this.cambiarModulo('inicio');
-
-    // Iniciar conteo de 7 segundos para consolidar el envío
-    this.deshacerTimeout = setTimeout(() => {
-      const msg = this.mensajesRecibidos.find(m => m.id === nuevoId);
+    // Iniciar conteo de 7 segundos para consolidar el envío de este mensaje específico
+    this.envioTimeouts[nuevoId] = setTimeout(() => {
+      const msg = this.mensajesBandeja.find(m => m.id === nuevoId);
       if (msg && msg.estado === 'Enviando') {
         msg.estado = 'Nuevo';
       }
-      this.mostrarDeshacer = false;
-      this.mensajeEnviandoId = null;
-      this.deshacerTimeout = null;
+      delete this.envioTimeouts[nuevoId];
     }, 7000);
 
     // Limpiar formulario de redacción
-    this.formTitulo = '';
-    this.formDescripcion = '';
-    this.formArchivos = [];
-    this.usuariosDisponibles = [...this.usuariosDisponiblesBase];
-    this.usuariosSeleccionados = [];
-    this.selectedDisponibles = [];
-    this.selectedSeleccionados = [];
+    this.resetearFormulario();
   }
 
-  deshacerEnvio(): void {
-    if (this.deshacerTimeout) {
-      clearTimeout(this.deshacerTimeout);
-      this.deshacerTimeout = null;
+  cancelarEnvio(id: number): void {
+    if (this.envioTimeouts[id]) {
+      clearTimeout(this.envioTimeouts[id]);
+      delete this.envioTimeouts[id];
     }
-    const msg = this.mensajesRecibidos.find(m => m.id === this.mensajeEnviandoId);
+    const msg = this.mensajesBandeja.find(m => m.id === id);
     if (msg) {
       msg.estado = 'Cancelado';
     }
-    this.mostrarDeshacer = false;
-    this.mensajeEnviandoId = null;
-    alert('Envío de documento cancelado. El registro se ha guardado en el sistema con estado "Cancelado".');
+    this.mostrarNotificacion('Envío cancelado. El registro se guardó con estado "Cancelado".', 'info');
   }
 
-  cancelarFormulario(): void {
+  get mensajesEnviados() {
+    return this.mensajesBandeja.filter(m => m.remitente === this.usuarioActual.nombre);
+  }
+
+  resetearFormulario(): void {
     this.formTitulo = '';
     this.formDescripcion = '';
     this.formArchivos = [];
@@ -286,12 +257,16 @@ export class App {
     this.usuariosSeleccionados = [];
     this.selectedDisponibles = [];
     this.selectedSeleccionados = [];
+  }
+
+  cancelarFormulario(): void {
+    this.resetearFormulario();
     this.actualizarFechaHora();
   }
 
   // 5. Bandeja de Entrada - Filtrado
   get mensajesFiltrados() {
-    return this.mensajesRecibidos.filter(msg => {
+    return this.mensajesBandeja.filter(msg => {
       // Filtrar por texto
       const matchesText = !this.buscarTexto || 
         msg.remitente.toLowerCase().includes(this.buscarTexto.toLowerCase()) ||
@@ -316,7 +291,7 @@ export class App {
 
   // 6. Mensajes Recientes en Inicio (excluyendo eliminados)
   get mensajesRecientes() {
-    return this.mensajesRecibidos.filter(m => m.estado !== 'Eliminado').slice(0, 5);
+    return this.mensajesBandeja.filter(m => m.estado !== 'Eliminado').slice(0, 5);
   }
 
   // 7. Bandeja de Entrada & Inicio - Detalle de mensaje y marcar visto
@@ -352,13 +327,8 @@ export class App {
     this.moduloActual = 'mensaje';
     this.actualizarFechaHora();
 
-    // Rellenar campos del formulario
-    this.formTitulo = `RE: ${msg.titulo}`;
-    this.formDescripcion = `\n\n--- Mensaje Original ---\nDe: ${msg.remitente}\nFecha: ${msg.fecha} a las ${msg.hora} horas.\nAsunto: ${msg.descripcion}`;
-
-    // Resetear listas de destinatarios
-    this.usuariosDisponibles = [...this.usuariosDisponiblesBase];
-    this.usuariosSeleccionados = [];
+    // Limpiar formulario antes de rellenar el destinatario
+    this.resetearFormulario();
 
     // Buscar coincidencia para el remitente en destinatarios
     const remitenteLower = msg.remitente.toLowerCase();
