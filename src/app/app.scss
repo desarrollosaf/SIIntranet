@@ -533,6 +533,116 @@ $texto-suave: #666;
   }
 }
 
+.formatos-module {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.formatos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.formato-category {
+  background: white;
+  border: 1px solid $borde;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 16px rgba(31, 38, 135, 0.05);
+}
+
+.formato-category summary {
+  list-style: none;
+  background: $vino;
+  color: white;
+  padding: 15px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.formato-category summary::-webkit-details-marker {
+  display: none;
+}
+
+.formato-category summary strong {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.formato-category[open] summary strong {
+  transform: rotate(45deg);
+}
+
+.formato-content {
+  padding: 18px;
+  background: #fff;
+}
+
+.file-empty {
+  border: 1px dashed #cfd4dc;
+  border-radius: 12px;
+  padding: 22px 24px;
+  background: #fafafa;
+
+  p {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+  }
+}
+
+.file-item {
+  border: 1px solid $borde;
+  border-radius: 10px;
+  padding: 16px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+
+  strong {
+    display: block;
+    color: $texto;
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+
+  p {
+    margin: 0;
+    color: #666;
+    font-size: 13px;
+  }
+}
+
+.file-link {
+  border: 0;
+  background: #f6edf2;
+  color: $vino;
+  border-radius: 8px;
+  padding: 9px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+
+  &:hover {
+    background: $vino;
+    color: white;
+  }
+}
+
 .footer {
   max-width: 1280px;
   margin: 0 auto;
@@ -603,6 +713,12 @@ $texto-suave: #666;
   .recipients-actions,
   .recipients-lists {
     grid-template-columns: 1fr;
+  }
+
+  .file-empty,
+  .file-item {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .footer {
