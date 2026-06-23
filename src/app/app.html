@@ -32,11 +32,8 @@
         Formatos
       </button>
 
-      <button
-        type="button"
-        (click)="cambiarModulo('administracion')"
-        [class.active]="moduloActual === 'administracion'"
-      >
+      <button type="button" (click)="cambiarModulo('administracion')"
+        [class.active]="moduloActual === 'administracion'">
         Administración
       </button>
     </nav>
@@ -68,436 +65,682 @@
 
     <section class="module-content">
       @if (moduloActual === 'inicio') {
-        <div class="inicio-layout">
-          <div class="recent-messages-card">
-            <div class="card-header">
-              <h3>Mensajes recientes</h3>
+      <div class="inicio-layout">
+        <div class="recent-messages-card">
+          <div class="card-header">
+            <h3>Mensajes recientes</h3>
+          </div>
+
+          <div class="recent-messages-scroll">
+            <div class="recent-message">
+              <div class="message-info">
+                <strong>Invitación CAS 190626_1630</strong>
+                <p>Secretaría Técnica · 19 de junio de 2026 a las 16:30 horas.</p>
+              </div>
+
+              <div class="message-meta">
+                <span class="message-date">19/06/2026</span>
+                <span class="status status-seen">Visto</span>
+              </div>
             </div>
 
-            <div class="recent-messages-scroll">
-              <div class="recent-message">
-                <div class="message-info">
-                  <strong>Invitación CAS 190626_1630</strong>
-                  <p>Secretaría Técnica · 19 de junio de 2026 a las 16:30 horas.</p>
-                </div>
-
-                <div class="message-meta">
-                  <span class="message-date">19/06/2026</span>
-                  <span class="status status-seen">Visto</span>
-                </div>
+            <div class="recent-message">
+              <div class="message-info">
+                <strong>Solicitud programático-presupuestal</strong>
+                <p>Actualización al formato de solicitud programático-presupuestal.</p>
               </div>
 
-              <div class="recent-message">
-                <div class="message-info">
-                  <strong>Solicitud programático-presupuestal</strong>
-                  <p>Actualización al formato de solicitud programático-presupuestal.</p>
-                </div>
+              <div class="message-meta">
+                <span class="message-date">18/06/2026</span>
+                <span class="status status-pending">Pendiente</span>
+              </div>
+            </div>
 
-                <div class="message-meta">
-                  <span class="message-date">18/06/2026</span>
-                  <span class="status status-pending">Pendiente</span>
-                </div>
+            <div class="recent-message">
+              <div class="message-info">
+                <strong>Contrato de licencias de software</strong>
+                <p>Contrato de licencias para el Órgano Superior de Fiscalización.</p>
               </div>
 
-              <div class="recent-message">
-                <div class="message-info">
-                  <strong>Contrato de licencias de software</strong>
-                  <p>Contrato de licencias para el Órgano Superior de Fiscalización.</p>
-                </div>
+              <div class="message-meta">
+                <span class="message-date">17/06/2026</span>
+                <span class="status status-sent">Enviado</span>
+              </div>
+            </div>
 
-                <div class="message-meta">
-                  <span class="message-date">17/06/2026</span>
-                  <span class="status status-sent">Enviado</span>
-                </div>
+            <div class="recent-message">
+              <div class="message-info">
+                <strong>Circular General 017</strong>
+                <p>Comunicado interno de la Secretaría de Administración y Finanzas.</p>
               </div>
 
-              <div class="recent-message">
-                <div class="message-info">
-                  <strong>Circular General 017</strong>
-                  <p>Comunicado interno de la Secretaría de Administración y Finanzas.</p>
-                </div>
+              <div class="message-meta">
+                <span class="message-date">14/06/2026</span>
+                <span class="status status-seen">Visto</span>
+              </div>
+            </div>
 
-                <div class="message-meta">
-                  <span class="message-date">14/06/2026</span>
-                  <span class="status status-seen">Visto</span>
-                </div>
+            <div class="recent-message">
+              <div class="message-info">
+                <strong>Acta CAS 150626_1700</strong>
+                <p>Ampliación al contrato CAS-LPNP02/2025/LXII-LEM.</p>
               </div>
 
-              <div class="recent-message">
-                <div class="message-info">
-                  <strong>Acta CAS 150626_1700</strong>
-                  <p>Ampliación al contrato CAS-LPNP02/2025/LXII-LEM.</p>
-                </div>
+              <div class="message-meta">
+                <span class="message-date">13/06/2026</span>
+                <span class="status status-pending">Pendiente</span>
+              </div>
+            </div>
 
-                <div class="message-meta">
-                  <span class="message-date">13/06/2026</span>
-                  <span class="status status-pending">Pendiente</span>
-                </div>
+            <div class="recent-message">
+              <div class="message-info">
+                <strong>Invitación CAS 150626_1700</strong>
+                <p>15 de junio de 2026 a las 17:00 horas.</p>
               </div>
 
-              <div class="recent-message">
-                <div class="message-info">
-                  <strong>Invitación CAS 150626_1700</strong>
-                  <p>15 de junio de 2026 a las 17:00 horas.</p>
-                </div>
+              <div class="message-meta">
+                <span class="message-date">12/06/2026</span>
+                <span class="status status-seen">Visto</span>
+              </div>
+            </div>
 
-                <div class="message-meta">
-                  <span class="message-date">12/06/2026</span>
-                  <span class="status status-seen">Visto</span>
-                </div>
+            <div class="recent-message">
+              <div class="message-info">
+                <strong>Reporte de actualización documental</strong>
+                <p>Solicitud de revisión de documentos institucionales.</p>
               </div>
 
-              <div class="recent-message">
-                <div class="message-info">
-                  <strong>Reporte de actualización documental</strong>
-                  <p>Solicitud de revisión de documentos institucionales.</p>
-                </div>
+              <div class="message-meta">
+                <span class="message-date">11/06/2026</span>
+                <span class="status status-sent">Enviado</span>
+              </div>
+            </div>
 
-                <div class="message-meta">
-                  <span class="message-date">11/06/2026</span>
-                  <span class="status status-sent">Enviado</span>
-                </div>
+            <div class="recent-message">
+              <div class="message-info">
+                <strong>Solicitud de validación de formato</strong>
+                <p>Revisión de formato administrativo para publicación interna.</p>
               </div>
 
-              <div class="recent-message">
-                <div class="message-info">
-                  <strong>Solicitud de validación de formato</strong>
-                  <p>Revisión de formato administrativo para publicación interna.</p>
-                </div>
+              <div class="message-meta">
+                <span class="message-date">10/06/2026</span>
+                <span class="status status-pending">Pendiente</span>
+              </div>
+            </div>
 
-                <div class="message-meta">
-                  <span class="message-date">10/06/2026</span>
-                  <span class="status status-pending">Pendiente</span>
-                </div>
+            <div class="recent-message">
+              <div class="message-info">
+                <strong>Oficio de coordinación interna</strong>
+                <p>Comunicación entre áreas administrativas.</p>
               </div>
 
-              <div class="recent-message">
-                <div class="message-info">
-                  <strong>Oficio de coordinación interna</strong>
-                  <p>Comunicación entre áreas administrativas.</p>
-                </div>
+              <div class="message-meta">
+                <span class="message-date">09/06/2026</span>
+                <span class="status status-seen">Visto</span>
+              </div>
+            </div>
 
-                <div class="message-meta">
-                  <span class="message-date">09/06/2026</span>
-                  <span class="status status-seen">Visto</span>
-                </div>
+            <div class="recent-message">
+              <div class="message-info">
+                <strong>Manual de procedimiento actualizado</strong>
+                <p>Actualización de manual institucional para consulta interna.</p>
               </div>
 
-              <div class="recent-message">
-                <div class="message-info">
-                  <strong>Manual de procedimiento actualizado</strong>
-                  <p>Actualización de manual institucional para consulta interna.</p>
-                </div>
-
-                <div class="message-meta">
-                  <span class="message-date">08/06/2026</span>
-                  <span class="status status-sent">Enviado</span>
-                </div>
+              <div class="message-meta">
+                <span class="message-date">08/06/2026</span>
+                <span class="status status-sent">Enviado</span>
               </div>
             </div>
           </div>
-
-          <aside class="inicio-side-panel">
-            <div class="external-links-card">
-              <div class="card-header">
-                <h3>Enlaces externos</h3>
-              </div>
-
-              <a href="#" target="_blank" rel="noopener noreferrer">
-                Cámara de Diputados del Estado de México
-              </a>
-
-              <a href="#" target="_blank" rel="noopener noreferrer">
-                Instituto de Estudios Legislativos
-              </a>
-
-              <a href="#" target="_blank" rel="noopener noreferrer">
-                Órgano Superior de Fiscalización
-              </a>
-
-              <a href="#" target="_blank" rel="noopener noreferrer">
-                Secretaría de Asuntos Parlamentarios
-              </a>
-
-              <a href="#" target="_blank" rel="noopener noreferrer">
-                Contraloría del Poder Legislativo
-              </a>
-            </div>
-
-            <div class="visits-card">
-              <span>Total de visitas</span>
-              <strong>5490</strong>
-              <small>Contador general del sistema.</small>
-            </div>
-          </aside>
         </div>
+
+        <aside class="inicio-side-panel">
+          <div class="external-links-card">
+            <div class="card-header">
+              <h3>Enlaces externos</h3>
+            </div>
+
+            <a href="#" target="_blank" rel="noopener noreferrer">
+              Cámara de Diputados del Estado de México
+            </a>
+
+            <a href="#" target="_blank" rel="noopener noreferrer">
+              Instituto de Estudios Legislativos
+            </a>
+
+            <a href="#" target="_blank" rel="noopener noreferrer">
+              Órgano Superior de Fiscalización
+            </a>
+
+            <a href="#" target="_blank" rel="noopener noreferrer">
+              Secretaría de Asuntos Parlamentarios
+            </a>
+
+            <a href="#" target="_blank" rel="noopener noreferrer">
+              Contraloría del Poder Legislativo
+            </a>
+          </div>
+
+          <div class="visits-card">
+            <span>Total de visitas</span>
+            <strong>5490</strong>
+            <small>Contador general del sistema.</small>
+          </div>
+        </aside>
+      </div>
       }
 
       @if (moduloActual === 'mensaje') {
-        <form class="message-form">
-          <div class="form-card">
-            <div class="card-header">
-              <h3>Información del documento</h3>
-            </div>
-
-            <div class="form-row">
-              <label for="titulo">Título del documento:</label>
-              <input id="titulo" name="titulo" type="text" />
-            </div>
-
-            <div class="form-row form-row-small">
-              <label for="fecha">Fecha de creación:</label>
-              <input id="fecha" name="fecha" type="date" value="2026-06-22" />
-            </div>
-
-            <div class="form-row form-row-small">
-              <label for="hora">Hora:</label>
-              <input id="hora" name="hora" type="time" value="15:58" />
-            </div>
-
-            <div class="form-row form-row-textarea">
-              <label for="descripcion">Descripción:</label>
-              <textarea
-                id="descripcion"
-                name="descripcion"
-                placeholder="Escriba aquí una breve reseña del documento"
-              ></textarea>
-            </div>
-
-            <div class="form-row">
-              <label for="documento">Seleccione el documento:</label>
-              <input id="documento" name="documento" type="file" />
-            </div>
+      <form class="message-form">
+        <div class="form-card">
+          <div class="card-header">
+            <h3>Información del documento</h3>
           </div>
 
-          <div class="form-card recipients-section">
-            <div class="card-header">
-              <h3>Destinatarios</h3>
-            </div>
-
-            <div class="recipients-actions">
-              <button type="button">Pasar ›</button>
-              <button type="button">‹ Quitar</button>
-              <button type="button">Pasar todos ›</button>
-              <button type="button">‹ Quitar todos</button>
-            </div>
-
-            <div class="recipients-lists">
-              <select multiple aria-label="Usuarios disponibles">
-                <option>Admin1 Admin Admin - Dir. de Informática</option>
-                <option>Javier Domínguez Morales - Secretaría de Asuntos Parlamentarios</option>
-                <option>José Gerardo Celestino Sánchez - Dir. de Auditoría Interna</option>
-                <option>Víctor Aguilera Mier - Coordinación Administrativa</option>
-                <option>Evelin Cuevas Dávila - Secretaría de Administración y Finanzas</option>
-                <option>Elena Karina Castañeda Pagaza - Unidad de Información</option>
-                <option>Pedro Alberto Ramírez Laguna - Dir. de Administración</option>
-                <option>Diana Pérez de la Cruz - Dir. de Recursos Materiales</option>
-              </select>
-
-              <select multiple aria-label="Usuarios seleccionados"></select>
-            </div>
+          <div class="form-row">
+            <label for="titulo">Título del documento:</label>
+            <input id="titulo" name="titulo" type="text" />
           </div>
 
-          <div class="form-actions">
-            <button type="submit">Enviar</button>
-            <button type="button" class="btn-secondary">Cancelar</button>
+          <div class="form-row form-row-small">
+            <label for="fecha">Fecha de creación:</label>
+            <input id="fecha" name="fecha" type="date" value="2026-06-22" />
           </div>
-        </form>
+
+          <div class="form-row form-row-small">
+            <label for="hora">Hora:</label>
+            <input id="hora" name="hora" type="time" value="15:58" />
+          </div>
+
+          <div class="form-row form-row-textarea">
+            <label for="descripcion">Descripción:</label>
+            <textarea id="descripcion" name="descripcion"
+              placeholder="Escriba aquí una breve reseña del documento"></textarea>
+          </div>
+
+          <div class="form-row">
+            <label for="documento">Seleccione el documento:</label>
+            <input id="documento" name="documento" type="file" />
+          </div>
+        </div>
+
+        <div class="form-card recipients-section">
+          <div class="card-header">
+            <h3>Destinatarios</h3>
+          </div>
+
+          <div class="recipients-actions">
+            <button type="button">Pasar ›</button>
+            <button type="button">‹ Quitar</button>
+            <button type="button">Pasar todos ›</button>
+            <button type="button">‹ Quitar todos</button>
+          </div>
+
+          <div class="recipients-lists">
+            <select multiple aria-label="Usuarios disponibles">
+              <option>Admin1 Admin Admin - Dir. de Informática</option>
+              <option>Javier Domínguez Morales - Secretaría de Asuntos Parlamentarios</option>
+              <option>José Gerardo Celestino Sánchez - Dir. de Auditoría Interna</option>
+              <option>Víctor Aguilera Mier - Coordinación Administrativa</option>
+              <option>Evelin Cuevas Dávila - Secretaría de Administración y Finanzas</option>
+              <option>Elena Karina Castañeda Pagaza - Unidad de Información</option>
+              <option>Pedro Alberto Ramírez Laguna - Dir. de Administración</option>
+              <option>Diana Pérez de la Cruz - Dir. de Recursos Materiales</option>
+            </select>
+
+            <select multiple aria-label="Usuarios seleccionados"></select>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit">Enviar</button>
+          <button type="button" class="btn-secondary">Cancelar</button>
+        </div>
+      </form>
       }
 
       @if (moduloActual === 'bandeja') {
-        <div class="empty-module">
-          <h3>Bandeja de entrada</h3>
-          <p>Este módulo se desarrollará posteriormente.</p>
+      <div class="inbox-module">
+        <div class="inbox-toolbar">
+          <div class="search-box">
+            <label for="buscarMensaje">Buscar documento</label>
+            <input id="buscarMensaje" type="text" placeholder="Buscar por remitente, título o descripción" />
+          </div>
+
+          <div class="filter-box">
+            <label for="estadoMensaje">Estado</label>
+            <select id="estadoMensaje">
+              <option>Todos</option>
+              <option>Nuevo</option>
+              <option>Pendiente</option>
+              <option>Visto</option>
+              <option>Respondido</option>
+              <option>Archivado</option>
+            </select>
+          </div>
+
+          <div class="filter-box">
+            <label for="fechaMensaje">Fecha</label>
+            <input id="fechaMensaje" type="date" />
+          </div>
         </div>
+
+        <div class="inbox-card">
+          <div class="inbox-header">
+            <h3>Documentos recibidos</h3>
+            <span>5 mensajes</span>
+          </div>
+
+          <div class="inbox-list">
+            <article class="inbox-item unread">
+              <div class="sender-block">
+                <span>Envía</span>
+                <strong>Secretaría Técnica</strong>
+              </div>
+
+              <div class="message-block">
+                <div class="message-title-row">
+                  <h4>Invitación CAS 190626_1630</h4>
+                  <span class="status-badge status-new">Nuevo</span>
+                </div>
+
+                <p>
+                  19 de junio de 2026 a las 16:30 horas.
+                </p>
+
+                <div class="document-row">
+                  <span>Documento:</span>
+                  <a href="#" target="_blank" rel="noopener noreferrer">invitacion-cas-190626.pdf</a>
+                </div>
+              </div>
+
+              <div class="inbox-actions">
+                <a href="#" target="_blank" rel="noopener noreferrer" class="action-link">
+                  Ver documento
+                </a>
+
+                <details class="reply-details">
+                  <summary>Responder</summary>
+
+                  <div class="reply-panel">
+                    <label>Respuesta</label>
+                    <textarea placeholder="Escriba aquí su respuesta"></textarea>
+
+                    <label>Adjuntar documento opcional</label>
+                    <input type="file" />
+
+                    <div class="reply-actions">
+                      <button type="button">Enviar respuesta</button>
+                      <button type="button" class="btn-light">Cancelar</button>
+                    </div>
+                  </div>
+                </details>
+              </div>
+            </article>
+
+            <article class="inbox-item">
+              <div class="sender-block">
+                <span>Envía</span>
+                <strong>Walfred José Gómez Vilchis</strong>
+              </div>
+
+              <div class="message-block">
+                <div class="message-title-row">
+                  <h4>Contrato de Protektnet Consulting Services, S.A. de C.V.</h4>
+                  <span class="status-badge status-pending-inbox">Pendiente</span>
+                </div>
+
+                <p>
+                  Contrato de 800 licencias Sophos XDR para el Órgano Superior de Fiscalización
+                  del Estado de México.
+                </p>
+
+                <div class="document-row">
+                  <span>Documento:</span>
+                  <a href="#" target="_blank" rel="noopener noreferrer">contrato-protektnet.pdf</a>
+                </div>
+              </div>
+
+              <div class="inbox-actions">
+                <a href="#" target="_blank" rel="noopener noreferrer" class="action-link">
+                  Ver documento
+                </a>
+
+                <details class="reply-details">
+                  <summary>Responder</summary>
+
+                  <div class="reply-panel">
+                    <label>Respuesta</label>
+                    <textarea placeholder="Escriba aquí su respuesta"></textarea>
+
+                    <label>Adjuntar documento opcional</label>
+                    <input type="file" />
+
+                    <div class="reply-actions">
+                      <button type="button">Enviar respuesta</button>
+                      <button type="button" class="btn-light">Cancelar</button>
+                    </div>
+                  </div>
+                </details>
+              </div>
+            </article>
+
+            <article class="inbox-item">
+              <div class="sender-block">
+                <span>Envía</span>
+                <strong>Secretaría Técnica</strong>
+              </div>
+
+              <div class="message-block">
+                <div class="message-title-row">
+                  <h4>Acta CAS 150626_1700</h4>
+                  <span class="status-badge status-seen-inbox">Visto</span>
+                </div>
+
+                <p>
+                  Ampliación al contrato CAS-LPNP02/2025/LXII-LEM, relativo a la contratación
+                  de licencias de software Microsoft Office.
+                </p>
+
+                <div class="document-row">
+                  <span>Documento:</span>
+                  <a href="#" target="_blank" rel="noopener noreferrer">acta-cas-150626.pdf</a>
+                </div>
+              </div>
+
+              <div class="inbox-actions">
+                <a href="#" target="_blank" rel="noopener noreferrer" class="action-link">
+                  Ver documento
+                </a>
+
+                <details class="reply-details">
+                  <summary>Responder</summary>
+
+                  <div class="reply-panel">
+                    <label>Respuesta</label>
+                    <textarea placeholder="Escriba aquí su respuesta"></textarea>
+
+                    <label>Adjuntar documento opcional</label>
+                    <input type="file" />
+
+                    <div class="reply-actions">
+                      <button type="button">Enviar respuesta</button>
+                      <button type="button" class="btn-light">Cancelar</button>
+                    </div>
+                  </div>
+                </details>
+              </div>
+            </article>
+
+            <article class="inbox-item">
+              <div class="sender-block">
+                <span>Envía</span>
+                <strong>Elena Karina Castañeda Pagaza</strong>
+              </div>
+
+              <div class="message-block">
+                <div class="message-title-row">
+                  <h4>Solicitud programático-presupuestal</h4>
+                  <span class="status-badge status-answered">Respondido</span>
+                </div>
+
+                <p>
+                  Actualización al formato de solicitud programático-presupuestal derivado de cambio
+                  de titulares de departamentos.
+                </p>
+
+                <div class="document-row">
+                  <span>Documento:</span>
+                  <a href="#" target="_blank" rel="noopener noreferrer">solicitud-presupuestal.docx</a>
+                </div>
+              </div>
+
+              <div class="inbox-actions">
+                <a href="#" target="_blank" rel="noopener noreferrer" class="action-link">
+                  Ver documento
+                </a>
+
+                <button type="button" class="archive-button">
+                  Archivar
+                </button>
+              </div>
+            </article>
+
+            <article class="inbox-item">
+              <div class="sender-block">
+                <span>Envía</span>
+                <strong>Secretaría de Administración y Finanzas</strong>
+              </div>
+
+              <div class="message-block">
+                <div class="message-title-row">
+                  <h4>Circular General 017</h4>
+                  <span class="status-badge status-seen-inbox">Visto</span>
+                </div>
+
+                <p>
+                  Comunicado interno de la Secretaría de Administración y Finanzas para conocimiento
+                  de las áreas administrativas.
+                </p>
+
+                <div class="document-row">
+                  <span>Documento:</span>
+                  <a href="#" target="_blank" rel="noopener noreferrer">circular-general-017.pdf</a>
+                </div>
+              </div>
+
+              <div class="inbox-actions">
+                <a href="#" target="_blank" rel="noopener noreferrer" class="action-link">
+                  Ver documento
+                </a>
+
+                <details class="reply-details">
+                  <summary>Responder</summary>
+
+                  <div class="reply-panel">
+                    <label>Respuesta</label>
+                    <textarea placeholder="Escriba aquí su respuesta"></textarea>
+
+                    <label>Adjuntar documento opcional</label>
+                    <input type="file" />
+
+                    <div class="reply-actions">
+                      <button type="button">Enviar respuesta</button>
+                      <button type="button" class="btn-light">Cancelar</button>
+                    </div>
+                  </div>
+                </details>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
       }
 
       @if (moduloActual === 'formatos') {
-        <div class="formatos-module">
-          <div class="formatos-list">
+      <div class="formatos-module">
+        <div class="formatos-list">
 
-            <details class="formato-category">
-              <summary>
-                <span>Formatos</span>
-                <strong>+</strong>
-              </summary>
+          <details class="formato-category">
+            <summary>
+              <span>Formatos</span>
+              <strong>+</strong>
+            </summary>
 
-              <div class="formato-content">
-                <div class="file-empty">
-                  <p>No hay documentos disponibles por el momento.</p>
-
-                  <!-- Cuando tengas PDFs, agrega aquí los enlaces:
+            <div class="formato-content">
+              <div class="file-empty">
+                <p>No hay documentos disponibles por el momento.</p>
+                <!-- 
                   <a href="assets/formatos/nombre-del-archivo.pdf" target="_blank" class="file-link">
                     Ver documento
                   </a>
                   -->
-                </div>
               </div>
-            </details>
+            </div>
+          </details>
 
-            <details class="formato-category">
-              <summary>
-                <span>Secretaría de Administración y Finanzas</span>
-                <strong>+</strong>
-              </summary>
+          <details class="formato-category">
+            <summary>
+              <span>Secretaría de Administración y Finanzas</span>
+              <strong>+</strong>
+            </summary>
 
-              <div class="formato-content">
-                <div class="file-item">
-                  <div>
-                    <strong>Manual de procedimientos</strong>
-                    <p>Documento pendiente por cargar en el sistema.</p>
-                  </div>
-
-                  <!-- Reemplaza href cuando tengas el PDF real -->
-                  <a href="#" target="_blank" class="file-link">Ver documento</a>
-                </div>
+            <div class="formato-content">
+              <div class="file-empty">
+                <p>No hay documentos disponibles por el momento.</p>
+                <!-- 
+                  <a href="assets/formatos/nombre-del-archivo.pdf" target="_blank" class="file-link">
+                    Ver documento
+                  </a>
+                  -->
               </div>
-            </details>
+            </div>
+          </details>
 
-            <details class="formato-category">
-              <summary>
-                <span>Secretaría Particular</span>
-                <strong>+</strong>
-              </summary>
+          <details class="formato-category">
+            <summary>
+              <span>Secretaría Particular</span>
+              <strong>+</strong>
+            </summary>
 
-              <div class="formato-content">
-                <div class="file-empty">
-                  <p>No hay documentos disponibles por el momento.</p>
+            <div class="formato-content">
+              <div class="file-empty">
+                <p>No hay documentos disponibles por el momento.</p>
 
-                  <!-- Agrega aquí los PDFs de Secretaría Particular -->
-                </div>
+                <!-- Agrega aquí los PDFs de Secretaría Particular -->
               </div>
-            </details>
+            </div>
+          </details>
 
-            <details class="formato-category">
-              <summary>
-                <span>Secretaría Técnica</span>
-                <strong>+</strong>
-              </summary>
+          <details class="formato-category">
+            <summary>
+              <span>Secretaría Técnica</span>
+              <strong>+</strong>
+            </summary>
 
-              <div class="formato-content">
-                <div class="file-empty">
-                  <p>No hay documentos disponibles por el momento.</p>
+            <div class="formato-content">
+              <div class="file-empty">
+                <p>No hay documentos disponibles por el momento.</p>
 
-                  <!-- Agrega aquí los PDFs de Secretaría Técnica -->
-                </div>
+                <!-- Agrega aquí los PDFs de Secretaría Técnica -->
               </div>
-            </details>
+            </div>
+          </details>
 
-            <details class="formato-category">
-              <summary>
-                <span>Unidad de Información, Planeación, Programación y Evaluación</span>
-                <strong>+</strong>
-              </summary>
+          <details class="formato-category">
+            <summary>
+              <span>Unidad de Información, Planeación, Programación y Evaluación</span>
+              <strong>+</strong>
+            </summary>
 
-              <div class="formato-content">
-                <div class="file-empty">
-                  <p>No hay documentos disponibles por el momento.</p>
+            <div class="formato-content">
+              <div class="file-empty">
+                <p>No hay documentos disponibles por el momento.</p>
 
-                  <!-- Agrega aquí los PDFs de la Unidad de Información, Planeación, Programación y Evaluación -->
-                </div>
+                <!-- Agrega aquí los PDFs de la Unidad de Información, Planeación, Programación y Evaluación -->
               </div>
-            </details>
+            </div>
+          </details>
 
-            <details class="formato-category">
-              <summary>
-                <span>Coordinación de Normatividad</span>
-                <strong>+</strong>
-              </summary>
+          <details class="formato-category">
+            <summary>
+              <span>Coordinación de Normatividad</span>
+              <strong>+</strong>
+            </summary>
 
-              <div class="formato-content">
-                <div class="file-empty">
-                  <p>No hay documentos disponibles por el momento.</p>
+            <div class="formato-content">
+              <div class="file-empty">
+                <p>No hay documentos disponibles por el momento.</p>
 
-                  <!-- Agrega aquí los PDFs de Coordinación de Normatividad -->
-                </div>
+                <!-- Agrega aquí los PDFs de Coordinación de Normatividad -->
               </div>
-            </details>
+            </div>
+          </details>
 
-            <details class="formato-category">
-              <summary>
-                <span>Unidad de Igualdad de Género y Erradicación de la Violencia</span>
-                <strong>+</strong>
-              </summary>
+          <details class="formato-category">
+            <summary>
+              <span>Unidad de Igualdad de Género y Erradicación de la Violencia</span>
+              <strong>+</strong>
+            </summary>
 
-              <div class="formato-content">
-                <div class="file-empty">
-                  <p>No hay documentos disponibles por el momento.</p>
+            <div class="formato-content">
+              <div class="file-empty">
+                <p>No hay documentos disponibles por el momento.</p>
 
-                  <!-- Agrega aquí los PDFs de la Unidad de Igualdad de Género y Erradicación de la Violencia -->
-                </div>
+                <!-- Agrega aquí los PDFs de la Unidad de Igualdad de Género y Erradicación de la Violencia -->
               </div>
-            </details>
+            </div>
+          </details>
 
-            <details class="formato-category">
-              <summary>
-                <span>Dirección de Administración y Desarrollo de Personal</span>
-                <strong>+</strong>
-              </summary>
+          <details class="formato-category">
+            <summary>
+              <span>Dirección de Administración y Desarrollo de Personal</span>
+              <strong>+</strong>
+            </summary>
 
-              <div class="formato-content">
-                <div class="file-empty">
-                  <p>No hay documentos disponibles por el momento.</p>
+            <div class="formato-content">
+              <div class="file-empty">
+                <p>No hay documentos disponibles por el momento.</p>
 
-                  <!-- Agrega aquí los PDFs de Dirección de Administración y Desarrollo de Personal -->
-                </div>
+                <!-- Agrega aquí los PDFs de Dirección de Administración y Desarrollo de Personal -->
               </div>
-            </details>
+            </div>
+          </details>
 
-            <details class="formato-category">
-              <summary>
-                <span>Dirección de Recursos Materiales</span>
-                <strong>+</strong>
-              </summary>
+          <details class="formato-category">
+            <summary>
+              <span>Dirección de Recursos Materiales</span>
+              <strong>+</strong>
+            </summary>
 
-              <div class="formato-content">
-                <div class="file-empty">
-                  <p>No hay documentos disponibles por el momento.</p>
+            <div class="formato-content">
+              <div class="file-empty">
+                <p>No hay documentos disponibles por el momento.</p>
 
-                  <!-- Agrega aquí los PDFs de Dirección de Recursos Materiales -->
-                </div>
+                <!-- Agrega aquí los PDFs de Dirección de Recursos Materiales -->
               </div>
-            </details>
+            </div>
+          </details>
 
-            <details class="formato-category">
-              <summary>
-                <span>Dirección de Finanzas</span>
-                <strong>+</strong>
-              </summary>
+          <details class="formato-category">
+            <summary>
+              <span>Dirección de Finanzas</span>
+              <strong>+</strong>
+            </summary>
 
-              <div class="formato-content">
-                <div class="file-empty">
-                  <p>No hay documentos disponibles por el momento.</p>
+            <div class="formato-content">
+              <div class="file-empty">
+                <p>No hay documentos disponibles por el momento.</p>
 
-                  <!-- Agrega aquí los PDFs de Dirección de Finanzas -->
-                </div>
+                <!-- Agrega aquí los PDFs de Dirección de Finanzas -->
               </div>
-            </details>
+            </div>
+          </details>
 
-            <details class="formato-category">
-              <summary>
-                <span>Dirección de Informática</span>
-                <strong>+</strong>
-              </summary>
+          <details class="formato-category">
+            <summary>
+              <span>Dirección de Informática</span>
+              <strong>+</strong>
+            </summary>
 
-              <div class="formato-content">
-                <div class="file-empty">
-                  <p>No hay documentos disponibles por el momento.</p>
+            <div class="formato-content">
+              <div class="file-empty">
+                <p>No hay documentos disponibles por el momento.</p>
 
-                  <!-- Agrega aquí los PDFs de Dirección de Informática -->
-                </div>
+                <!-- Agrega aquí los PDFs de Dirección de Informática -->
               </div>
-            </details>
+            </div>
+          </details>
 
-          </div>
         </div>
+      </div>
       }
 
       @if (moduloActual === 'administracion') {
-        <div class="empty-module">
-          <h3>Administración</h3>
-          <p>Módulo en desarrollo</p>
-        </div>
+      <div class="empty-module">
+        <h3>Administración</h3>
+        <p>Módulo en desarrollo</p>
+      </div>
       }
     </section>
   </main>
