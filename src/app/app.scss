@@ -1,4 +1,3 @@
-// Variables de diseño moderno
 $vino: #85003f;
 $vino-oscuro: #5c002c;
 $vino-claro: #a81c56;
@@ -30,7 +29,6 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   flex-direction: column;
 }
 
-// 1. TOP NAVBAR
 .top-navbar {
   min-height: 86px;
   background: rgba(255, 255, 255, 0.85);
@@ -111,7 +109,6 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-// MAIN MENU
 .main-menu {
   display: flex;
   justify-content: center;
@@ -196,9 +193,6 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   display: block;
 }
 
-
-
-// 2. HERO SECTION
 .main-area {
   flex: 1;
   max-width: 1280px;
@@ -255,12 +249,11 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-// 3. INICIO MODULE
 .inicio-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 390px;
   gap: 32px;
-  align-items: start;
+  align-items: stretch;
 }
 
 .inicio-side-panel {
@@ -269,7 +262,6 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   gap: 24px;
 }
 
-// Cards básicos
 .external-links-card,
 .recent-messages-card,
 .visits-card,
@@ -285,7 +277,16 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   transition: $transition;
 }
 
-.recent-messages-card,
+.recent-messages-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  &:hover {
+    box-shadow: $hover-shadow;
+  }
+}
+
 .external-links-card {
   &:hover {
     box-shadow: $hover-shadow;
@@ -317,18 +318,34 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .recent-messages-scroll {
-  max-height: 400px;
+  flex: 1;
+  max-height: 600px;
   overflow-y: auto;
-  
+  display: flex;
+  flex-direction: column;
+
+  .file-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 24px;
+    padding: 40px;
+  }
+
   &::-webkit-scrollbar {
     width: 6px;
   }
+
   &::-webkit-scrollbar-track {
     background: transparent;
   }
+
   &::-webkit-scrollbar-thumb {
     background: #cbd5e1;
     border-radius: 10px;
+
     &:hover {
       background: #94a3b8;
     }
@@ -406,7 +423,6 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   color: #1e40af;
 }
 
-// Enlaces externos
 .external-links-card {
   a {
     display: flex;
@@ -443,7 +459,6 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-// Contador visitas
 .visits-card {
   display: flex;
   align-items: center;
@@ -501,7 +516,6 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-// 4. NUEVO MENSAJE FORM
 .message-form {
   max-width: 980px;
   margin: 0 auto;
@@ -592,7 +606,6 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   align-items: start;
 }
 
-// Selector de archivos personalizado
 .file-input-container {
   display: flex;
   align-items: center;
@@ -620,7 +633,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     border: 0;
     padding: 0;
     background: transparent;
-    
+
     &::file-selector-button {
       border: 0;
       background: $vino;
@@ -645,7 +658,6 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-// Destinatarios Transfer Box
 .recipients-container {
   display: grid;
   grid-template-columns: 1fr 160px 1fr;
@@ -784,7 +796,6 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-// 5. BANDEJA DE ENTRADA (INBOX)
 .inbox-module {
   max-width: 1150px;
   margin: 0 auto;
@@ -856,12 +867,15 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   &::-webkit-scrollbar {
     width: 6px;
   }
+
   &::-webkit-scrollbar-track {
     background: transparent;
   }
+
   &::-webkit-scrollbar-thumb {
     background: #cbd5e1;
     border-radius: 10px;
+
     &:hover {
       background: #94a3b8;
     }
@@ -987,7 +1001,6 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-// Estado badges en Inbox
 .status-badge {
   display: inline-flex;
   align-items: center;
@@ -1028,7 +1041,6 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   color: #475569;
 }
 
-// Botones de acciones
 .inbox-actions {
   display: flex;
   flex-direction: column;
@@ -1064,7 +1076,6 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-// 6. FORMATOS MODULE (ACORDEONES)
 .formatos-module {
   max-width: 1100px;
   margin: 0 auto;
@@ -1189,7 +1200,6 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-// 7. ADMINISTRACION & PLACEHOLDERS
 .empty-module {
   padding: 48px;
   text-align: center;
@@ -1228,22 +1238,24 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-// ANIMATION UTILITIES
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
     transform: scale(1);
   }
+
   50% {
     opacity: .7;
     transform: scale(0.95);
   }
 }
+
 .animate-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-// FOOTER
 .footer {
   border-top: 1px solid $borde;
   background: white;
@@ -1255,7 +1267,6 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   letter-spacing: 2px;
 }
 
-// 8. MEDIA QUERIES (RESPONSIVO)
 @media (max-width: 1100px) {
   .top-navbar {
     grid-template-columns: 1fr;
@@ -1301,7 +1312,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
-    
+
     button {
       flex: 1;
       min-width: 120px;
@@ -1330,6 +1341,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
   .form-actions {
     flex-direction: column;
+
     button {
       width: 100%;
       justify-content: center;
@@ -1343,7 +1355,6 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-// 9. ELEMENTOS DE SOLO LECTURA Y CANCELACIÓN DE ARCHIVOS
 .readonly-input {
   background-color: #f1f5f9 !important;
   cursor: not-allowed;
@@ -1395,7 +1406,6 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-// 10. MODAL DE DETALLES DE MENSAJE
 .modal-backdrop {
   position: fixed;
   top: 0;
@@ -1433,9 +1443,22 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     opacity: 0;
     transform: translateY(20px) scale(0.98);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideUpCenter {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
   }
 }
 
@@ -1488,9 +1511,11 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   &::-webkit-scrollbar {
     width: 6px;
   }
+
   &::-webkit-scrollbar-track {
     background: transparent;
   }
+
   &::-webkit-scrollbar-thumb {
     background: #cbd5e1;
     border-radius: 10px;
@@ -1627,16 +1652,17 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   .modal-backdrop {
     padding: 12px;
   }
+
   .modal-card {
     max-height: calc(100vh - 24px);
   }
+
   .detail-grid {
     grid-template-columns: 1fr;
     gap: 12px;
   }
 }
 
-// 12. MENSAJES RECIENTES INTERACTIVOS EN INICIO
 .card-header-hint {
   font-size: 11px;
   color: $texto-mutado;
@@ -1664,7 +1690,6 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-// Nuevos status badges pequeños para Inicio
 .status-new-sm {
   background: #fdf2f8;
   color: #9d174d;
@@ -1680,7 +1705,6 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   color: #991b1b;
 }
 
-// 13. CARGA DE MÚLTIPLES ARCHIVOS
 .form-row-files {
   align-items: start;
 }
@@ -1718,7 +1742,6 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-// 14. BOTÓN ELIMINAR (PAPELERA)
 .delete-button {
   border: 1px solid #fee2e2;
   background: #fff5f5;
@@ -1748,7 +1771,6 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-// 15. NUEVOS ESTADOS DE BANDEJA
 .status-sending-badge {
   background: #eff6ff;
   color: #1d4ed8;
@@ -1759,7 +1781,6 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   color: #b91c1c;
 }
 
-// Estado visual de mensajes enviando y cancelados
 .inbox-item.item-sending {
   background: #f8faff;
   border-left: 3px solid #3b82f6;
@@ -1773,23 +1794,28 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   padding-left: 21px;
   opacity: 0.75;
 
-  h4, strong {
+  h4,
+  strong {
     text-decoration: line-through;
     color: $texto-suave;
   }
 }
 
-// Animación de rotación para ícono de "Enviando"
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
+
 .animate-spin {
   animation: spin 1.2s linear infinite;
   display: inline-block;
 }
 
-// 16. CONTENEDORES DE LOGOS E IMÁGENES CON FALLBACK EN NAVBAR
 .brand-logo-container {
   position: relative;
   display: flex;
@@ -1807,8 +1833,8 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       display: none;
     }
 
-    // Si la imagen carga, ocultamos el fallback
-    &:not(.hide-img) ~ .brand-logo-placeholder {
+
+    &:not(.hide-img)~.brand-logo-placeholder {
       display: none;
     }
   }
@@ -1831,8 +1857,8 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       display: none;
     }
 
-    // Si la imagen carga, ocultamos el fallback
-    &:not(.hide-img) ~ .saf-placeholder {
+
+    &:not(.hide-img)~.saf-placeholder {
       display: none;
       border-right: none;
       padding-right: 0;
@@ -1840,7 +1866,6 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-// 17. DISTINTIVO DE USUARIO EN EL HERO SECTION
 .hero-user-badge {
   margin-left: auto;
   background: rgba(255, 255, 255, 0.12);
@@ -1889,7 +1914,6 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-// 18. SECCIÓN DE MENSAJES ENVIADOS AL FINAL DE LA REDACCIÓN
 .sent-messages-section {
   margin-top: 32px;
 }
@@ -1967,7 +1991,6 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-// Botón para cancelar envío
 .btn-cancel-send {
   background: #fef2f2;
   color: #dc2626;
@@ -1994,13 +2017,11 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-// Badge de éxito verde
 .status-success-badge {
   background: #f0fdf4;
   color: #15803d;
 }
 
-// 19. SISTEMA DE NOTIFICACIONES EN PANTALLA (reemplaza alert() nativo)
 .notificacion-banner {
   position: fixed;
   bottom: 28px;
@@ -2016,7 +2037,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   justify-content: space-between;
   gap: 20px;
   box-shadow: 0 20px 40px rgba(15, 23, 42, 0.22);
-  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideUpCenter 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 
   .notif-content {
     display: flex;
@@ -2056,8 +2077,13 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     color: white;
     border: 1px solid rgba(239, 68, 68, 0.4);
 
-    i { color: #f87171; }
-    .notif-close { color: #94a3b8; }
+    i {
+      color: #f87171;
+    }
+
+    .notif-close {
+      color: #94a3b8;
+    }
   }
 
   &.notif-info {
@@ -2065,8 +2091,13 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     color: white;
     border: 1px solid rgba(99, 102, 241, 0.3);
 
-    i { color: #818cf8; }
-    .notif-close { color: #94a3b8; }
+    i {
+      color: #818cf8;
+    }
+
+    .notif-close {
+      color: #94a3b8;
+    }
   }
 
   &.notif-exito {
@@ -2074,12 +2105,16 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     color: white;
     border: 1px solid rgba(34, 197, 94, 0.3);
 
-    i { color: #4ade80; }
-    .notif-close { color: #86efac; }
+    i {
+      color: #4ade80;
+    }
+
+    .notif-close {
+      color: #86efac;
+    }
   }
 }
 
-// 20. LOGIN PANTALLA COMPLETA & ESTILOS PREMIUM
 .login-wrapper {
   min-height: 100vh;
   display: flex;
@@ -2090,7 +2125,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
 
-  // Fondo animado y burbujas difusas institucionales
+
   &::before {
     content: '';
     position: absolute;
@@ -2145,9 +2180,14 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       border: 1px solid rgba(133, 0, 63, 0.15);
       background: linear-gradient(135deg, rgba(133, 0, 63, 0.05) 0%, rgba(133, 0, 63, 0) 100%);
       color: $vino;
-      
-      i { color: $vino; }
-      .brand-logo-text span { color: $texto-suave; }
+
+      i {
+        color: $vino;
+      }
+
+      .brand-logo-text span {
+        color: $texto-suave;
+      }
     }
 
     .brand-logo-img {
@@ -2190,8 +2230,8 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     font-weight: 600;
   }
 
-  // Los inputs heredan directamente la estructura alineada y el padding-left (40px)
-  // de la clase base .input-with-icon definida a nivel global.
+
+
 }
 
 .btn-login {
@@ -2229,15 +2269,18 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
   .saf-logo-container {
     opacity: 0.85;
-    
+
     .saf-placeholder {
       border-left: 0;
       padding-left: 0;
       color: $texto-mutado;
       font-size: 11px;
       text-align: center;
-      
-      i { color: $texto-mutado; font-size: 18px; }
+
+      i {
+        color: $texto-mutado;
+        font-size: 18px;
+      }
     }
 
     .saf-logo-img {
@@ -2246,7 +2289,6 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-// 21. INTERACTIVIDAD DEL BADGE DE USUARIO
 .hero-user-badge.clickable {
   cursor: pointer;
   transition: $transition;
@@ -2262,7 +2304,6 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-// 22. MODAL DE PERFIL DE USUARIO
 .profile-modal {
   max-width: 440px;
 
@@ -2340,5 +2381,420 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
       }
     }
+  }
+}
+
+.floating-visits-counter {
+  position: fixed;
+  right: 15px;
+  bottom: 24px;
+  z-index: 90;
+  background: white;
+  color: $texto-suave;
+  border: 1px solid $borde;
+  border-radius: 999px;
+  padding: 11px 18px;
+  min-width: 125px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+  font-size: 14px;
+  font-weight: 700;
+
+  i {
+    color: $vino;
+    font-size: 18px;
+  }
+
+  span {
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 720px) {
+  .floating-visits-counter {
+    right: 16px;
+    bottom: 16px;
+    min-width: auto;
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+}
+
+.calendar-card {
+  background: white;
+  border: 1px solid $borde;
+  border-radius: 16px;
+  box-shadow: $card-shadow;
+  overflow: hidden;
+  transition: $transition;
+
+  &:hover {
+    box-shadow: $hover-shadow;
+  }
+}
+
+.calendar-controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  background: rgba(133, 0, 63, 0.02);
+  border-bottom: 1px solid $borde;
+}
+
+.calendar-month-title {
+  color: $texto;
+  font-size: 14px;
+  font-weight: 800;
+  text-transform: capitalize;
+  letter-spacing: 0.2px;
+}
+
+.btn-calendar-nav {
+  width: 28px;
+  height: 28px;
+  border: 1px solid $borde;
+  background: white;
+  color: $texto-suave;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: $transition;
+
+  i {
+    font-size: 12px;
+  }
+
+  &:hover {
+    background: $vino;
+    border-color: $vino;
+    color: white;
+    box-shadow: 0 2px 6px rgba(133, 0, 63, 0.15);
+  }
+}
+
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: 14px 18px 8px;
+  gap: 6px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+  margin-bottom: 10px;
+
+  span {
+    text-align: center;
+    color: $texto-mutado;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  padding: 0 18px 16px;
+}
+
+.calendar-day {
+  position: relative;
+  aspect-ratio: 1;
+  width: 100%;
+  max-width: 38px;
+  height: 38px;
+  margin: 0 auto;
+  border: 2px solid transparent;
+  background: transparent;
+  color: $texto;
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: $transition;
+
+  span {
+    z-index: 2;
+    margin-top: -2px;
+  }
+
+  &:hover {
+    background: rgba(133, 0, 63, 0.08);
+    color: $vino;
+  }
+}
+
+.calendar-day-empty {
+  aspect-ratio: 1;
+  width: 100%;
+  max-width: 38px;
+  height: 38px;
+  margin: 0 auto;
+}
+
+.calendar-day-today {
+  border-color: rgba(133, 0, 63, 0.3);
+  background: rgba(133, 0, 63, 0.05);
+  color: $vino;
+  font-weight: 700;
+}
+
+.calendar-day-selected {
+  background: $vino;
+  color: white;
+  border-color: $vino;
+  box-shadow: 0 4px 10px rgba(133, 0, 63, 0.25);
+
+  span {
+    color: white;
+  }
+
+  .calendar-dot {
+    background: white !important;
+  }
+
+  &:hover {
+    background: $vino-oscuro;
+    color: white;
+  }
+}
+
+.calendar-day-has-events {
+  font-weight: 800;
+}
+
+.calendar-dots {
+  position: absolute;
+  bottom: 4px;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2.5px;
+  height: 4px;
+  z-index: 2;
+}
+
+.calendar-dot,
+.calendar-legend i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dot-recibido {
+  background: #166534;
+}
+
+.dot-enviado {
+  background: #0284c7;
+}
+
+.dot-recordatorio {
+  background: $vino;
+}
+
+.calendar-legend {
+  padding: 0 18px 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: $texto-mutado;
+    font-size: 11px;
+    font-weight: 700;
+  }
+}
+
+.calendar-selected-panel {
+  padding: 16px 18px;
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  >strong {
+    display: block;
+    color: $texto;
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: capitalize;
+    border-left: 3px solid $vino;
+    padding-left: 8px;
+  }
+}
+
+.calendar-events-list {
+  max-height: 150px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-right: 4px;
+
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+  }
+}
+
+.calendar-event-item {
+  background: white;
+  border: 1px solid $borde;
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.01);
+  transition: $transition;
+
+  &:hover {
+    border-color: $borde-focus;
+    box-shadow: 0 4px 8px rgba(15, 23, 42, 0.02);
+  }
+
+  p {
+    margin: 4px 0 0;
+    color: $texto-suave;
+    font-size: 12.5px;
+    line-height: 1.4;
+    font-weight: 500;
+  }
+}
+
+.calendar-event-type {
+  display: inline-flex;
+  width: fit-content;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: capitalize;
+}
+
+.event-recibido {
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.event-enviado {
+  background: #f0f9ff;
+  color: #075985;
+}
+
+.event-recordatorio {
+  background: #fdf2f8;
+  color: $vino;
+}
+
+.calendar-empty-text {
+  margin: 0;
+  color: $texto-mutado;
+  font-size: 12.5px;
+  line-height: 1.4;
+  text-align: center;
+  padding: 12px 0;
+  font-weight: 500;
+}
+
+.calendar-reminder-form {
+  margin-top: 4px;
+  display: flex;
+  gap: 8px;
+
+  input {
+    flex: 1;
+    border: 1px solid $borde;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+    outline: none;
+    color: $texto;
+    background: white;
+    transition: $transition;
+
+    &:focus {
+      border-color: $vino;
+      box-shadow: 0 0 0 3px rgba(133, 0, 63, 0.08);
+    }
+  }
+
+  button {
+    width: 40px;
+    height: 40px;
+    border: 0;
+    background: $vino;
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: $transition;
+
+    i {
+      font-size: 16px;
+    }
+
+    &:hover {
+      background: $vino-oscuro;
+      box-shadow: 0 4px 10px rgba(133, 0, 63, 0.2);
+    }
+  }
+}
+
+.btn-delete-reminder {
+  width: 26px;
+  height: 26px;
+  border: 0;
+  background: #f1f5f9;
+  color: $texto-mutado;
+  border-radius: 7px;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: $transition;
+
+  i {
+    font-size: 11px;
+  }
+
+  &:hover {
+    background: $vino;
+    color: white;
+  }
+}
+
+@media (max-width: 1100px) {
+  .calendar-card {
+    max-width: 100%;
   }
 }
