@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef, HostListener } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 export interface Mensaje {
@@ -21,6 +21,18 @@ export interface EventoCalendario {
   descripcion: string;
 }
 
+export interface UsuarioSistema {
+  id: number;
+  nombre: string;
+  usuario: string;
+  correo: string;
+  area: string;
+  rol: string;
+  estado: 'Activo' | 'Inactivo';
+  passwordTemporal?: string;
+}
+
+
 @Component({
   selector: 'app-root',
   imports: [FormsModule],
@@ -28,6 +40,67 @@ export interface EventoCalendario {
   styleUrl: './app.scss'
 })
 export class App {
+
+  constructor(private cdr: ChangeDetectorRef) {
+    this.detectarSesionGuardada();
+    this.detectarModuloInicial();
+  }
+
+  detectarSesionGuardada(): void {
+    const logged = sessionStorage.getItem('si_session_logged');
+    const userStr = sessionStorage.getItem('si_session_user');
+    if (logged === 'true' && userStr) {
+      try {
+        this.usuarioActual = JSON.parse(userStr);
+        this.isLoggedIn = true;
+      } catch (e) {
+        this.isLoggedIn = false;
+      }
+    }
+  }
+
+  detectarModuloInicial(): void {
+    const hash = window.location.hash.replace('#', '');
+    if (hash && ['inicio', 'mensaje', 'bandeja', 'formatos', 'administracion'].includes(hash)) {
+      if (hash === 'administracion' && this.usuarioActual.tipo !== 'admin') {
+        this.moduloActual = 'inicio';
+        window.location.hash = 'inicio';
+      } else {
+        this.moduloActual = hash;
+      }
+    } else {
+      this.moduloActual = 'inicio';
+    }
+  }
+
+  @HostListener('window:popstate', ['$event'])
+  onPopState(event: PopStateEvent): void {
+    const state = event.state;
+    if (state && state.modulo) {
+      this.navegarModuloSinHistorial(state.modulo);
+    } else {
+      const hash = window.location.hash.replace('#', '');
+      if (hash) {
+        this.navegarModuloSinHistorial(hash);
+      } else {
+        this.navegarModuloSinHistorial('inicio');
+      }
+    }
+  }
+
+  navegarModuloSinHistorial(modulo: string): void {
+    if (modulo === 'administracion' && this.usuarioActual.tipo !== 'admin') {
+      this.moduloActual = 'inicio';
+      window.history.replaceState({ modulo: 'inicio' }, '', '#inicio');
+      this.mostrarNotificacion('Acceso restringido: Solo los administradores pueden acceder a esta sección.', 'error');
+      return;
+    }
+    this.moduloActual = modulo;
+    if (modulo === 'mensaje') {
+      this.actualizarFechaHora();
+    }
+    this.cdr.detectChanges();
+  }
 
   moduloActual = 'inicio';
 
@@ -53,14 +126,11 @@ export class App {
   mostrarNotificacion(mensaje: string, tipo: 'error' | 'exito' | 'info' = 'info'): void {
     if (this.notificacionTimeout) clearTimeout(this.notificacionTimeout);
     this.notificacion = { mensaje, tipo };
+    this.cdr.detectChanges();
     this.notificacionTimeout = setTimeout(() => {
       this.notificacion = null;
-    }, 4500);
-  }
-
-  cerrarNotificacion(): void {
-    this.notificacion = null;
-    if (this.notificacionTimeout) clearTimeout(this.notificacionTimeout);
+      this.cdr.detectChanges();
+    }, 3000);
   }
 
   isLoggedIn = false;
@@ -71,8 +141,58 @@ export class App {
 
   usuarioActual = {
     nombre: 'Usuario del sistema',
-    rol: 'Usuario Activo'
+    rol: 'Usuario',
+    tipo: 'normal' as 'normal' | 'admin'
   };
+
+  usuariosSistema: UsuarioSistema[] = [
+    {
+      id: 1,
+      nombre: 'Administrador del sistema',
+      usuario: 'admin',
+      correo: 'admin.intranet@congresoedomex.gob.mx',
+      area: 'Dirección de Informática',
+      rol: 'Administrador',
+      estado: 'Activo',
+      passwordTemporal: ''
+    },
+    {
+      id: 2,
+      nombre: 'Usuario de Prueba Uno',
+      usuario: 'usuario1',
+      correo: 'usuario1.prueba@congresoedomex.gob.mx',
+      area: 'Secretaría Técnica',
+      rol: 'Usuario',
+      estado: 'Activo',
+      passwordTemporal: ''
+    },
+    {
+      id: 3,
+      nombre: 'Usuario de Prueba Dos',
+      usuario: 'usuario2',
+      correo: 'usuario2.prueba@congresoedomex.gob.mx',
+      area: 'Área Pendiente',
+      rol: 'Usuario',
+      estado: 'Inactivo',
+      passwordTemporal: ''
+    },
+    {
+      id: 4,
+      nombre: 'Usuario de Prueba Tres',
+      usuario: 'usuario3',
+      correo: 'usuario3.prueba@congresoedomex.gob.mx',
+      area: 'Dirección de Finanzas',
+      rol: 'Usuario',
+      estado: 'Activo',
+      passwordTemporal: ''
+    }
+  ];
+
+  buscarUsuarioAdmin = '';
+  filtroRolAdmin = 'Todos';
+  filtroEstadoAdmin = 'Todos';
+  usuarioSeleccionadoAdmin: UsuarioSistema | null = null;
+  usuarioEditandoAdmin: UsuarioSistema | null = null;
 
   totalVisitas = '--';
 
@@ -84,7 +204,12 @@ export class App {
     { nombre: 'Contraloría del Poder Legislativo', url: 'https://contraloriadelpoderlegislativo.gob.mx/index' }
   ];
 
-  usuariosDisponiblesBase: string[] = [];
+  usuariosDisponiblesBase: string[] = [
+    'Administrador del sistema - Dirección de Informática',
+    'Usuario de Prueba Uno - Secretaría Técnica',
+    'Usuario de Prueba Dos - Área Pendiente',
+    'Usuario de Prueba Tres - Dirección de Finanzas'
+  ];
 
   usuariosDisponibles: string[] = [...this.usuariosDisponiblesBase];
   usuariosSeleccionados: string[] = [];
@@ -269,9 +394,21 @@ export class App {
   ];
 
   cambiarModulo(modulo: string): void {
+    if (modulo === 'administracion' && this.usuarioActual.tipo !== 'admin') {
+      this.moduloActual = 'inicio';
+      window.location.hash = 'inicio';
+      window.history.replaceState({ modulo: 'inicio' }, '', '#inicio');
+      this.mostrarNotificacion('Acceso restringido: Solo los administradores pueden acceder a esta sección.', 'error');
+      return;
+    }
     this.moduloActual = modulo;
     if (modulo === 'mensaje') {
       this.actualizarFechaHora();
+    }
+
+    const hash = '#' + modulo;
+    if (window.location.hash !== hash) {
+      window.history.pushState({ modulo }, '', hash);
     }
   }
 
@@ -519,8 +656,28 @@ export class App {
     }
 
     this.isLoggedIn = true;
-    this.usuarioActual.nombre = this.loginUsuario.trim();
-    this.usuarioActual.rol = 'Usuario Activo';
+    const usuarioLimpio = this.loginUsuario.trim().toLowerCase();
+    if (usuarioLimpio === 'admin') {
+      this.usuarioActual = {
+        nombre: 'Administrador del sistema',
+        rol: 'Administrador',
+        tipo: 'admin'
+      };
+      this.mostrarNotificacion('Sesión iniciada como Administrador.', 'exito');
+    } else {
+      this.usuarioActual = {
+        nombre: this.loginUsuario.trim(),
+        rol: 'Usuario',
+        tipo: 'normal'
+      };
+      this.mostrarNotificacion('Sesión iniciada correctamente.', 'exito');
+    }
+
+    sessionStorage.setItem('si_session_logged', 'true');
+    sessionStorage.setItem('si_session_user', JSON.stringify(this.usuarioActual));
+
+    window.location.hash = this.moduloActual;
+    window.history.replaceState({ modulo: this.moduloActual }, '', '#' + this.moduloActual);
   }
 
   cerrarSesion(): void {
@@ -528,6 +685,16 @@ export class App {
     this.mostrarPerfilModal = false;
     this.loginUsuario = '';
     this.loginPassword = '';
+    this.usuarioActual = {
+      nombre: 'Usuario del sistema',
+      rol: 'Usuario',
+      tipo: 'normal'
+    };
+    this.usuarioSeleccionadoAdmin = null;
+    this.usuarioEditandoAdmin = null;
+    sessionStorage.removeItem('si_session_logged');
+    sessionStorage.removeItem('si_session_user');
+    window.location.hash = 'inicio';
     this.resetearFormulario();
   }
 
@@ -537,6 +704,95 @@ export class App {
 
   cerrarPerfilUsuario(): void {
     this.mostrarPerfilModal = false;
+  }
+
+  get usuariosFiltrados(): UsuarioSistema[] {
+    return this.usuariosSistema.filter(u => {
+      const matchesSearch = !this.buscarUsuarioAdmin.trim() ||
+        u.nombre.toLowerCase().includes(this.buscarUsuarioAdmin.toLowerCase()) ||
+        u.usuario.toLowerCase().includes(this.buscarUsuarioAdmin.toLowerCase()) ||
+        u.correo.toLowerCase().includes(this.buscarUsuarioAdmin.toLowerCase()) ||
+        u.area.toLowerCase().includes(this.buscarUsuarioAdmin.toLowerCase()) ||
+        u.rol.toLowerCase().includes(this.buscarUsuarioAdmin.toLowerCase()) ||
+        u.estado.toLowerCase().includes(this.buscarUsuarioAdmin.toLowerCase());
+
+      const matchesRol = this.filtroRolAdmin === 'Todos' || u.rol === this.filtroRolAdmin;
+      const matchesEstado = this.filtroEstadoAdmin === 'Todos' || u.estado === this.filtroEstadoAdmin;
+
+      return matchesSearch && matchesRol && matchesEstado;
+    });
+  }
+
+  seleccionarUsuarioAdmin(usuario: UsuarioSistema): void {
+    this.usuarioSeleccionadoAdmin = usuario;
+    this.usuarioEditandoAdmin = null;
+  }
+
+  editarUsuarioAdmin(usuario: UsuarioSistema): void {
+    this.usuarioEditandoAdmin = { ...usuario };
+  }
+
+  cancelarEdicionUsuarioAdmin(): void {
+    this.usuarioEditandoAdmin = null;
+  }
+
+  guardarCambiosUsuarioAdmin(): void {
+    if (!this.usuarioEditandoAdmin) return;
+
+    if (!this.usuarioEditandoAdmin.nombre.trim()) {
+      this.mostrarNotificacion('El nombre no puede estar vacío.', 'error');
+      return;
+    }
+    if (!this.usuarioEditandoAdmin.usuario.trim()) {
+      this.mostrarNotificacion('El usuario no puede estar vacío.', 'error');
+      return;
+    }
+    if (!this.usuarioEditandoAdmin.rol.trim()) {
+      this.mostrarNotificacion('El rol no puede estar vacío.', 'error');
+      return;
+    }
+    if (this.usuarioEditandoAdmin.estado !== 'Activo' && this.usuarioEditandoAdmin.estado !== 'Inactivo') {
+      this.mostrarNotificacion('El estado seleccionado no es válido.', 'error');
+      return;
+    }
+
+    const index = this.usuariosSistema.findIndex(u => u.id === this.usuarioEditandoAdmin!.id);
+    if (index !== -1) {
+      this.usuariosSistema[index] = { ...this.usuarioEditandoAdmin };
+      this.usuarioSeleccionadoAdmin = this.usuariosSistema[index];
+      this.usuarioEditandoAdmin = null;
+      this.mostrarNotificacion('Usuario actualizado correctamente.', 'exito');
+    }
+  }
+
+  cambiarEstadoUsuario(usuario: UsuarioSistema): void {
+    usuario.estado = usuario.estado === 'Activo' ? 'Inactivo' : 'Activo';
+
+    if (this.usuarioEditandoAdmin && this.usuarioEditandoAdmin.id === usuario.id) {
+      this.usuarioEditandoAdmin.estado = usuario.estado;
+    }
+
+    if (usuario.estado === 'Activo') {
+      this.mostrarNotificacion('Usuario activado correctamente.', 'exito');
+    } else {
+      this.mostrarNotificacion('Usuario desactivado correctamente.', 'exito');
+    }
+  }
+
+  generarPasswordTemporal(usuario: UsuarioSistema): void {
+    const num = Math.floor(1000 + Math.random() * 9000);
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const letter1 = chars[Math.floor(Math.random() * chars.length)];
+    const letter2 = chars[Math.floor(Math.random() * chars.length)];
+    const password = `Temp-${num}-${letter1}${letter2}`;
+
+    usuario.passwordTemporal = password;
+
+    if (this.usuarioEditandoAdmin && this.usuarioEditandoAdmin.id === usuario.id) {
+      this.usuarioEditandoAdmin.passwordTemporal = password;
+    }
+
+    this.mostrarNotificacion('Contraseña temporal generada con éxito.', 'exito');
   }
 
 }
