@@ -127,6 +127,7 @@ export class App {
   calendarioModalAbierto = false;
   fechaBusquedaCalendario = '';
   filtroEventosCalendario: 'Todos' | 'Recibidos' | 'Enviados' | 'Recordatorios' = 'Todos';
+  buscarDestinatario = '';
 
   recordatoriosCalendario: EventoCalendario[] = [];
 
@@ -205,6 +206,8 @@ export class App {
   filtroEstadoAdmin = 'Todos';
   usuarioSeleccionadoAdmin: UsuarioSistema | null = null;
   usuarioEditandoAdmin: UsuarioSistema | null = null;
+  modalVerUsuarioAbierto = false;
+  modalEditarUsuarioAbierto = false;
 
   totalVisitas = '--';
 
@@ -655,6 +658,14 @@ export class App {
     return this.mensajesBandeja.filter(m => this.esMensajeEnviado(m));
   }
 
+  get usuariosDisponiblesFiltrados(): string[] {
+    if (!this.buscarDestinatario.trim()) {
+      return this.usuariosDisponibles;
+    }
+    const query = this.buscarDestinatario.toLowerCase().trim();
+    return this.usuariosDisponibles.filter(u => u.toLowerCase().includes(query));
+  }
+
   resetearFormulario(): void {
     this.formTitulo = '';
     this.formDescripcion = '';
@@ -663,6 +674,7 @@ export class App {
     this.usuariosSeleccionados = [];
     this.selectedDisponibles = [];
     this.selectedSeleccionados = [];
+    this.buscarDestinatario = '';
   }
 
   cancelarFormulario(): void {
@@ -843,6 +855,8 @@ export class App {
     };
     this.usuarioSeleccionadoAdmin = null;
     this.usuarioEditandoAdmin = null;
+    this.modalVerUsuarioAbierto = false;
+    this.modalEditarUsuarioAbierto = false;
     sessionStorage.removeItem('si_session_logged');
     sessionStorage.removeItem('si_session_user');
     window.location.hash = 'inicio';
@@ -877,14 +891,28 @@ export class App {
   seleccionarUsuarioAdmin(usuario: UsuarioSistema): void {
     this.usuarioSeleccionadoAdmin = usuario;
     this.usuarioEditandoAdmin = null;
+    this.modalVerUsuarioAbierto = true;
   }
 
-  editarUsuarioAdmin(usuario: UsuarioSistema): void {
+  cerrarModalVerUsuario(): void {
+    this.modalVerUsuarioAbierto = false;
+    this.usuarioSeleccionadoAdmin = null;
+  }
+
+  abrirModalEditarUsuario(usuario: UsuarioSistema): void {
     this.usuarioEditandoAdmin = { ...usuario };
+    this.modalEditarUsuarioAbierto = true;
+    this.modalVerUsuarioAbierto = false;
+  }
+
+  cerrarModalEditarUsuario(): void {
+    this.modalEditarUsuarioAbierto = false;
+    this.usuarioEditandoAdmin = null;
   }
 
   cancelarEdicionUsuarioAdmin(): void {
     this.usuarioEditandoAdmin = null;
+    this.modalEditarUsuarioAbierto = false;
   }
 
   guardarCambiosUsuarioAdmin(): void {
@@ -912,6 +940,7 @@ export class App {
       this.usuariosSistema[index] = { ...this.usuarioEditandoAdmin };
       this.usuarioSeleccionadoAdmin = this.usuariosSistema[index];
       this.usuarioEditandoAdmin = null;
+      this.modalEditarUsuarioAbierto = false;
       this.mostrarNotificacion('Usuario actualizado correctamente.', 'exito');
     }
   }
@@ -944,6 +973,145 @@ export class App {
     }
 
     this.mostrarNotificacion('Contraseña temporal generada con éxito.', 'exito');
+  }
+
+  descargarPdfUsuario(usuario: UsuarioSistema): void {
+    const printWindow = window.open('', '_blank', 'width=800,height=600');
+    if (!printWindow) {
+      this.mostrarNotificacion('Error al abrir la ventana de impresión. Por favor permita las ventanas emergentes.', 'error');
+      return;
+    }
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Ficha de Usuario - ${usuario.nombre}</title>
+        <style>
+          body {
+            font-family: 'Montserrat', 'Inter', sans-serif;
+            color: #333333;
+            margin: 40px;
+            line-height: 1.6;
+          }
+          .header {
+            border-bottom: 2px solid #5C2238;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          }
+          .header h1 {
+            color: #5C2238;
+            margin: 0;
+            font-size: 24px;
+            text-transform: uppercase;
+            font-weight: 700;
+          }
+          .header .logo-text {
+            font-size: 14px;
+            color: #666;
+            font-weight: 600;
+            text-transform: uppercase;
+          }
+          .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 40px;
+          }
+          .info-item {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+          }
+          .info-label {
+            font-size: 11px;
+            color: #777;
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 5px;
+            letter-spacing: 0.5px;
+          }
+          .info-value {
+            font-size: 15px;
+            font-weight: 600;
+            color: #111;
+          }
+          .footer {
+            margin-top: 50px;
+            border-top: 1px solid #ccc;
+            padding-top: 20px;
+            text-align: center;
+            font-size: 11px;
+            color: #888;
+            line-height: 1.4;
+          }
+          @media print {
+            body { margin: 20px; }
+            .no-print { display: none; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div>
+            <h1>Ficha de Información del Usuario</h1>
+            <div style="font-size: 12px; color: #555; margin-top: 5px;">SIIntranet - Portal de Gestión del Poder Legislativo</div>
+          </div>
+          <div class="logo-text">GOBIERNO DEL ESTADO DE MÉXICO</div>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-item" style="grid-column: span 2;">
+            <div class="info-label">Nombre Completo</div>
+            <div class="info-value" style="font-size: 18px; font-weight: bold; color: #5C2238;">${usuario.nombre}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Nombre de Usuario</div>
+            <div class="info-value" style="font-family: monospace;">${usuario.usuario}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Rol / Perfil</div>
+            <div class="info-value">${usuario.rol}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Correo Electrónico</div>
+            <div class="info-value">${usuario.correo || 'Pendiente'}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Área / Adscripción</div>
+            <div class="info-value">${usuario.area || 'Pendiente'}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Estado de la Cuenta</div>
+            <div class="info-value" style="font-weight: bold; color: ${usuario.estado === 'Activo' ? '#166534' : '#991b1b'};">${usuario.estado}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Fecha de Emisión</div>
+            <div class="info-value">${new Date().toLocaleDateString('es-MX')} ${new Date().toLocaleTimeString('es-MX')}</div>
+          </div>
+        </div>
+
+        <div class="footer">
+          Documento emitido de manera digital e institucional a través del módulo de administración de SIIntranet.<br>
+          © 2026 Poder Legislativo del Estado de México. Todos los derechos reservados.
+        </div>
+
+        <script>
+          window.onload = function() {
+            setTimeout(function() {
+              window.print();
+              window.close();
+            }, 300);
+          };
+        </script>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
   }
 
   esMensajeEnviado(msg: Mensaje): boolean {

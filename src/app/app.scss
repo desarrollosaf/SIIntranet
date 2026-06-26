@@ -4,12 +4,29 @@ $vino-claro: #a81c56;
 $azul-linea: #0284c7;
 $fondo: #f8fafc;
 $borde: #e2e8f0;
-$borde-focus: #cbd5e1;
+$borde-focus: #a81c56;
 $texto: #0f172a;
-$texto-suave: #475569;
+$texto-suave: #334155;
 $texto-mutado: #64748b;
-$card-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.04), 0 8px 12px -6px rgba(15, 23, 42, 0.03);
-$hover-shadow: 0 20px 40px -10px rgba(133, 0, 63, 0.08), 0 10px 16px -8px rgba(15, 23, 42, 0.04);
+
+// Typography sizes
+$font-xs: 11px;
+$font-sm: 13px;
+$font-md: 14px;
+$font-lg: 16px;
+$font-xl: 19px;
+$font-xxl: 24px;
+$font-giant: 32px;
+
+// Border Radii
+$radius-sm: 6px;
+$radius-md: 10px;
+$radius-lg: 16px;
+
+// Shadows & Animations
+$card-shadow: 0 1px 3px rgba(15, 23, 42, 0.03), 0 10px 25px -5px rgba(15, 23, 42, 0.05), 0 8px 10px -6px rgba(15, 23, 42, 0.03);
+$hover-shadow: 0 20px 30px -10px rgba(133, 0, 63, 0.08), 0 10px 16px -8px rgba(133, 0, 63, 0.04);
+$modal-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.15);
 $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
 * {
@@ -119,10 +136,10 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     border: 0;
     background: transparent;
     color: $texto-suave;
-    font-size: 14px;
+    font-size: $font-md;
     font-weight: 600;
     padding: 10px 16px;
-    border-radius: 12px;
+    border-radius: $radius-md;
     cursor: pointer;
     font-family: inherit;
     display: flex;
@@ -260,6 +277,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
   gap: 26px;
+  height: 100%;
 }
 
 .external-links-card,
@@ -270,8 +288,8 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 .inbox-toolbar,
 .empty-module {
   background: white;
-  border: 1px solid $borde;
-  border-radius: 16px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: $radius-lg;
   box-shadow: $card-shadow;
   overflow: hidden;
   transition: $transition;
@@ -288,31 +306,56 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .external-links-card {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+
   &:hover {
     box-shadow: $hover-shadow;
   }
 }
 
 .card-header {
-  padding: 16px 24px;
-  border-bottom: 1px solid $borde;
-  background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+  padding: 18px 24px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+  background: linear-gradient(180deg, #ffffff 0%, #fcfcfc 100%);
   display: flex;
   align-items: center;
+  position: relative;
+
+  // Subtle left accent bar
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 20%;
+    bottom: 20%;
+    width: 3px;
+    background: $vino;
+    border-radius: 0 4px 4px 0;
+  }
 
   h3 {
     margin: 0;
     color: $vino;
-    font-size: 15px;
+    font-size: $font-md;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
     font-weight: 800;
     display: flex;
     align-items: center;
     gap: 8px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
 
     i {
       font-size: 16px;
+      background: rgba(133, 0, 63, 0.08);
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
     }
   }
 }
@@ -479,9 +522,11 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   gap: 20px;
-  padding: 24px;
+  padding: 20px 24px;
   background: linear-gradient(135deg, white 0%, #fffbfd 100%);
   position: relative;
+  transition: $transition;
+  cursor: default;
 
   &::before {
     content: '';
@@ -490,26 +535,33 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     top: 0;
     bottom: 0;
     width: 4px;
-    background: $vino-claro;
+    background: linear-gradient(180deg, $vino 0%, $vino-claro 100%);
+    border-radius: 0 4px 4px 0;
+  }
+
+  &:hover {
+    box-shadow: $hover-shadow;
   }
 
   .visits-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    background: rgba(168, 28, 86, 0.08);
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(133, 0, 63, 0.08) 0%, rgba(168, 28, 86, 0.06) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     color: $vino;
-    font-size: 20px;
+    font-size: 22px;
+    border: 1px solid rgba(133, 0, 63, 0.1);
+    flex-shrink: 0;
   }
 
   .visits-content {
     span {
       display: block;
       color: $texto-mutado;
-      font-size: 11px;
+      font-size: 10.5px;
       text-transform: uppercase;
       letter-spacing: 0.8px;
       font-weight: 700;
@@ -518,22 +570,23 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     strong {
       display: block;
       color: $vino;
-      font-size: 28px;
-      font-weight: 800;
-      line-height: 1.1;
+      font-size: 32px;
+      font-weight: 900;
+      line-height: 1.05;
       margin: 2px 0;
+      letter-spacing: -1px;
     }
 
     small {
       color: $texto-suave;
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 500;
     }
   }
 }
 
 .message-form {
-  max-width: 980px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -550,7 +603,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   margin: 20px 24px 0;
 
   label {
-    font-size: 13px;
+    font-size: $font-sm;
     color: $texto;
     font-weight: 700;
     text-transform: uppercase;
@@ -580,12 +633,12 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   textarea,
   select {
     width: 100%;
-    border: 1px solid $borde;
+    border: 1px solid rgba(203, 213, 225, 0.8);
     background: #ffffff;
     color: $texto;
-    border-radius: 10px;
-    padding: 11px 14px 11px 40px;
-    font-size: 14px;
+    border-radius: $radius-md;
+    padding: 10px 14px 10px 40px;
+    font-size: $font-md;
     font-weight: 500;
     outline: none;
     transition: $transition;
@@ -595,13 +648,13 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     &:hover {
-      border-color: $borde-focus;
+      border-color: rgba(168, 28, 86, 0.4);
     }
 
     &:focus {
       border-color: $vino;
       background: white;
-      box-shadow: 0 0 0 4px rgba(133, 0, 63, 0.08);
+      box-shadow: 0 0 0 3px rgba(133, 0, 63, 0.12);
     }
   }
 
@@ -625,17 +678,18 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 .file-input-container {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   border: 1px dashed $borde;
-  padding: 12px 18px;
+  padding: 8px 14px;
   border-radius: 10px;
   background: #fafafa;
   transition: $transition;
   position: relative;
   cursor: pointer;
+  width: fit-content;
 
   i {
-    font-size: 20px;
+    font-size: 16px;
     color: $vino;
     position: relative;
     left: 0;
@@ -644,9 +698,9 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   .file-selector-btn {
     background: $vino;
     color: white;
-    padding: 6px 12px;
+    padding: 4px 10px;
     border-radius: 6px;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
     cursor: pointer;
     margin-right: 4px;
@@ -658,12 +712,13 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .file-selector-text {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
     color: $texto-suave;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    max-width: 250px;
   }
 
   &:hover {
@@ -674,16 +729,16 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
 .recipients-container {
   display: grid;
-  grid-template-columns: 1fr 160px 1fr;
-  gap: 20px;
-  margin: 20px 24px;
+  grid-template-columns: 1fr 140px 1fr;
+  gap: 12px;
+  margin: 12px 24px 20px;
   align-items: center;
 }
 
 .select-box {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 
   .select-title {
     font-size: 11px;
@@ -694,21 +749,25 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   select {
-    height: 220px;
+    height: 150px;
     border: 1px solid $borde;
-    border-radius: 12px;
-    padding: 8px;
-    font-size: 13px;
+    border-radius: 10px;
+    padding: 6px;
+    font-size: 12.5px;
     color: $texto;
     font-weight: 500;
     outline: none;
     background: white;
     box-shadow: inset 0 2px 4px rgba(15, 23, 42, 0.02);
     transition: $transition;
+    overflow-x: hidden;
 
     option {
-      padding: 8px 12px;
+      padding: 6px 10px;
       border-radius: 6px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
       margin-bottom: 2px;
 
       &:checked {
@@ -727,22 +786,22 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 .recipients-actions {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 
   button {
     border: 1px solid $borde;
     background: white;
     color: $texto-suave;
-    border-radius: 8px;
-    padding: 9px 12px;
-    font-size: 12px;
+    border-radius: $radius-sm;
+    padding: 6px 10px;
+    font-size: $font-xs;
     font-weight: 700;
     cursor: pointer;
     transition: $transition;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 4px;
 
     i {
       font-size: 11px;
@@ -768,7 +827,8 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .form-actions {
-  margin-top: 24px;
+  margin-top: 16px;
+  margin-bottom: 12px;
   display: flex;
   justify-content: flex-end;
   gap: 12px;
@@ -777,33 +837,33 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     border: 0;
     background: $vino;
     color: white;
-    border-radius: 10px;
-    padding: 12px 24px;
-    font-size: 14px;
+    border-radius: $radius-md;
+    padding: 10px 20px;
+    font-size: $font-md;
     font-weight: 700;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    box-shadow: 0 4px 12px rgba(133, 0, 63, 0.15);
+    box-shadow: 0 3px 8px rgba(133, 0, 63, 0.12);
     transition: $transition;
 
     &:hover {
       background: $vino-oscuro;
       transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(133, 0, 63, 0.22);
+      box-shadow: 0 5px 12px rgba(133, 0, 63, 0.18);
     }
 
     &.btn-secondary {
-      background: white;
-      border: 1px solid $borde;
-      color: $texto-suave;
+      background: transparent;
+      border: 1px solid rgba(133, 0, 63, 0.2);
+      color: $vino;
       box-shadow: none;
 
       &:hover {
-        background: #f1f5f9;
-        color: $texto;
-        border-color: $borde-focus;
+        background: rgba(133, 0, 63, 0.04);
+        color: $vino;
+        border-color: $vino;
         transform: none;
       }
     }
@@ -811,7 +871,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .inbox-module {
-  max-width: 1150px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -850,6 +910,18 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 20%;
+    bottom: 20%;
+    width: 3px;
+    background: $vino;
+    border-radius: 0 4px 4px 0;
+  }
 
   h3 {
     margin: 0;
@@ -859,18 +931,31 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     align-items: center;
     gap: 8px;
+
+    i {
+      background: rgba(133, 0, 63, 0.08);
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      flex-shrink: 0;
+    }
   }
 
   .badge-count {
     background: rgba(133, 0, 63, 0.06);
     color: $vino;
-    padding: 6px 12px;
+    padding: 6px 14px;
     border-radius: 30px;
-    font-size: 12px;
+    font-size: $font-xs;
     font-weight: 700;
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    border: 1px solid rgba(133, 0, 63, 0.12);
   }
 }
 
@@ -912,16 +997,22 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   &:hover {
-    background: rgba(15, 23, 42, 0.005);
+    background: rgba(133, 0, 63, 0.025);
+    border-left: 2px solid rgba(133, 0, 63, 0.25);
+    padding-left: 22px;
   }
 
   &.unread {
-    background: rgba(133, 0, 63, 0.015);
-    border-left: 3px solid $vino;
-    padding-left: 21px;
+    background: rgba(133, 0, 63, 0.025);
+    border-left: 4px solid $vino;
+    padding-left: 20px;
 
     .message-title-row h4 {
       font-weight: 800;
+    }
+
+    .sender-block strong {
+      color: $vino;
     }
   }
 }
@@ -1017,44 +1108,92 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-.status-badge {
+.status-badge,
+.profile-badge,
+.calendar-event-type,
+.event-recibido,
+.event-enviado,
+.event-recordatorio {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 800;
+  border-radius: 999px;
+  font-size: $font-xs;
+  font-weight: 700;
   white-space: nowrap;
+  letter-spacing: 0.3px;
+  line-height: 1.2;
+  border: 1px solid transparent;
 
   i {
     font-size: 10px;
   }
 }
 
-.status-new {
-  background: #fdf2f8;
-  color: #9d174d;
-}
-
-.status-pending-inbox {
-  background: #fffbeb;
-  color: #92400e;
-}
-
-.status-seen-inbox {
+// Green states: visto, activo, enviado, seen, etc.
+.status-visto,
+.status-enviado,
+.status-seen,
+.status-seen-inbox,
+.status-success-badge,
+.event-enviado,
+.event-recibido {
   background: #f0fdf4;
   color: #166534;
+  border-color: rgba(22, 101, 52, 0.15);
 }
 
-.status-answered {
-  background: #f0f9ff;
-  color: #075985;
+// Blue states: respondido, usuario, respondiendo, enviando, cargando, etc.
+.status-respondido,
+.status-answered,
+.status-enviando,
+.status-sending,
+.status-sending-badge,
+.status-respondiendo,
+.status-cargando {
+  background: #eff6ff;
+  color: #1e40af;
+  border-color: rgba(30, 64, 175, 0.15);
 }
 
+// Red states: cancelado, inactivo, eliminado, etc.
+.status-cancelado,
+.status-cancelled,
+.status-cancelled-badge,
+.status-eliminado,
+.status-eliminando,
+.status-cancelando {
+  background: #fef2f2;
+  color: #991b1b;
+  border-color: rgba(153, 27, 27, 0.15);
+}
+
+// Wine/Pink states: nuevo, administrador, recordatorio, etc.
+.status-nuevo,
+.status-new,
+.status-new-sm,
+.profile-badge,
+.event-recordatorio {
+  background: #fdf2f8;
+  color: #9d174d;
+  border-color: rgba(157, 23, 77, 0.15);
+}
+
+// Yellow/Orange states: pendiente, guardando, etc.
+.status-pending,
+.status-pending-inbox,
+.status-guardando {
+  background: #fffbeb;
+  color: #854d0e;
+  border-color: rgba(133, 77, 14, 0.15);
+}
+
+// Gray states: archivado, etc.
 .status-archived {
-  background: #f1f5f9;
+  background: #f8fafc;
   color: #475569;
+  border-color: rgba(71, 85, 105, 0.15);
 }
 
 .inbox-actions {
@@ -1067,9 +1206,9 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid $borde;
   background: white;
   color: $texto-suave;
-  border-radius: 8px;
+  border-radius: $radius-md;
   padding: 8px 12px;
-  font-size: 13px;
+  font-size: $font-sm;
   font-weight: 700;
   cursor: pointer;
   text-decoration: none;
@@ -1093,7 +1232,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .formatos-module {
-  max-width: 1100px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -1105,14 +1244,15 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
 .formato-category {
   background: white;
-  border: 1px solid $borde;
+  border: 1px solid rgba(226, 232, 240, 0.8);
   border-radius: 12px;
   overflow: hidden;
   box-shadow: $card-shadow;
   transition: $transition;
 
   &:hover {
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+    box-shadow: $hover-shadow;
+    border-color: rgba(133, 0, 63, 0.2);
   }
 
   summary {
@@ -1170,10 +1310,11 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   &[open] {
-    border-color: $vino;
+    border-color: rgba(133, 0, 63, 0.35);
+    box-shadow: $hover-shadow;
 
     summary {
-      border-bottom: 1px solid $borde;
+      border-bottom: 1px solid rgba(226, 232, 240, 0.8);
       background: rgba(133, 0, 63, 0.02);
       color: $vino;
 
@@ -1274,13 +1415,25 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
 .footer {
   border-top: 1px solid $borde;
-  background: white;
+  background: linear-gradient(180deg, #ffffff 0%, #fafcff 100%);
   padding: 24px;
   text-align: center;
   color: $texto-mutado;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 2px;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 10%;
+    right: 10%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, rgba(133, 0, 63, 0.3) 30%, rgba(133, 0, 63, 0.5) 50%, rgba(133, 0, 63, 0.3) 70%, transparent 100%);
+    border-radius: 0 0 2px 2px;
+  }
 }
 
 @media (max-width: 1100px) {
@@ -1439,25 +1592,25 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .file-selected-badge {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  border: 1px solid rgba(133, 0, 63, 0.25);
-  background: rgba(133, 0, 63, 0.02);
-  padding: 12px 18px;
-  border-radius: 10px;
-  width: 100%;
+  gap: 8px;
+  border: 1px solid rgba(133, 0, 63, 0.18);
+  background: rgba(133, 0, 63, 0.03);
+  padding: 6px 12px;
+  border-radius: 20px;
+  width: auto;
 
   .file-name-info {
     display: flex;
     align-items: center;
-    gap: 10px;
-    font-size: 13.5px;
-    font-weight: 700;
+    gap: 6px;
+    font-size: $font-xs;
+    font-weight: 600;
     color: $vino;
 
     i {
-      font-size: 18px;
+      font-size: 14px;
     }
   }
 
@@ -1466,8 +1619,8 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     background: transparent;
     color: $texto-mutado;
     cursor: pointer;
-    font-size: 14px;
-    padding: 4px;
+    font-size: 11px;
+    padding: 2px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1487,9 +1640,9 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   right: 0;
   bottom: 0;
   left: 0;
-  background-color: rgba(15, 23, 42, 0.4);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background-color: rgba(15, 23, 42, 0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   z-index: 200;
   display: flex;
   align-items: center;
@@ -1499,13 +1652,13 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
 .modal-card {
   background: white;
-  border-radius: 16px;
+  border-radius: $radius-lg;
   width: 100%;
   max-width: 600px;
   max-height: calc(100vh - 48px);
-  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+  box-shadow: $modal-shadow;
   overflow: hidden;
-  border: 1px solid $borde;
+  border: 1px solid rgba(226, 232, 240, 0.8);
   display: flex;
   flex-direction: column;
 }
@@ -1540,20 +1693,47 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
 .modal-header {
   padding: 18px 24px;
-  border-bottom: 1px solid $borde;
-  background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+  background: linear-gradient(180deg, #ffffff 0%, #fcfcfc 100%);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  position: relative;
+
+  // Matching left accent bar as card-header
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 20%;
+    bottom: 20%;
+    width: 3px;
+    background: $vino;
+    border-radius: 0 4px 4px 0;
+  }
 
   h3 {
     margin: 0;
     color: $vino;
-    font-size: 16px;
+    font-size: $font-md;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
     font-weight: 800;
     display: flex;
     align-items: center;
     gap: 8px;
+
+    i {
+      background: rgba(133, 0, 63, 0.08);
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
   }
 
   .btn-close {
@@ -1565,9 +1745,11 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 6px;
+    padding: 8px;
     border-radius: 50%;
     transition: $transition;
+    width: 34px;
+    height: 34px;
 
     &:hover {
       background: #f1f5f9;
@@ -1660,13 +1842,13 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-size: 13.5px;
+    font-size: $font-sm;
     font-weight: 700;
     color: #0284c7;
     background: #f0f9ff;
     border: 1px solid #e0f2fe;
     padding: 6px 12px;
-    border-radius: 8px;
+    border-radius: $radius-md;
     text-decoration: none;
     transition: $transition;
 
@@ -1688,9 +1870,9 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
   button {
     border: 0;
-    border-radius: 10px;
+    border-radius: $radius-md;
     padding: 10px 18px;
-    font-size: 13.5px;
+    font-size: $font-md;
     font-weight: 700;
     cursor: pointer;
     display: inline-flex;
@@ -1796,8 +1978,9 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
 .files-list {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .file-size {
@@ -1993,20 +2176,42 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sent-messages-section {
-  margin-top: 32px;
+  margin-top: 20px;
 }
 
 .sent-messages-list {
   display: flex;
   flex-direction: column;
+  max-height: 320px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+
+    &:hover {
+      background: #94a3b8;
+    }
+  }
 }
 
 .sent-message-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
-  padding: 18px 24px;
+  gap: 16px;
+  padding: 12px 18px;
   border-bottom: 1px solid $borde;
   transition: $transition;
 
@@ -2026,34 +2231,38 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
     strong {
       text-decoration: line-through;
-      color: $texto-suave;
+      color: $texto-mutado;
     }
   }
 
   .sent-msg-info {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 3px;
     flex: 1;
+    min-width: 0;
 
     strong {
-      font-size: 15px;
+      font-size: 14px;
       color: $texto;
       font-weight: 700;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+      word-break: break-word;
     }
 
     .sent-msg-details {
       display: flex;
       flex-wrap: wrap;
-      gap: 16px;
+      gap: 12px;
     }
 
     .sent-msg-meta {
-      font-size: 12px;
+      font-size: 11.5px;
       color: $texto-suave;
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
       font-weight: 500;
 
       i {
@@ -2065,7 +2274,8 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   .sent-msg-status-actions {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
+    flex-shrink: 0;
   }
 }
 
@@ -2285,9 +2495,9 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   background: linear-gradient(135deg, $vino 0%, $vino-claro 100%);
   border: 0;
   color: white;
-  border-radius: 12px;
+  border-radius: $radius-md;
   padding: 14px;
-  font-size: 15px;
+  font-size: $font-md;
   font-weight: 700;
   cursor: pointer;
   display: flex;
@@ -2411,9 +2621,9 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       background: rgba(220, 38, 38, 0.08);
       color: #dc2626;
       border: 1px solid rgba(220, 38, 38, 0.2);
-      border-radius: 10px;
+      border-radius: $radius-md;
       padding: 10px 16px;
-      font-size: 13px;
+      font-size: $font-sm;
       font-weight: 700;
       cursor: pointer;
       display: flex;
@@ -2472,7 +2682,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
 .calendar-card-compact {
   background: white;
-  border: 1px solid $borde;
+  border: 1px solid rgba(226, 232, 240, 0.8);
   border-radius: 16px;
   box-shadow: $card-shadow;
   padding: 16px 20px;
@@ -2482,8 +2692,8 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   justify-content: space-between;
   gap: 16px;
   transition: $transition;
-  flex: 1;
-  min-height: 120px;
+  flex: 0 0 auto;
+  min-height: 100px;
 
   &:hover {
     box-shadow: $hover-shadow;
@@ -3085,9 +3295,9 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   input {
     flex: 1;
     border: 1px solid $borde;
-    border-radius: 10px;
+    border-radius: $radius-md;
     padding: 10px 14px;
-    font-size: 13px;
+    font-size: $font-sm;
     outline: none;
     color: $texto;
     background: white;
@@ -3105,7 +3315,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     border: 0;
     background: $vino;
     color: white;
-    border-radius: 10px;
+    border-radius: $radius-md;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -3155,18 +3365,21 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
 /* Administración de Usuarios */
 .admin-module {
-  max-width: 100%;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
 .admin-table-container {
   width: 100%;
-  overflow-x: auto;
+  max-height: 380px;
+  overflow-y: auto;
+  overflow-x: hidden;
   background: white;
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 transparent;
 
   &::-webkit-scrollbar {
+    width: 6px;
     height: 6px;
   }
 
@@ -3188,23 +3401,108 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
   th,
   td {
-    padding: 14px 20px;
-    border-bottom: 1px solid $borde;
+    padding: 12px 18px;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.8);
     vertical-align: middle;
     white-space: nowrap;
   }
 
   th {
-    background: #fafafa;
-    color: $texto;
-    font-weight: 700;
+    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    color: $texto-suave;
+    font-weight: 800;
     text-transform: uppercase;
-    font-size: 11px;
-    letter-spacing: 0.5px;
+    font-size: 10.5px;
+    letter-spacing: 0.6px;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    border-bottom: 2px solid rgba(226, 232, 240, 0.9);
+
+    &:first-child {
+      border-left: 3px solid $vino;
+    }
+  }
+
+  tbody tr {
+    transition: $transition;
+
+    &:hover td {
+      background: rgba(133, 0, 63, 0.02);
+    }
   }
 
   tr:last-child td {
     border-bottom: none;
+  }
+
+  @media (max-width: 768px) {
+    &,
+    thead,
+    tbody,
+    th,
+    td,
+    tr {
+      display: block;
+      width: 100%;
+    }
+    thead {
+      display: none;
+    }
+    tr {
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      border-radius: $radius-md;
+      margin-bottom: 16px;
+      padding: 14px 16px;
+      background: white;
+      box-shadow: $card-shadow;
+      
+      &:hover td {
+        background-color: transparent !important;
+      }
+    }
+    td {
+      border-bottom: none;
+      padding: 8px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      white-space: normal;
+      text-align: right;
+      font-size: 13px;
+      
+      &::before {
+        font-weight: 700;
+        color: $texto-suave;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        text-align: left;
+      }
+      
+      &:nth-child(1)::before {
+        content: "Nombre:";
+      }
+      &:nth-child(2)::before {
+        content: "Usuario:";
+      }
+      &:nth-child(3)::before {
+        content: "Rol:";
+      }
+      &:nth-child(4)::before {
+        content: "Estado:";
+      }
+      &:nth-child(5)::before {
+        content: "Acciones:";
+      }
+      
+      &.actions-cell {
+        border-top: 1px solid rgba(226, 232, 240, 0.8);
+        margin-top: 8px;
+        padding-top: 12px;
+        justify-content: flex-end;
+      }
+    }
   }
 
   .font-bold {
@@ -3247,13 +3545,23 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   transition: $transition;
 
   &:hover td {
-    background-color: rgba(133, 0, 63, 0.015) !important;
+    background-color: rgba(133, 0, 63, 0.03) !important;
+  }
+
+  &:hover td:first-child {
+    border-left: 2px solid rgba(133, 0, 63, 0.4) !important;
+    padding-left: 16px;
   }
 }
 
 tr.selected-row td {
-  background-color: rgba(133, 0, 63, 0.04) !important;
-  border-bottom-color: rgba(133, 0, 63, 0.15) !important;
+  background-color: rgba(133, 0, 63, 0.055) !important;
+  border-bottom-color: rgba(133, 0, 63, 0.18) !important;
+}
+
+tr.selected-row td:first-child {
+  border-left: 3px solid $vino !important;
+  padding-left: 15px;
 }
 
 .btn-admin-action {
@@ -3262,13 +3570,13 @@ tr.selected-row td {
   gap: 6px;
   padding: 6px 12px;
   border-radius: 8px;
-  border: 1px solid $borde;
+  border: 1px solid rgba(226, 232, 240, 0.8);
   background: white;
   color: $texto-suave;
   cursor: pointer;
   font-family: inherit;
   font-weight: 700;
-  font-size: 12px;
+  font-size: $font-xs;
   transition: $transition;
 
   i {
@@ -3279,6 +3587,7 @@ tr.selected-row td {
     background: rgba(133, 0, 63, 0.05);
     color: $vino;
     border-color: $vino;
+    transform: translateY(-1px);
   }
 }
 
@@ -3288,12 +3597,12 @@ tr.selected-row td {
 }
 
 .btn-admin-action-btn {
-  border: 1px solid $borde;
+  border: 1px solid rgba(226, 232, 240, 0.8);
   background: white;
   color: $texto-suave;
-  border-radius: 10px;
+  border-radius: $radius-md;
   padding: 10px 18px;
-  font-size: 13px;
+  font-size: $font-sm;
   font-weight: 700;
   cursor: pointer;
   display: inline-flex;
@@ -3309,38 +3618,45 @@ tr.selected-row td {
     background: rgba(133, 0, 63, 0.05);
     color: $vino;
     border-color: $vino;
+    transform: translateY(-1px);
   }
 
   &.btn-secondary {
-    background: #faf5ff;
-    color: #7e22ce;
-    border-color: rgba(126, 34, 206, 0.2);
+    background: #f8fafc;
+    color: $texto-suave;
+    border-color: rgba(226, 232, 240, 0.8);
 
     &:hover {
-      background: #f3e8ff;
-      border-color: #7e22ce;
+      background: #f1f5f9;
+      color: $texto;
+      border-color: rgba(203, 213, 225, 0.8);
+      transform: translateY(-1px);
     }
   }
 
   &.btn-success {
     background: #f0fdf4;
-    color: #15803d;
-    border-color: rgba(21, 128, 61, 0.2);
+    color: #166534;
+    border-color: rgba(22, 101, 52, 0.15);
 
     &:hover {
       background: #dcfce7;
+      color: #15803d;
       border-color: #15803d;
+      transform: translateY(-1px);
     }
   }
 
   &.btn-danger {
     background: #fef2f2;
-    color: #b91c1c;
-    border-color: rgba(185, 28, 28, 0.2);
+    color: #991b1b;
+    border-color: rgba(153, 27, 27, 0.15);
 
     &:hover {
       background: #fee2e2;
+      color: #b91c1c;
       border-color: #b91c1c;
+      transform: translateY(-1px);
     }
   }
 }
@@ -3362,66 +3678,7 @@ tr.selected-row td {
   }
 }
 
-/* Normalized Message States Badges */
-.status-nuevo {
-  background: #fdf2f8;
-  color: #9d174d;
-}
-
-.status-visto {
-  background: #f0fdf4;
-  color: #166534;
-}
-
-.status-respondido {
-  background: #f0f9ff;
-  color: #075985;
-}
-
-.status-enviado {
-  background: #f0fdf4;
-  color: #15803d;
-}
-
-.status-cancelado {
-  background: #fef2f2;
-  color: #991b1b;
-}
-
-.status-eliminado {
-  background: #f1f5f9;
-  color: #475569;
-}
-
-.status-enviando {
-  background: #f0f9ff;
-  color: #0369a1;
-}
-
-.status-respondiendo {
-  background: #f0f9ff;
-  color: #0369a1;
-}
-
-.status-eliminando {
-  background: #fef2f2;
-  color: #991b1b;
-}
-
-.status-cancelando {
-  background: #fef2f2;
-  color: #991b1b;
-}
-
-.status-guardando {
-  background: #fffbeb;
-  color: #92400e;
-}
-
-.status-cargando {
-  background: #f0f9ff;
-  color: #0369a1;
-}
+/* Redundant state badges removed, styled globally above */
 
 /* Clickable Calendar Events Interactive Styles */
 .calendar-event-item.clickable {
@@ -3432,5 +3689,59 @@ tr.selected-row td {
     background: rgba(133, 0, 63, 0.04);
     border-left-color: $vino;
     transform: translateX(2px);
+  }
+}
+
+/* Optimized Message Form Layout */
+.message-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 20px;
+  padding: 20px 24px;
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    label {
+      font-size: 11px;
+      color: $texto-suave;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .input-with-icon input,
+    .input-with-icon textarea,
+    .input-with-icon select {
+      padding: 9px 12px 9px 38px;
+      font-size: 13.5px;
+    }
+
+    .input-with-icon textarea {
+      min-height: 80px;
+    }
+  }
+
+  .form-group-full {
+    grid-column: span 2;
+  }
+}
+
+.recipients-search-bar {
+  margin: 12px 24px 0;
+
+  .input-with-icon input {
+    padding: 8px 12px 8px 34px;
+    font-size: $font-sm;
+    border-radius: $radius-md;
+  }
+
+  .input-with-icon i {
+    font-size: 14px;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
   }
 }

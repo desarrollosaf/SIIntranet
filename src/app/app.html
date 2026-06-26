@@ -205,78 +205,80 @@
             <h3><i class="bi bi-info-circle-fill"></i> Información del documento</h3>
           </div>
 
-          <div class="form-row">
-            <label for="titulo">Título del documento:</label>
-            <div class="input-with-icon">
-              <i class="bi bi-card-text"></i>
-              <input id="titulo" name="titulo" type="text" [(ngModel)]="formTitulo" />
+          <div class="message-form-grid">
+            <div class="form-group form-group-full">
+              <label for="titulo">Título del documento:</label>
+              <div class="input-with-icon">
+                <i class="bi bi-card-text"></i>
+                <input id="titulo" name="titulo" type="text" [(ngModel)]="formTitulo" placeholder="Ingrese el título del documento" />
+              </div>
             </div>
-          </div>
 
-          <div class="form-row form-row-small">
-            <label for="fecha">Fecha de creación:</label>
-            <div class="input-with-icon">
-              <i class="bi bi-calendar3"></i>
-              <input id="fecha" name="fecha" type="date" [(ngModel)]="formFecha" readonly class="readonly-input"
-                title="Fecha automática de envío" />
+            <div class="form-group">
+              <label for="fecha">Fecha de creación:</label>
+              <div class="input-with-icon">
+                <i class="bi bi-calendar3"></i>
+                <input id="fecha" name="fecha" type="date" [(ngModel)]="formFecha" readonly class="readonly-input"
+                  title="Fecha automática de envío" />
+              </div>
             </div>
-          </div>
 
-          <div class="form-row form-row-small">
-            <label for="hora">Hora:</label>
-            <div class="input-with-icon">
-              <i class="bi bi-clock"></i>
-              <input id="hora" name="hora" type="time" [(ngModel)]="formHora" readonly class="readonly-input"
-                title="Hora automática de envío" />
+            <div class="form-group">
+              <label for="hora">Hora:</label>
+              <div class="input-with-icon">
+                <i class="bi bi-clock"></i>
+                <input id="hora" name="hora" type="time" [(ngModel)]="formHora" readonly class="readonly-input"
+                  title="Hora automática de envío" />
+              </div>
             </div>
-          </div>
 
-          <div class="form-row form-row-textarea">
-            <label for="descripcion">Descripción:</label>
-            <div class="input-with-icon align-start">
-              <i class="bi bi-text-paragraph"></i>
-              <textarea id="descripcion" name="descripcion" [(ngModel)]="formDescripcion"
-                placeholder="Escriba aquí una breve reseña del documento"></textarea>
+            <div class="form-group form-group-full">
+              <label for="descripcion">Descripción:</label>
+              <div class="input-with-icon align-start">
+                <i class="bi bi-text-paragraph"></i>
+                <textarea id="descripcion" name="descripcion" [(ngModel)]="formDescripcion"
+                  placeholder="Escriba aquí una breve reseña del documento"></textarea>
+              </div>
             </div>
-          </div>
 
-          <div class="form-row form-row-files">
-            <label>Documentos adjuntos:</label>
-            <div class="files-section">
-              @if (formArchivos.length > 0) {
-              <div class="files-list">
-                @for (archivo of formArchivos; track archivo.name; let i = $index) {
-                <div class="file-selected-badge">
-                  <div class="file-name-info">
-                    <i class="bi bi-file-earmark-check-fill"></i>
-                    <span>{{ archivo.name }}</span>
-                    <span class="file-size">({{ (archivo.size / 1024).toFixed(1) }} KB)</span>
+            <div class="form-group form-group-full">
+              <label>Documentos adjuntos:</label>
+              <div class="files-section">
+                @if (formArchivos.length > 0) {
+                <div class="files-list">
+                  @for (archivo of formArchivos; track archivo.name; let i = $index) {
+                  <div class="file-selected-badge">
+                    <div class="file-name-info">
+                      <i class="bi bi-file-earmark-check-fill"></i>
+                      <span>{{ archivo.name }}</span>
+                      <span class="file-size">({{ (archivo.size / 1024).toFixed(1) }} KB)</span>
+                    </div>
+                    <button type="button" class="btn-clear-file" (click)="clearSelectedFile(i)" title="Remover archivo">
+                      <i class="bi bi-x-lg"></i>
+                    </button>
                   </div>
-                  <button type="button" class="btn-clear-file" (click)="clearSelectedFile(i)" title="Remover archivo">
-                    <i class="bi bi-x-lg"></i>
-                  </button>
+                  }
                 </div>
                 }
+                <label class="file-input-container" for="documento">
+                  <i class="bi bi-file-earmark-arrow-up"></i>
+                  <span class="file-selector-btn">Buscar archivo</span>
+                  <span class="file-selector-text">
+                    @if (formArchivos.length === 0) {
+                      No se ha seleccionado ningún archivo.
+                    } @else {
+                      {{ formArchivos.length === 1 ? '1 archivo seleccionado' : formArchivos.length + ' archivos seleccionados' }}
+                    }
+                  </span>
+                  <input id="documento" name="documento" type="file" multiple (change)="onFileSelected($event)" style="display: none;" />
+                </label>
+                @if (formArchivos.length > 0) {
+                <p class="files-count-hint">
+                  <i class="bi bi-paperclip"></i>
+                  {{ formArchivos.length }} {{ formArchivos.length === 1 ? 'archivo adjunto' : 'archivos adjuntos' }}
+                </p>
+                }
               </div>
-              }
-              <label class="file-input-container" for="documento">
-                <i class="bi bi-file-earmark-arrow-up"></i>
-                <span class="file-selector-btn">Buscar archivo</span>
-                <span class="file-selector-text">
-                  @if (formArchivos.length === 0) {
-                    No se ha seleccionado ningún archivo.
-                  } @else {
-                    {{ formArchivos.length === 1 ? '1 archivo seleccionado' : formArchivos.length + ' archivos seleccionados' }}
-                  }
-                </span>
-                <input id="documento" name="documento" type="file" multiple (change)="onFileSelected($event)" style="display: none;" />
-              </label>
-              @if (formArchivos.length > 0) {
-              <p class="files-count-hint">
-                <i class="bi bi-paperclip"></i>
-                {{ formArchivos.length }} {{ formArchivos.length === 1 ? 'archivo adjunto' : 'archivos adjuntos' }}
-              </p>
-              }
             </div>
           </div>
         </div>
@@ -286,12 +288,19 @@
             <h3><i class="bi bi-people-fill"></i> Destinatarios</h3>
           </div>
 
+          <div class="recipients-search-bar">
+            <div class="input-with-icon">
+              <i class="bi bi-search"></i>
+              <input type="text" name="buscarDestinatario" [(ngModel)]="buscarDestinatario" placeholder="Buscar usuarios disponibles..." />
+            </div>
+          </div>
+
           <div class="recipients-container">
             <div class="select-box">
               <span class="select-title">Usuarios disponibles</span>
               <select multiple aria-label="Usuarios disponibles" [(ngModel)]="selectedDisponibles"
                 name="selDisponibles">
-                @for (usuario of usuariosDisponibles; track usuario) {
+                @for (usuario of usuariosDisponiblesFiltrados; track usuario) {
                 <option [value]="usuario">{{ usuario }}</option>
                 } @empty {
                 <option disabled>No hay destinatarios cargados</option>
@@ -608,20 +617,16 @@
                 <tr>
                   <th>Nombre</th>
                   <th>Usuario</th>
-                  <th>Correo</th>
-                  <th>Área</th>
                   <th>Rol</th>
                   <th>Estado</th>
-                  <th class="actions-header">Detalles</th>
+                  <th class="actions-header">Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 @for (u of usuariosFiltrados; track u.id) {
-                <tr (click)="seleccionarUsuarioAdmin(u)" class="clickable-row" [class.selected-row]="usuarioSeleccionadoAdmin?.id === u.id">
+                <tr [class.selected-row]="usuarioSeleccionadoAdmin?.id === u.id">
                   <td class="font-bold">{{ u.nombre }}</td>
                   <td><code>{{ u.usuario }}</code></td>
-                  <td>{{ u.correo || 'Pendiente' }}</td>
-                  <td>{{ u.area || 'Pendiente' }}</td>
                   <td>
                     <span class="status-badge" [class.status-new]="u.rol === 'Administrador'" [class.status-answered]="u.rol === 'Usuario'">
                       {{ u.rol }}
@@ -633,15 +638,21 @@
                     </span>
                   </td>
                   <td class="actions-cell">
-                    <button type="button" class="btn-admin-action" (click)="seleccionarUsuarioAdmin(u); $event.stopPropagation()" title="Ver detalles">
-                      <i class="bi bi-eye-fill"></i>
-                      <span>Ver</span>
-                    </button>
+                    <div style="display: flex; gap: 6px; justify-content: flex-end;">
+                      <button type="button" class="btn-admin-action" (click)="seleccionarUsuarioAdmin(u)" title="Ver detalles">
+                        <i class="bi bi-eye-fill"></i>
+                        <span>Ver</span>
+                      </button>
+                      <button type="button" class="btn-admin-action" (click)="abrirModalEditarUsuario(u)" title="Editar usuario">
+                        <i class="bi bi-pencil-fill"></i>
+                        <span>Editar</span>
+                      </button>
+                    </div>
                   </td>
                 </tr>
                 } @empty {
                 <tr>
-                  <td colspan="7">
+                  <td colspan="5">
                     <div class="file-empty" style="margin: 20px;">
                       <i class="bi bi-people"></i>
                       <p>No se encontraron usuarios con los filtros seleccionados.</p>
@@ -653,157 +664,6 @@
             </table>
           </div>
         </div>
-
-        <!-- Panel de Detalle de Usuario Seleccionado -->
-        @if (usuarioSeleccionadoAdmin) {
-        <div class="form-card user-detail-card animate-slide-up">
-          <div class="card-header">
-            <h3><i class="bi bi-person-badge-fill"></i> Detalles del Usuario Seleccionado</h3>
-          </div>
-
-          @if (!usuarioEditandoAdmin) {
-          <!-- Modo Lectura -->
-          <div class="user-detail-content" style="padding: 24px;">
-            <div class="detail-grid">
-              <div class="detail-row">
-                <span class="detail-label">Nombre Completo</span>
-                <div class="detail-value font-bold">{{ usuarioSeleccionadoAdmin.nombre }}</div>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">Usuario</span>
-                <div class="detail-value"><code>{{ usuarioSeleccionadoAdmin.usuario }}</code></div>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">Correo Institucional</span>
-                <div class="detail-value text-accent">{{ usuarioSeleccionadoAdmin.correo || 'Pendiente' }}</div>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">Área / Adscripción</span>
-                <div class="detail-value">{{ usuarioSeleccionadoAdmin.area || 'Pendiente' }}</div>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">Rol</span>
-                <div class="detail-value">
-                  <span class="status-badge" [class.status-new]="usuarioSeleccionadoAdmin.rol === 'Administrador'" [class.status-answered]="usuarioSeleccionadoAdmin.rol === 'Usuario'">
-                    {{ usuarioSeleccionadoAdmin.rol }}
-                  </span>
-                </div>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">Estado</span>
-                <div class="detail-value">
-                  <span class="status-badge" [class.status-seen-inbox]="usuarioSeleccionadoAdmin.estado === 'Activo'" [class.status-cancelled]="usuarioSeleccionadoAdmin.estado === 'Inactivo'">
-                    {{ usuarioSeleccionadoAdmin.estado }}
-                  </span>
-                </div>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">Contraseña Temporal</span>
-                <div class="detail-value">
-                  @if (usuarioSeleccionadoAdmin.passwordTemporal) {
-                  <code class="temp-pwd-code">{{ usuarioSeleccionadoAdmin.passwordTemporal }}</code>
-                  } @else {
-                  <span class="text-muted-italic">Ninguna generada</span>
-                  }
-                </div>
-              </div>
-            </div>
-
-            <div class="detail-actions" style="margin-top: 24px; display: flex; gap: 12px; flex-wrap: wrap;">
-              <button type="button" class="btn-admin-action-btn" (click)="editarUsuarioAdmin(usuarioSeleccionadoAdmin)">
-                <i class="bi bi-pencil-fill"></i>
-                <span>Editar usuario</span>
-              </button>
-              <button type="button" class="btn-admin-action-btn btn-secondary" (click)="generarPasswordTemporal(usuarioSeleccionadoAdmin)">
-                <i class="bi bi-key-fill"></i>
-                <span>Regenerar contraseña</span>
-              </button>
-              @if (usuarioSeleccionadoAdmin.estado === 'Inactivo') {
-              <button type="button" class="btn-admin-action-btn btn-success" (click)="cambiarEstadoUsuario(usuarioSeleccionadoAdmin)">
-                <i class="bi bi-check-circle-fill"></i>
-                <span>Activar usuario</span>
-              </button>
-              } @else {
-              <button type="button" class="btn-admin-action-btn btn-danger" (click)="cambiarEstadoUsuario(usuarioSeleccionadoAdmin)">
-                <i class="bi bi-x-circle-fill"></i>
-                <span>Desactivar usuario</span>
-              </button>
-              }
-            </div>
-          </div>
-          } @else {
-          <!-- Modo Edición -->
-          <form (submit)="guardarCambiosUsuarioAdmin(); $event.preventDefault();" class="user-detail-form" style="padding: 24px;">
-            <div class="detail-grid" style="margin-bottom: 24px;">
-              <div class="form-row" style="margin: 0; grid-template-columns: 1fr;">
-                <label for="editNombre" style="margin-bottom: 6px;">Nombre completo:</label>
-                <div class="input-with-icon">
-                  <i class="bi bi-person-fill"></i>
-                  <input id="editNombre" name="editNombre" type="text" [(ngModel)]="usuarioEditandoAdmin.nombre" required />
-                </div>
-              </div>
-
-              <div class="form-row" style="margin: 0; grid-template-columns: 1fr;">
-                <label for="editUsuario" style="margin-bottom: 6px;">Usuario (Login):</label>
-                <div class="input-with-icon">
-                  <i class="bi bi-shield-lock-fill"></i>
-                  <input id="editUsuario" name="editUsuario" type="text" [(ngModel)]="usuarioEditandoAdmin.usuario" required />
-                </div>
-              </div>
-
-              <div class="form-row" style="margin: 0; grid-template-columns: 1fr;">
-                <label for="editCorreo" style="margin-bottom: 6px;">Correo:</label>
-                <div class="input-with-icon">
-                  <i class="bi bi-envelope-fill"></i>
-                  <input id="editCorreo" name="editCorreo" type="email" [(ngModel)]="usuarioEditandoAdmin.correo" />
-                </div>
-              </div>
-
-              <div class="form-row" style="margin: 0; grid-template-columns: 1fr;">
-                <label for="editArea" style="margin-bottom: 6px;">Área:</label>
-                <div class="input-with-icon">
-                  <i class="bi bi-building"></i>
-                  <input id="editArea" name="editArea" type="text" [(ngModel)]="usuarioEditandoAdmin.area" />
-                </div>
-              </div>
-
-              <div class="form-row" style="margin: 0; grid-template-columns: 1fr;">
-                <label for="editRol" style="margin-bottom: 6px;">Rol:</label>
-                <div class="input-with-icon">
-                  <i class="bi bi-person-badge-fill"></i>
-                  <select id="editRol" name="editRol" [(ngModel)]="usuarioEditandoAdmin.rol" required>
-                    <option value="Administrador">Administrador</option>
-                    <option value="Usuario">Usuario</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="form-row" style="margin: 0; grid-template-columns: 1fr;">
-                <label for="editEstado" style="margin-bottom: 6px;">Estado:</label>
-                <div class="input-with-icon">
-                  <i class="bi bi-toggle-on"></i>
-                  <select id="editEstado" name="editEstado" [(ngModel)]="usuarioEditandoAdmin.estado" required>
-                    <option value="Activo">Activo</option>
-                    <option value="Inactivo">Inactivo</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div class="detail-actions" style="display: flex; gap: 12px; flex-wrap: wrap;">
-              <button type="submit" class="btn-admin-action-btn btn-success">
-                <i class="bi bi-save-fill"></i>
-                <span>Guardar cambios</span>
-              </button>
-              <button type="button" class="btn-admin-action-btn" (click)="cancelarEdicionUsuarioAdmin()">
-                <i class="bi bi-x-circle-fill"></i>
-                <span>Cancelar edición</span>
-              </button>
-            </div>
-          </form>
-          }
-        </div>
-        }
       </div>
       } @else if (moduloActual === 'administracion') {
       <div class="empty-module">
@@ -1201,7 +1061,174 @@
   </div>
   }
 
+  @if (modalVerUsuarioAbierto && usuarioSeleccionadoAdmin) {
+  <div class="modal-backdrop" (click)="cerrarModalVerUsuario()">
+    <div class="modal-card animate-slide-up" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3><i class="bi bi-person-badge-fill"></i> Detalles del Usuario</h3>
+        <button type="button" class="btn-close" (click)="cerrarModalVerUsuario()" title="Cerrar">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="detail-grid">
+          <div class="detail-row" style="grid-column: span 2;">
+            <span class="detail-label">Nombre Completo</span>
+            <div class="detail-value font-bold text-accent" style="font-size: 16.5px;">{{ usuarioSeleccionadoAdmin.nombre }}</div>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Usuario</span>
+            <div class="detail-value"><code>{{ usuarioSeleccionadoAdmin.usuario }}</code></div>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Correo Institucional</span>
+            <div class="detail-value text-accent">{{ usuarioSeleccionadoAdmin.correo || 'Pendiente' }}</div>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Área / Adscripción</span>
+            <div class="detail-value">{{ usuarioSeleccionadoAdmin.area || 'Pendiente' }}</div>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Rol</span>
+            <div class="detail-value">
+              <span class="status-badge" [class.status-new]="usuarioSeleccionadoAdmin.rol === 'Administrador'" [class.status-answered]="usuarioSeleccionadoAdmin.rol === 'Usuario'">
+                {{ usuarioSeleccionadoAdmin.rol }}
+              </span>
+            </div>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Estado</span>
+            <div class="detail-value">
+              <span class="status-badge" [class.status-seen-inbox]="usuarioSeleccionadoAdmin.estado === 'Activo'" [class.status-cancelled]="usuarioSeleccionadoAdmin.estado === 'Inactivo'">
+                {{ usuarioSeleccionadoAdmin.estado }}
+              </span>
+            </div>
+          </div>
+          <div class="detail-row" style="grid-column: span 2;">
+            <span class="detail-label">Contraseña Temporal</span>
+            <div class="detail-value">
+              @if (usuarioSeleccionadoAdmin.passwordTemporal) {
+              <code class="temp-pwd-code" style="font-size: 13.5px; font-weight: 700;">{{ usuarioSeleccionadoAdmin.passwordTemporal }}</code>
+              } @else {
+              <span class="text-muted-italic">Ninguna generada</span>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="flex-wrap: wrap; gap: 8px;">
+        <button type="button" class="btn-admin-action-btn" (click)="abrirModalEditarUsuario(usuarioSeleccionadoAdmin)">
+          <i class="bi bi-pencil-fill"></i>
+          <span>Editar</span>
+        </button>
+        <button type="button" class="btn-admin-action-btn btn-secondary" (click)="generarPasswordTemporal(usuarioSeleccionadoAdmin)">
+          <i class="bi bi-key-fill"></i>
+          <span>Contraseña Temp.</span>
+        </button>
+        <button type="button" class="btn-admin-action-btn btn-secondary" (click)="descargarPdfUsuario(usuarioSeleccionadoAdmin)">
+          <i class="bi bi-file-earmark-pdf-fill"></i>
+          <span>Descargar PDF</span>
+        </button>
+        @if (usuarioSeleccionadoAdmin.estado === 'Inactivo') {
+        <button type="button" class="btn-admin-action-btn btn-success" (click)="cambiarEstadoUsuario(usuarioSeleccionadoAdmin)">
+          <i class="bi bi-check-circle-fill"></i>
+          <span>Activar</span>
+        </button>
+        } @else {
+        <button type="button" class="btn-admin-action-btn btn-danger" (click)="cambiarEstadoUsuario(usuarioSeleccionadoAdmin)">
+          <i class="bi bi-x-circle-fill"></i>
+          <span>Desactivar</span>
+        </button>
+        }
+        <button type="button" class="btn-admin-action-btn" (click)="cerrarModalVerUsuario()" style="background: #e2e8f0; color: #475569; border-color: #cbd5e1;">
+          <span>Cerrar</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  }
 
+  @if (modalEditarUsuarioAbierto && usuarioEditandoAdmin) {
+  <div class="modal-backdrop" (click)="cerrarModalEditarUsuario()">
+    <div class="modal-card animate-slide-up" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3><i class="bi bi-person-badge-fill"></i> Editar Usuario</h3>
+        <button type="button" class="btn-close" (click)="cerrarModalEditarUsuario()" title="Cerrar">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <form (submit)="guardarCambiosUsuarioAdmin(); $event.preventDefault();">
+        <div class="modal-body" style="max-height: 420px;">
+          <div class="detail-grid" style="grid-template-columns: 1fr; gap: 14px;">
+            <div class="form-row" style="margin: 0; grid-template-columns: 1fr;">
+              <label for="editNombre" style="margin-bottom: 6px; font-weight: 700; font-size: 12px; color: #475569; text-transform: uppercase;">Nombre completo:</label>
+              <div class="input-with-icon">
+                <i class="bi bi-person-fill"></i>
+                <input id="editNombre" name="editNombre" type="text" [(ngModel)]="usuarioEditandoAdmin.nombre" required style="padding-left: 36px;" />
+              </div>
+            </div>
+
+            <div class="form-row" style="margin: 0; grid-template-columns: 1fr;">
+              <label for="editUsuario" style="margin-bottom: 6px; font-weight: 700; font-size: 12px; color: #475569; text-transform: uppercase;">Usuario (Login):</label>
+              <div class="input-with-icon">
+                <i class="bi bi-shield-lock-fill"></i>
+                <input id="editUsuario" name="editUsuario" type="text" [(ngModel)]="usuarioEditandoAdmin.usuario" required style="padding-left: 36px;" />
+              </div>
+            </div>
+
+            <div class="form-row" style="margin: 0; grid-template-columns: 1fr;">
+              <label for="editCorreo" style="margin-bottom: 6px; font-weight: 700; font-size: 12px; color: #475569; text-transform: uppercase;">Correo:</label>
+              <div class="input-with-icon">
+                <i class="bi bi-envelope-fill"></i>
+                <input id="editCorreo" name="editCorreo" type="email" [(ngModel)]="usuarioEditandoAdmin.correo" style="padding-left: 36px;" />
+              </div>
+            </div>
+
+            <div class="form-row" style="margin: 0; grid-template-columns: 1fr;">
+              <label for="editArea" style="margin-bottom: 6px; font-weight: 700; font-size: 12px; color: #475569; text-transform: uppercase;">Área:</label>
+              <div class="input-with-icon">
+                <i class="bi bi-building"></i>
+                <input id="editArea" name="editArea" type="text" [(ngModel)]="usuarioEditandoAdmin.area" style="padding-left: 36px;" />
+              </div>
+            </div>
+
+            <div class="form-row" style="margin: 0; grid-template-columns: 1fr;">
+              <label for="editRol" style="margin-bottom: 6px; font-weight: 700; font-size: 12px; color: #475569; text-transform: uppercase;">Rol:</label>
+              <div class="input-with-icon">
+                <i class="bi bi-person-badge-fill"></i>
+                <select id="editRol" name="editRol" [(ngModel)]="usuarioEditandoAdmin.rol" required style="padding-left: 36px;">
+                  <option value="Administrador">Administrador</option>
+                  <option value="Usuario">Usuario</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row" style="margin: 0; grid-template-columns: 1fr;">
+              <label for="editEstado" style="margin-bottom: 6px; font-weight: 700; font-size: 12px; color: #475569; text-transform: uppercase;">Estado:</label>
+              <div class="input-with-icon">
+                <i class="bi bi-toggle-on"></i>
+                <select id="editEstado" name="editEstado" [(ngModel)]="usuarioEditandoAdmin.estado" required style="padding-left: 36px;">
+                  <option value="Activo">Activo</option>
+                  <option value="Inactivo">Inactivo</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn-admin-action-btn btn-success">
+            <i class="bi bi-save-fill"></i>
+            <span>Guardar cambios</span>
+          </button>
+          <button type="button" class="btn-admin-action-btn" (click)="cerrarModalEditarUsuario()" style="background: #e2e8f0; color: #475569; border-color: #cbd5e1;">
+            <i class="bi bi-x-circle-fill"></i>
+            <span>Cancelar</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  }
 
 </div>
 }
