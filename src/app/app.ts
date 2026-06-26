@@ -10,7 +10,11 @@ export interface Mensaje {
   hora: string;
   documento: string;
   destinatarios: string;
-  estado: 'Enviando' | 'Nuevo' | 'Pendiente' | 'Visto' | 'Respondido' | 'Cancelado' | 'Eliminado';
+  estado: 'Enviando' | 'Nuevo' | 'Visto' | 'Respondido' | 'Cancelado' | 'Eliminado' | 'Enviado' | 'Pendiente';
+  tipoMensaje?: 'recibido' | 'enviado';
+  estadoLectura?: 'Nuevo' | 'Visto';
+  estadoRespuesta?: 'Pendiente' | 'Respondido';
+  estadoTemporal?: 'Enviando' | 'Respondiendo' | 'Eliminando' | 'Cancelando' | 'Guardando' | 'Cargando' | null;
 }
 
 export interface EventoCalendario {
@@ -19,6 +23,10 @@ export interface EventoCalendario {
   tipo: 'enviado' | 'recibido' | 'recordatorio';
   titulo: string;
   descripcion: string;
+  hora?: string;
+  estados?: string[];
+  esEnviado?: boolean;
+  mensajeAsociado?: Mensaje;
 }
 
 export interface UsuarioSistema {
@@ -225,7 +233,74 @@ export class App {
 
   envioTimeouts: { [key: number]: ReturnType<typeof setTimeout> } = {};
 
-  mensajesBandeja: Mensaje[] = [];
+  mensajesBandeja: Mensaje[] = [
+    {
+      id: 101,
+      remitente: 'Usuario de Prueba Uno',
+      titulo: 'Oficio de Solicitud de Mantenimiento',
+      descripcion: 'Solicito apoyo para la revisión de los equipos de cómputo en el área de Secretaría Técnica.',
+      fecha: '2026-06-26',
+      hora: '09:00',
+      documento: 'solicitud_mantenimiento.pdf',
+      destinatarios: 'Administrador del sistema',
+      estado: 'Nuevo',
+      estadoLectura: 'Nuevo',
+      estadoRespuesta: 'Pendiente',
+      tipoMensaje: 'recibido'
+    },
+    {
+      id: 102,
+      remitente: 'Usuario de Prueba Tres',
+      titulo: 'Reporte Presupuestal Trimestral',
+      descripcion: 'Envío el reporte consolidado de gastos correspondiente al segundo trimestre para su revisión.',
+      fecha: '2026-06-25',
+      hora: '14:30',
+      documento: 'reporte_trimestral.docx',
+      destinatarios: 'Administrador del sistema',
+      estado: 'Visto',
+      estadoLectura: 'Visto',
+      estadoRespuesta: 'Pendiente',
+      tipoMensaje: 'recibido'
+    },
+    {
+      id: 103,
+      remitente: 'Usuario de Prueba Uno',
+      titulo: 'Minuta de Reunión de Trabajo',
+      descripcion: 'Comparto la minuta de los acuerdos tomados en la sesión del día de ayer.',
+      fecha: '2026-06-24',
+      hora: '11:15',
+      documento: 'minuta_reunion.pdf',
+      destinatarios: 'Administrador del sistema',
+      estado: 'Respondido',
+      estadoLectura: 'Visto',
+      estadoRespuesta: 'Respondido',
+      tipoMensaje: 'recibido'
+    },
+    {
+      id: 104,
+      remitente: 'Administrador del sistema',
+      titulo: 'Circular de Nuevas Políticas de Seguridad',
+      descripcion: 'Se solicita a todo el personal seguir los lineamientos adjuntos para el uso de contraseñas.',
+      fecha: '2026-06-23',
+      hora: '10:00',
+      documento: 'politicas_seguridad.pdf',
+      destinatarios: 'Usuario de Prueba Uno, Usuario de Prueba Tres',
+      estado: 'Enviado',
+      tipoMensaje: 'enviado'
+    },
+    {
+      id: 105,
+      remitente: 'Administrador del sistema',
+      titulo: 'Convocatoria a Capacitación de Intranet',
+      descripcion: 'Sesión de capacitación sobre el uso del nuevo sistema de gestión documental.',
+      fecha: '2026-06-22',
+      hora: '16:00',
+      documento: 'convocatoria_capacitacion.pdf',
+      destinatarios: 'Todos los usuarios',
+      estado: 'Cancelado',
+      tipoMensaje: 'enviado'
+    }
+  ];
 
   buscarTexto = '';
   buscarEstado = 'Todos';
@@ -247,9 +322,13 @@ export class App {
       .filter(msg => msg.fecha && msg.estado !== 'Eliminado')
       .map(msg => ({
         fecha: msg.fecha,
-        tipo: (msg.remitente === this.usuarioActual.nombre ? 'enviado' : 'recibido') as 'enviado' | 'recibido' | 'recordatorio',
+        tipo: (this.esMensajeEnviado(msg) ? 'enviado' : 'recibido') as 'enviado' | 'recibido' | 'recordatorio',
         titulo: msg.titulo || 'Documento',
-        descripcion: `${msg.estado || 'Estado pendiente'} · ${msg.documento || 'Documento pendiente'}`
+        descripcion: `${this.esMensajeEnviado(msg) ? 'Para: ' + msg.destinatarios : 'De: ' + msg.remitente} · Estado: ${this.obtenerEstadosMensaje(msg).join(' + ')}`,
+        hora: msg.hora,
+        estados: this.obtenerEstadosMensaje(msg),
+        esEnviado: this.esMensajeEnviado(msg),
+        mensajeAsociado: msg
       }));
 
     return [
@@ -513,7 +592,7 @@ export class App {
       ? this.formArchivos.map(f => f.name).join(', ')
       : 'Sin adjunto';
 
-    const nuevoMsg = {
+    const nuevoMsg: Mensaje = {
       id: nuevoId,
       remitente: this.usuarioActual.nombre,
       titulo: this.formTitulo,
@@ -522,15 +601,19 @@ export class App {
       hora: this.formHora,
       documento: documentosAdjuntos,
       destinatarios: this.usuariosSeleccionados.join(', '),
-      estado: 'Enviando' as Mensaje['estado']
+      estado: 'Enviando',
+      tipoMensaje: 'enviado'
     };
 
     this.mensajesBandeja = [nuevoMsg, ...this.mensajesBandeja];
+    this.mostrarNotificacion('Enviando documento...', 'info');
 
     this.envioTimeouts[nuevoId] = setTimeout(() => {
       const msg = this.mensajesBandeja.find(m => m.id === nuevoId);
       if (msg && msg.estado === 'Enviando') {
-        msg.estado = 'Nuevo';
+        msg.estado = 'Enviado';
+        this.mostrarNotificacion('Mensaje enviado correctamente.', 'exito');
+        this.cdr.detectChanges();
       }
       delete this.envioTimeouts[nuevoId];
     }, 7000);
@@ -551,8 +634,8 @@ export class App {
     this.mostrarNotificacion('Envío cancelado. El registro se guardó con estado "Cancelado".', 'info');
   }
 
-  get mensajesEnviados() {
-    return this.mensajesBandeja.filter(m => m.remitente === this.usuarioActual.nombre);
+  get mensajesEnviados(): Mensaje[] {
+    return this.mensajesBandeja.filter(m => this.esMensajeEnviado(m));
   }
 
   resetearFormulario(): void {
@@ -570,28 +653,48 @@ export class App {
     this.actualizarFechaHora();
   }
 
-  get mensajesFiltrados() {
+  get mensajesFiltrados(): Mensaje[] {
     return this.mensajesBandeja.filter(msg => {
       const matchesText = !this.buscarTexto ||
         msg.remitente.toLowerCase().includes(this.buscarTexto.toLowerCase()) ||
         msg.titulo.toLowerCase().includes(this.buscarTexto.toLowerCase()) ||
         msg.descripcion.toLowerCase().includes(this.buscarTexto.toLowerCase());
 
-      const matchesEstado = this.buscarEstado === 'Todos' || msg.estado === this.buscarEstado;
+      let matchesEstado = false;
+      const esEnviado = this.esMensajeEnviado(msg);
+      const esRecibido = this.esMensajeRecibido(msg);
+
+      if (this.buscarEstado === 'Todos') {
+        matchesEstado = msg.estado !== 'Eliminado';
+      } else if (this.buscarEstado === 'Nuevo') {
+        matchesEstado = esRecibido && msg.estadoLectura === 'Nuevo' && msg.estado !== 'Eliminado';
+      } else if (this.buscarEstado === 'Visto') {
+        matchesEstado = esRecibido && msg.estadoLectura === 'Visto' && msg.estado !== 'Eliminado';
+      } else if (this.buscarEstado === 'Respondido') {
+        matchesEstado = esRecibido && msg.estadoRespuesta === 'Respondido' && msg.estado !== 'Eliminado';
+      } else if (this.buscarEstado === 'Enviado') {
+        matchesEstado = esEnviado && msg.estado === 'Enviado';
+      } else if (this.buscarEstado === 'Cancelado') {
+        matchesEstado = esEnviado && msg.estado === 'Cancelado';
+      } else if (this.buscarEstado === 'Eliminado') {
+        matchesEstado = msg.estado === 'Eliminado';
+      }
 
       const matchesFecha = !this.buscarFecha || msg.fecha === this.buscarFecha;
-
-      const isDeleted = msg.estado === 'Eliminado';
-      if (this.buscarEstado !== 'Eliminado' && isDeleted) {
-        return false;
-      }
 
       return matchesText && matchesEstado && matchesFecha;
     });
   }
 
   get mensajesRecientes(): Mensaje[] {
-    return this.mensajesBandeja.filter(m => m.estado !== 'Eliminado').slice(0, 5);
+    return [...this.mensajesBandeja]
+      .filter(m => m.estado !== 'Eliminado')
+      .sort((a, b) => {
+        const datetimeA = `${a.fecha}T${a.hora}`;
+        const datetimeB = `${b.fecha}T${b.hora}`;
+        return datetimeB.localeCompare(datetimeA);
+      })
+      .slice(0, 5);
   }
 
   verDetallesMensaje(msg: Mensaje): void {
@@ -604,44 +707,74 @@ export class App {
   }
 
   marcarComoVisto(msg: Mensaje): void {
-    if (msg.estado === 'Nuevo') {
-      msg.estado = 'Visto';
+    if (this.esMensajeRecibido(msg)) {
+      if (msg.estadoLectura !== 'Visto') {
+        msg.estadoLectura = 'Visto';
+        if (msg.estado === 'Nuevo') {
+          msg.estado = 'Visto';
+        }
+        this.mostrarNotificacion(`Documento "${msg.titulo}" marcado como visto.`, 'info');
+        this.cdr.detectChanges();
+      }
     }
   }
 
   eliminarMensaje(msg: Mensaje, event: Event): void {
     event.preventDefault();
     event.stopPropagation();
-    msg.estado = 'Eliminado';
-    if (this.mensajeSeleccionado && this.mensajeSeleccionado.id === msg.id) {
-      this.mensajeSeleccionado = null;
-    }
-    this.mostrarNotificacion(`El documento "${msg.titulo}" ha sido movido a la Papelera.`, 'info');
+    
+    msg.estadoTemporal = 'Eliminando';
+    this.mostrarNotificacion('Eliminando documento...', 'info');
+    this.cdr.detectChanges();
+    
+    setTimeout(() => {
+      msg.estadoTemporal = null;
+      msg.estado = 'Eliminado';
+      if (this.mensajeSeleccionado && this.mensajeSeleccionado.id === msg.id) {
+        this.mensajeSeleccionado = null;
+      }
+      this.mostrarNotificacion(`El documento "${msg.titulo}" ha sido movido a la Papelera.`, 'exito');
+      this.cdr.detectChanges();
+    }, 1500);
   }
 
   responderMensaje(msg: Mensaje, event: Event): void {
     event.preventDefault();
     event.stopPropagation();
 
-    this.moduloActual = 'mensaje';
-    this.actualizarFechaHora();
+    msg.estadoTemporal = 'Respondiendo';
+    this.mostrarNotificacion('Preparando respuesta...', 'info');
+    this.cdr.detectChanges();
 
-    this.resetearFormulario();
+    setTimeout(() => {
+      msg.estadoTemporal = null;
+      this.marcarComoVisto(msg);
+      this.marcarComoRespondido(msg);
 
-    const remitenteLower = msg.remitente.toLowerCase();
-    const match = this.usuariosDisponibles.find(u => u.toLowerCase().includes(remitenteLower));
+      this.moduloActual = 'mensaje';
+      this.actualizarFechaHora();
+      this.resetearFormulario();
 
-    if (match) {
-      this.usuariosDisponibles = this.usuariosDisponibles.filter(u => u !== match);
-      this.usuariosSeleccionados = [match];
-    } else {
-      const nuevoDestinatario = `${msg.remitente} - Remitente original`;
-      this.usuariosSeleccionados = [nuevoDestinatario];
-    }
+      const remitenteLower = msg.remitente.toLowerCase();
+      const match = this.usuariosDisponibles.find(u => u.toLowerCase().includes(remitenteLower));
 
-    if (msg.estado !== 'Eliminado' && msg.estado !== 'Cancelado') {
-      msg.estado = 'Respondido';
-    }
+      if (match) {
+        this.usuariosDisponibles = this.usuariosDisponibles.filter(u => u !== match);
+        this.usuariosSeleccionados = [match];
+      } else {
+        const nuevoDestinatario = `${msg.remitente} - Remitente original`;
+        this.usuariosSeleccionados = [nuevoDestinatario];
+      }
+
+      this.mostrarNotificacion('Respuesta redactada. Complete los detalles y envíe el documento.', 'exito');
+      
+      const hash = '#mensaje';
+      if (window.location.hash !== hash) {
+        window.history.pushState({ modulo: 'mensaje' }, '', hash);
+      }
+      
+      this.cdr.detectChanges();
+    }, 1500);
   }
 
   hacerLogin(event: Event): void {
@@ -793,6 +926,97 @@ export class App {
     }
 
     this.mostrarNotificacion('Contraseña temporal generada con éxito.', 'exito');
+  }
+
+  esMensajeEnviado(msg: Mensaje): boolean {
+    if (msg.tipoMensaje === 'enviado') return true;
+    if (msg.tipoMensaje === 'recibido') return false;
+    return msg.remitente === this.usuarioActual.nombre;
+  }
+
+  esMensajeRecibido(msg: Mensaje): boolean {
+    if (msg.tipoMensaje === 'recibido') return true;
+    if (msg.tipoMensaje === 'enviado') return false;
+    return msg.remitente !== this.usuarioActual.nombre;
+  }
+
+  obtenerTextoOrigenMensaje(msg: Mensaje): string {
+    return this.esMensajeEnviado(msg) ? 'Enviado por ti' : msg.remitente;
+  }
+
+  obtenerTextoDestinoMensaje(msg: Mensaje): string {
+    return this.esMensajeEnviado(msg) ? msg.destinatarios : 'Para mí';
+  }
+
+  obtenerResumenParticipantesMensaje(msg: Mensaje): string {
+    return this.esMensajeEnviado(msg) ? `Para: ${msg.destinatarios}` : msg.remitente;
+  }
+
+  obtenerEtiquetaTipoMensaje(msg: Mensaje): string {
+    return this.esMensajeEnviado(msg) ? 'Enviado' : 'Recibido';
+  }
+
+  puedeResponderMensaje(msg: Mensaje | null): boolean {
+    if (!msg) return false;
+    if (msg.estadoTemporal) return false;
+    if (msg.estado === 'Eliminado' || msg.estado === 'Cancelado') return false;
+    return this.esMensajeRecibido(msg);
+  }
+
+  obtenerEstadosMensaje(msg: Mensaje): string[] {
+    if (msg.estadoTemporal) {
+      return [msg.estadoTemporal];
+    }
+    if (msg.estado === 'Eliminado') {
+      return ['Eliminado'];
+    }
+    if (msg.estado === 'Cancelado') {
+      return ['Cancelado'];
+    }
+    if (this.esMensajeEnviado(msg)) {
+      if (msg.estado === 'Enviando') {
+        return ['Enviando'];
+      }
+      return ['Enviado'];
+    } else {
+      const states: string[] = [];
+      if (msg.estadoLectura === 'Nuevo') {
+        states.push('Nuevo');
+      } else {
+        states.push('Visto');
+      }
+      if (msg.estadoRespuesta === 'Respondido') {
+        states.push('Respondido');
+      }
+      return states;
+    }
+  }
+
+  marcarComoRespondido(msg: Mensaje): void {
+    if (this.esMensajeRecibido(msg)) {
+      msg.estadoLectura = 'Visto';
+      msg.estadoRespuesta = 'Respondido';
+      msg.estado = 'Respondido';
+      this.cdr.detectChanges();
+    }
+  }
+
+  cancelarMensaje(msg: Mensaje): void {
+    if (msg.estado === 'Enviando') {
+      this.cancelarEnvio(msg.id);
+      return;
+    }
+    if (msg.estado === 'Enviado') {
+      msg.estadoTemporal = 'Cancelando';
+      this.mostrarNotificacion('Cancelando envío del documento...', 'info');
+      this.cdr.detectChanges();
+      setTimeout(() => {
+        msg.estadoTemporal = null;
+        msg.estado = 'Cancelado';
+        this.mostrarNotificacion('Envío cancelado correctamente.', 'exito');
+        this.cdr.detectChanges();
+      }, 1500);
+    }
   }
 
 }

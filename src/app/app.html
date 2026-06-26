@@ -137,24 +137,23 @@
             <div class="recent-message clickable" (click)="verDetallesMensaje(msg)">
               <div class="message-info">
                 <strong>{{ msg.titulo }}</strong>
-                <p>{{ msg.remitente }} · {{ msg.fecha }}</p>
+                <p>{{ obtenerResumenParticipantesMensaje(msg) }} · {{ msg.fecha }}</p>
               </div>
 
-              <div class="message-meta">
-                @if (msg.estado === 'Nuevo') {
-                <span class="status status-new-sm"><i class="bi bi-star-fill"></i> Nuevo</span>
-                } @else if (msg.estado === 'Pendiente') {
-                <span class="status status-pending"><i class="bi bi-hourglass-split"></i> Pendiente</span>
-                } @else if (msg.estado === 'Visto') {
-                <span class="status status-seen"><i class="bi bi-check2-all"></i> Visto</span>
-                } @else if (msg.estado === 'Enviando') {
-                <span class="status status-sending"><i class="bi bi-arrow-repeat"></i> Enviando</span>
-                } @else if (msg.estado === 'Cancelado') {
-                <span class="status status-cancelled"><i class="bi bi-x-circle-fill"></i> Cancelado</span>
-                } @else if (msg.estado === 'Respondido') {
-                <span class="status status-sent"><i class="bi bi-reply-fill"></i> Respondido</span>
-                } @else {
-                <span class="status status-sent"><i class="bi bi-send-fill"></i> {{ msg.estado }}</span>
+              <div class="message-meta" style="flex-direction: row; gap: 4px; flex-wrap: wrap; justify-content: flex-end;">
+                @for (est of obtenerEstadosMensaje(msg); track est) {
+                  <span class="status-badge status-{{ est.toLowerCase() }}">
+                    @if (est === 'Nuevo') { <i class="bi bi-star-fill animate-pulse"></i> }
+                    @else if (est === 'Visto') { <i class="bi bi-eye-fill"></i> }
+                    @else if (est === 'Respondido') { <i class="bi bi-reply-fill"></i> }
+                    @else if (est === 'Enviado') { <i class="bi bi-send-fill"></i> }
+                    @else if (est === 'Cancelado') { <i class="bi bi-x-circle-fill"></i> }
+                    @else if (est === 'Enviando') { <i class="bi bi-arrow-repeat animate-spin"></i> }
+                    @else if (est === 'Respondiendo') { <i class="bi bi-arrow-repeat animate-spin"></i> }
+                    @else if (est === 'Eliminando') { <i class="bi bi-trash3-fill"></i> }
+                    @else if (est === 'Cancelando') { <i class="bi bi-x-circle-fill"></i> }
+                    <span>{{ est }}</span>
+                  </span>
                 }
               </div>
             </div>
@@ -246,15 +245,56 @@
 
               <div class="calendar-events-list">
                 @for (evento of eventosFechaSeleccionadaCalendario; track $index) {
-                <div class="calendar-event-item">
-                  <div>
-                    <span class="calendar-event-type" [class.event-recibido]="evento.tipo === 'recibido'"
-                      [class.event-enviado]="evento.tipo === 'enviado'"
-                      [class.event-recordatorio]="evento.tipo === 'recordatorio'">
-                      {{ evento.tipo }}
-                    </span>
+                <div class="calendar-event-item" 
+                     [class.clickable]="evento.tipo !== 'recordatorio'" 
+                     (click)="evento.tipo !== 'recordatorio' && evento.mensajeAsociado ? verDetallesMensaje(evento.mensajeAsociado) : null"
+                     [title]="evento.tipo !== 'recordatorio' ? 'Ver detalles del mensaje' : ''">
+                  <div class="calendar-event-body" style="width: 100%;">
+                    <div class="calendar-event-title-row" style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                      <span class="calendar-event-title" style="font-weight: 700; font-size: 14px; color: var(--texto);">{{ evento.titulo }}</span>
+                      @if (evento.hora) {
+                      <span class="calendar-event-time" style="font-size: 11px; color: var(--texto-mutado);"><i class="bi bi-clock"></i> {{ evento.hora }}</span>
+                      }
+                    </div>
 
-                    <p>{{ evento.descripcion }}</p>
+                    @if (evento.tipo !== 'recordatorio' && evento.mensajeAsociado) {
+                      <div class="calendar-event-participants" style="font-size: 12px; color: var(--texto-suave); margin-top: 3px; display: flex; align-items: center; gap: 4px;">
+                        @if (evento.esEnviado) {
+                          <i class="bi bi-people-fill"></i>
+                          <span>Para: {{ evento.mensajeAsociado.destinatarios }}</span>
+                        } @else {
+                          <i class="bi bi-person-fill"></i>
+                          <span>De: {{ evento.mensajeAsociado.remitente }}</span>
+                        }
+                      </div>
+                    }
+
+                    <div class="calendar-event-meta-row" style="margin-top: 6px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                      <span class="calendar-event-type" [class.event-recibido]="evento.tipo === 'recibido'"
+                        [class.event-enviado]="evento.tipo === 'enviado'"
+                        [class.event-recordatorio]="evento.tipo === 'recordatorio'">
+                        {{ evento.tipo }}
+                      </span>
+
+                      @if (evento.estados) {
+                        @for (est of evento.estados; track est) {
+                          <span class="status-badge status-{{ est.toLowerCase() }}">
+                            @if (est === 'Nuevo') { <i class="bi bi-star-fill animate-pulse"></i> }
+                            @else if (est === 'Visto') { <i class="bi bi-eye-fill"></i> }
+                            @else if (est === 'Respondido') { <i class="bi bi-reply-fill"></i> }
+                            @else if (est === 'Enviado') { <i class="bi bi-send-fill"></i> }
+                            @else if (est === 'Cancelado') { <i class="bi bi-x-circle-fill"></i> }
+                            @else if (est === 'Enviando') { <i class="bi bi-arrow-repeat animate-spin"></i> }
+                            @else if (est === 'Respondiendo') { <i class="bi bi-arrow-repeat animate-spin"></i> }
+                            @else if (est === 'Eliminando') { <i class="bi bi-trash3-fill"></i> }
+                            @else if (est === 'Cancelando') { <i class="bi bi-x-circle-fill"></i> }
+                            <span>{{ est }}</span>
+                          </span>
+                        }
+                      } @else {
+                        <p class="calendar-event-desc" style="margin: 4px 0 0; font-size: 13px; color: var(--texto-suave);">{{ evento.descripcion }}</p>
+                      }
+                    </div>
                   </div>
 
                   @if (evento.tipo === 'recordatorio') {
@@ -455,22 +495,26 @@
             </div>
 
             <div class="sent-msg-status-actions">
-              @if (msg.estado === 'Enviando') {
-              <span class="status-badge status-sending-badge">
-                <i class="bi bi-arrow-repeat animate-spin"></i> Enviando...
-              </span>
-              <button type="button" class="btn-cancel-send" (click)="cancelarEnvio(msg.id)" title="Cancelar envío">
+              @for (est of obtenerEstadosMensaje(msg); track est) {
+                <span class="status-badge status-{{ est.toLowerCase() }}">
+                  @if (est === 'Enviando') { <i class="bi bi-arrow-repeat animate-spin"></i> }
+                  @else if (est === 'Cancelado') { <i class="bi bi-x-circle-fill"></i> }
+                  @else if (est === 'Enviado') { <i class="bi bi-check-circle-fill"></i> }
+                  @else if (est === 'Cancelando') { <i class="bi bi-arrow-repeat animate-spin"></i> }
+                  <span>{{ est }}</span>
+                </span>
+              }
+
+              @if (msg.estado === 'Enviando' && !msg.estadoTemporal) {
+              <button type="button" class="btn-cancel-send" (click)="cancelarMensaje(msg)" title="Cancelar envío">
                 <i class="bi bi-x-circle-fill"></i>
                 <span>Cancelar envío</span>
               </button>
-              } @else if (msg.estado === 'Cancelado') {
-              <span class="status-badge status-cancelled-badge">
-                <i class="bi bi-x-circle-fill"></i> Cancelado
-              </span>
-              } @else {
-              <span class="status-badge status-success-badge">
-                <i class="bi bi-check-circle-fill"></i> Enviado
-              </span>
+              } @else if (msg.estado === 'Enviado' && !msg.estadoTemporal) {
+              <button type="button" class="btn-cancel-send btn-cancel-sent" (click)="cancelarMensaje(msg)" title="Anular envío" style="background: rgba(133, 0, 63, 0.05); color: #85003f; border: 1px solid rgba(133, 0, 63, 0.2); margin-left: 8px;">
+                <i class="bi bi-x-circle"></i>
+                <span>Anular envío</span>
+              </button>
               }
             </div>
           </div>
@@ -503,10 +547,9 @@
               <select id="estadoMensaje" name="estadoMensaje" [(ngModel)]="buscarEstado">
                 <option value="Todos">Todos</option>
                 <option value="Nuevo">Nuevo</option>
-                <option value="Pendiente">Pendiente</option>
                 <option value="Visto">Visto</option>
                 <option value="Respondido">Respondido</option>
-                <option value="Enviando">Enviando</option>
+                <option value="Enviado">Enviado</option>
                 <option value="Cancelado">Cancelado</option>
                 <option value="Eliminado">🗑 Papelera</option>
               </select>
@@ -533,46 +576,41 @@
 
           <div class="inbox-list">
             @for (msg of mensajesFiltrados; track msg.id) {
-            <article class="inbox-item" [class.unread]="msg.estado === 'Nuevo'"
-              [class.item-sending]="msg.estado === 'Enviando'" [class.item-cancelled]="msg.estado === 'Cancelado'">
+            <article class="inbox-item" 
+                     [class.unread]="esMensajeRecibido(msg) && msg.estadoLectura === 'Nuevo'"
+                     [class.item-sending]="msg.estado === 'Enviando'" 
+                     [class.item-cancelled]="msg.estado === 'Cancelado'">
               <div class="sender-block">
-                <span>Envía</span>
-                <strong>{{ msg.remitente }}</strong>
+                @if (esMensajeRecibido(msg)) {
+                  <span>Envía</span>
+                  <strong>{{ msg.remitente }}</strong>
+                } @else {
+                  <span>Para</span>
+                  <strong>{{ msg.destinatarios }}</strong>
+                }
                 <span class="date-tag"><i class="bi bi-calendar"></i> {{ msg.fecha }}</span>
               </div>
 
               <div class="message-block">
                 <div class="message-title-row">
                   <h4>{{ msg.titulo }}</h4>
-                  @if (msg.estado === 'Nuevo') {
-                  <span class="status-badge status-new">
-                    <i class="bi bi-star-fill animate-pulse"></i> Nuevo
-                  </span>
-                  } @else if (msg.estado === 'Pendiente') {
-                  <span class="status-badge status-pending-inbox">
-                    <i class="bi bi-hourglass-split"></i> Pendiente
-                  </span>
-                  } @else if (msg.estado === 'Visto') {
-                  <span class="status-badge status-seen-inbox">
-                    <i class="bi bi-eye-fill"></i> Visto
-                  </span>
-                  } @else if (msg.estado === 'Respondido') {
-                  <span class="status-badge status-answered">
-                    <i class="bi bi-reply-fill"></i> Respondido
-                  </span>
-                  } @else if (msg.estado === 'Enviando') {
-                  <span class="status-badge status-sending-badge">
-                    <i class="bi bi-arrow-repeat animate-spin"></i> Enviando
-                  </span>
-                  } @else if (msg.estado === 'Cancelado') {
-                  <span class="status-badge status-cancelled-badge">
-                    <i class="bi bi-x-circle-fill"></i> Cancelado
-                  </span>
-                  } @else if (msg.estado === 'Eliminado') {
-                  <span class="status-badge status-archived">
-                    <i class="bi bi-trash3-fill"></i> Eliminado
-                  </span>
-                  }
+                  <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                    @for (est of obtenerEstadosMensaje(msg); track est) {
+                      <span class="status-badge status-{{ est.toLowerCase() }}">
+                        @if (est === 'Nuevo') { <i class="bi bi-star-fill animate-pulse"></i> }
+                        @else if (est === 'Visto') { <i class="bi bi-eye-fill"></i> }
+                        @else if (est === 'Respondido') { <i class="bi bi-reply-fill"></i> }
+                        @else if (est === 'Enviado') { <i class="bi bi-send-fill"></i> }
+                        @else if (est === 'Cancelado') { <i class="bi bi-x-circle-fill"></i> }
+                        @else if (est === 'Eliminado') { <i class="bi bi-trash3-fill"></i> }
+                        @else if (est === 'Enviando') { <i class="bi bi-arrow-repeat animate-spin"></i> }
+                        @else if (est === 'Respondiendo') { <i class="bi bi-arrow-repeat animate-spin"></i> }
+                        @else if (est === 'Eliminando') { <i class="bi bi-trash3-fill"></i> }
+                        @else if (est === 'Cancelando') { <i class="bi bi-x-circle-fill"></i> }
+                        <span>{{ est }}</span>
+                      </span>
+                    }
+                  </div>
                 </div>
 
                 <p>{{ msg.descripcion }}</p>
@@ -591,19 +629,19 @@
               </div>
 
               <div class="inbox-actions">
-                <button type="button" class="action-link btn-view-message" (click)="verDetallesMensaje(msg)">
+                <button type="button" class="action-link btn-view-message" (click)="verDetallesMensaje(msg)" [disabled]="msg.estadoTemporal">
                   <i class="bi bi-chat-square-text-fill"></i>
                   <span>Ver detalles</span>
                 </button>
 
-                @if (msg.estado !== 'Eliminado' && msg.estado !== 'Cancelado') {
+                @if (puedeResponderMensaje(msg)) {
                 <button type="button" class="action-link" (click)="responderMensaje(msg, $event)">
                   <i class="bi bi-reply-fill"></i>
                   <span>Responder</span>
                 </button>
                 }
 
-                @if (msg.estado !== 'Eliminado') {
+                @if (msg.estado !== 'Eliminado' && !msg.estadoTemporal) {
                 <button type="button" class="delete-button" (click)="eliminarMensaje(msg, $event)">
                   <i class="bi bi-trash3-fill"></i>
                   <span>Eliminar</span>
@@ -926,12 +964,49 @@
       </div>
       <div class="modal-body">
         <div class="detail-row">
+          <span class="detail-label">Estado</span>
+          <div class="detail-value" style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+            @for (est of obtenerEstadosMensaje(mensajeSeleccionado); track est) {
+              <span class="status-badge status-{{ est.toLowerCase() }}">
+                @if (est === 'Nuevo') { <i class="bi bi-star-fill animate-pulse"></i> }
+                @else if (est === 'Visto') { <i class="bi bi-eye-fill"></i> }
+                @else if (est === 'Respondido') { <i class="bi bi-reply-fill"></i> }
+                @else if (est === 'Enviado') { <i class="bi bi-send-fill"></i> }
+                @else if (est === 'Cancelado') { <i class="bi bi-x-circle-fill"></i> }
+                @else if (est === 'Eliminado') { <i class="bi bi-trash3-fill"></i> }
+                @else if (est === 'Enviando') { <i class="bi bi-arrow-repeat animate-spin"></i> }
+                @else if (est === 'Respondiendo') { <i class="bi bi-arrow-repeat animate-spin"></i> }
+                @else if (est === 'Eliminando') { <i class="bi bi-trash3-fill"></i> }
+                @else if (est === 'Cancelando') { <i class="bi bi-x-circle-fill"></i> }
+                <span>{{ est }}</span>
+              </span>
+            }
+          </div>
+        </div>
+        @if (esMensajeRecibido(mensajeSeleccionado)) {
+        <div class="detail-row">
           <span class="detail-label">Remitente</span>
           <div class="detail-value text-accent">
             <i class="bi bi-person-fill"></i>
             <strong>{{ mensajeSeleccionado.remitente }}</strong>
           </div>
         </div>
+        } @else {
+        <div class="detail-row">
+          <span class="detail-label">Origen</span>
+          <div class="detail-value text-accent">
+            <i class="bi bi-person-check-fill"></i>
+            <strong>Enviado por ti</strong>
+          </div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Destinatarios</span>
+          <div class="detail-value text-accent">
+            <i class="bi bi-people-fill"></i>
+            <strong>{{ mensajeSeleccionado.destinatarios }}</strong>
+          </div>
+        </div>
+        }
         <div class="detail-grid">
           <div class="detail-row">
             <span class="detail-label">Fecha</span>
@@ -973,7 +1048,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        @if (mensajeSeleccionado.estado !== 'Eliminado' && mensajeSeleccionado.estado !== 'Cancelado') {
+        @if (puedeResponderMensaje(mensajeSeleccionado)) {
         <button type="button" class="btn-modal-reply"
           (click)="responderMensaje(mensajeSeleccionado, $event); cerrarDetalles()">
           <i class="bi bi-reply-fill"></i>
