@@ -15,6 +15,7 @@ export interface Mensaje {
   estadoLectura?: 'Nuevo' | 'Visto';
   estadoRespuesta?: 'Pendiente' | 'Respondido';
   estadoTemporal?: 'Enviando' | 'Respondiendo' | 'Eliminando' | 'Cancelando' | 'Guardando' | 'Cargando' | null;
+  confirmarEliminarSent?: boolean;
 }
 
 export interface EventoCalendario {
@@ -231,6 +232,9 @@ export class App implements OnDestroy {
   buscarEstado = 'Todos';
   buscarFecha = '';
 
+  buscarTextoEnviados = '';
+  buscarEstadoEnviados = 'Todos';
+
   mensajeSeleccionado: Mensaje | null = null;
 
   get nombreMesCalendario(): string {
@@ -355,10 +359,15 @@ export class App implements OnDestroy {
   agregarRecordatorioCalendario(event: Event): void {
     event.preventDefault();
 
-    const descripcion = this.nuevoRecordatorioCalendario.trim();
+    const descripcion = (this.nuevoRecordatorioCalendario || '').trim();
 
     if (!descripcion) {
-      this.mostrarNotificacion('Ingrese una descripción para el recordatorio.', 'error');
+      this.mostrarNotificacion('El recordatorio no puede estar vacío.', 'error');
+      return;
+    }
+
+    if (!this.validarLongitudRecordatorio(descripcion)) {
+      this.mostrarNotificacion('El recordatorio no puede exceder los 150 caracteres.', 'error');
       return;
     }
 
@@ -489,28 +498,48 @@ export class App implements OnDestroy {
 
   pasar(): void {
     if (this.selectedDisponibles.length === 0) return;
-    this.usuariosSeleccionados = [...this.usuariosSeleccionados, ...this.selectedDisponibles];
+    const aPasar = this.selectedDisponibles.filter(u => !this.usuariosSeleccionados.includes(u));
+    this.usuariosSeleccionados = [...this.usuariosSeleccionados, ...aPasar];
     this.usuariosDisponibles = this.usuariosDisponibles.filter(u => !this.selectedDisponibles.includes(u));
     this.selectedDisponibles = [];
   }
 
   quitar(): void {
     if (this.selectedSeleccionados.length === 0) return;
-    this.usuariosDisponibles = [...this.usuariosDisponibles, ...this.selectedSeleccionados];
+    const aQuitar = this.selectedSeleccionados.filter(u => !this.usuariosDisponibles.includes(u));
+    this.usuariosDisponibles = [...this.usuariosDisponibles, ...aQuitar];
     this.usuariosSeleccionados = this.usuariosSeleccionados.filter(u => !this.selectedSeleccionados.includes(u));
     this.selectedSeleccionados = [];
   }
 
   pasarTodos(): void {
-    this.usuariosSeleccionados = [...this.usuariosSeleccionados, ...this.usuariosDisponibles];
+    const aPasar = this.usuariosDisponibles.filter(u => !this.usuariosSeleccionados.includes(u));
+    this.usuariosSeleccionados = [...this.usuariosSeleccionados, ...aPasar];
     this.usuariosDisponibles = [];
     this.selectedDisponibles = [];
   }
 
   quitarTodos(): void {
-    this.usuariosDisponibles = [...this.usuariosDisponibles, ...this.usuariosSeleccionados];
+    const aQuitar = this.usuariosSeleccionados.filter(u => !this.usuariosDisponibles.includes(u));
+    this.usuariosDisponibles = [...this.usuariosDisponibles, ...aQuitar];
     this.usuariosSeleccionados = [];
     this.selectedSeleccionados = [];
+  }
+
+  pasarDirecto(usuario: string): void {
+    if (!this.usuariosSeleccionados.includes(usuario)) {
+      this.usuariosSeleccionados = [...this.usuariosSeleccionados, usuario];
+      this.usuariosDisponibles = this.usuariosDisponibles.filter(u => u !== usuario);
+    }
+    this.selectedDisponibles = this.selectedDisponibles.filter(u => u !== usuario);
+  }
+
+  quitarDirecto(usuario: string): void {
+    if (!this.usuariosDisponibles.includes(usuario)) {
+      this.usuariosDisponibles = [...this.usuariosDisponibles, usuario];
+      this.usuariosSeleccionados = this.usuariosSeleccionados.filter(u => u !== usuario);
+    }
+    this.selectedSeleccionados = this.selectedSeleccionados.filter(u => u !== usuario);
   }
 
   enviarMensaje(event: Event): void {
@@ -573,6 +602,38 @@ export class App implements OnDestroy {
 
   get mensajesEnviados(): Mensaje[] {
     return this.mensajesBandeja.filter(m => this.esMensajeEnviado(m));
+  }
+
+  get mensajesEnviadosFiltrados(): Mensaje[] {
+    let list = this.mensajesBandeja.filter(m => this.esMensajeEnviado(m));
+
+    // Sort: newest first
+    list.sort((a, b) => {
+      const datetimeA = `${a.fecha}T${a.hora}`;
+      const datetimeB = `${b.fecha}T${b.hora}`;
+      return datetimeB.localeCompare(datetimeA);
+    });
+
+    // Text filter
+    const textQuery = (this.buscarTextoEnviados || '').trim().toLowerCase();
+    if (textQuery) {
+      list = list.filter(m => 
+        (m.titulo || '').toLowerCase().includes(textQuery) ||
+        (m.descripcion || '').toLowerCase().includes(textQuery) ||
+        (m.destinatarios || '').toLowerCase().includes(textQuery) ||
+        (m.documento || '').toLowerCase().includes(textQuery)
+      );
+    }
+
+    // Status filter
+    const statusQuery = this.buscarEstadoEnviados;
+    if (statusQuery === 'Todos') {
+      list = list.filter(m => m.estado !== 'Eliminado');
+    } else {
+      list = list.filter(m => m.estado === statusQuery);
+    }
+
+    return list;
   }
 
   get usuariosDisponiblesFiltrados(): string[] {
@@ -644,7 +705,6 @@ export class App implements OnDestroy {
   }
 
   verDetallesMensaje(msg: Mensaje): void {
-    this.cerrarCalendario();
     this.mensajeSeleccionado = msg;
     this.marcarComoVisto(msg);
   }
@@ -653,14 +713,16 @@ export class App implements OnDestroy {
     this.mensajeSeleccionado = null;
   }
 
-  marcarComoVisto(msg: Mensaje): void {
+  marcarComoVisto(msg: Mensaje, mostrarNotif = false): void {
     if (this.esMensajeRecibido(msg)) {
       if (msg.estadoLectura !== 'Visto') {
         msg.estadoLectura = 'Visto';
         if (msg.estado === 'Nuevo') {
           msg.estado = 'Visto';
         }
-        this.mostrarNotificacion(`Documento "${msg.titulo}" marcado como visto.`, 'info');
+        if (mostrarNotif) {
+          this.mostrarNotificacion(`Documento "${msg.titulo}" marcado como visto.`, 'info');
+        }
         this.cdr.detectChanges();
       }
     }
@@ -681,6 +743,42 @@ export class App implements OnDestroy {
         this.mensajeSeleccionado = null;
       }
       this.mostrarNotificacion(`El documento "${msg.titulo}" ha sido movido a la Papelera.`, 'exito');
+      this.cdr.detectChanges();
+    }, 1500);
+  }
+
+  eliminarMensajeEnviado(msg: Mensaje, event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!msg.confirmarEliminarSent) {
+      // Reset confirmation on other messages to avoid confusion
+      this.mensajesBandeja.forEach(m => m.confirmarEliminarSent = false);
+      msg.confirmarEliminarSent = true;
+      this.cdr.detectChanges();
+      
+      // Auto cancel after 5 seconds
+      setTimeout(() => {
+        if (msg.confirmarEliminarSent) {
+          msg.confirmarEliminarSent = false;
+          this.cdr.detectChanges();
+        }
+      }, 5000);
+      return;
+    }
+
+    msg.confirmarEliminarSent = false;
+    msg.estadoTemporal = 'Eliminando';
+    this.mostrarNotificacion('Eliminando mensaje de la vista...', 'info');
+    this.cdr.detectChanges();
+
+    setTimeout(() => {
+      msg.estadoTemporal = null;
+      msg.estado = 'Eliminado';
+      if (this.mensajeSeleccionado && this.mensajeSeleccionado.id === msg.id) {
+        this.mensajeSeleccionado = null;
+      }
+      this.mostrarNotificacion('Mensaje eliminado de la vista.', 'exito');
       this.cdr.detectChanges();
     }, 1500);
   }
@@ -1055,7 +1153,12 @@ export class App implements OnDestroy {
   }
 
   obtenerResumenParticipantesMensaje(msg: Mensaje): string {
-    return this.esMensajeEnviado(msg) ? `Para: ${msg.destinatarios}` : msg.remitente;
+    if (this.esMensajeEnviado(msg)) {
+      const resumen = this.obtenerDestinatariosResumen(msg, 2);
+      const extra = this.obtenerCantidadDestinatariosExtra(msg, 2);
+      return `Para: ${resumen}${extra > 0 ? ` y ${extra} más` : ''}`;
+    }
+    return `De: ${msg.remitente}`;
   }
 
   obtenerEtiquetaTipoMensaje(msg: Mensaje): string {
@@ -1369,6 +1472,55 @@ export class App implements OnDestroy {
         { nombre: `Oficio administrativo de prueba ${String(index + 1).padStart(2, '0')}C.pdf`, archivo: `oficio_prueba_${index + 1}c.pdf` }
       ];
     });
+  }
+
+  normalizarListaDestinatarios(destinatarios: string): string[] {
+    if (!destinatarios) return [];
+    return destinatarios.split(',').map(d => d.trim()).filter(d => d.length > 0);
+  }
+
+  obtenerDestinatariosResumen(msg: Mensaje | null, limite = 2): string {
+    if (!msg || !msg.destinatarios) return '';
+    const list = this.normalizarListaDestinatarios(msg.destinatarios);
+    if (list.length === 0) return '';
+    return list.slice(0, limite).join(', ');
+  }
+
+  obtenerCantidadDestinatariosExtra(msg: Mensaje | null, limite = 2): number {
+    if (!msg || !msg.destinatarios) return 0;
+    const list = this.normalizarListaDestinatarios(msg.destinatarios);
+    return Math.max(0, list.length - limite);
+  }
+
+  normalizarListaDocumentos(documento: string): string[] {
+    if (!documento || documento === 'Sin adjunto') return [];
+    return documento.split(',').map(d => d.trim()).filter(d => d.length > 0);
+  }
+
+  obtenerDocumentosResumen(msg: Mensaje | null, limite = 2): string {
+    if (!msg || !msg.documento || msg.documento === 'Sin adjunto') return 'Sin adjunto';
+    const list = this.normalizarListaDocumentos(msg.documento);
+    if (list.length === 0) return 'Sin adjunto';
+    return list.slice(0, limite).join(', ');
+  }
+
+  obtenerCantidadDocumentosExtra(msg: Mensaje | null, limite = 2): number {
+    if (!msg || !msg.documento || msg.documento === 'Sin adjunto') return 0;
+    const list = this.normalizarListaDocumentos(msg.documento);
+    return Math.max(0, list.length - limite);
+  }
+
+  validarLongitudRecordatorio(texto: string): boolean {
+    if (!texto) return false;
+    return texto.trim().length <= 150;
+  }
+
+  abrirMensajeDesdeVista(msg: Mensaje, event?: Event): void {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    this.verDetallesMensaje(msg);
   }
 
   private obtenerFechaRelativa(dias: number): string {
