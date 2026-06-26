@@ -1,4 +1,4 @@
-import { Component, ChangeDetectorRef, HostListener } from '@angular/core';
+import { Component, ChangeDetectorRef, HostListener, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 export interface Mensaje {
@@ -40,6 +40,11 @@ export interface UsuarioSistema {
   passwordTemporal?: string;
 }
 
+export interface DocumentoFormato {
+  nombre: string;
+  archivo: string;
+}
+
 
 @Component({
   selector: 'app-root',
@@ -47,11 +52,41 @@ export interface UsuarioSistema {
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
-export class App {
+export class App implements OnDestroy {
+
+  documentosFormatos: { [categoria: string]: DocumentoFormato[] } = {};
 
   constructor(private cdr: ChangeDetectorRef) {
     this.detectarSesionGuardada();
     this.detectarModuloInicial();
+    this.inicializarDatosPrueba();
+    this.inicializarVisitas();
+    this.actualizarUsuariosDisponibles();
+  }
+
+  ngOnDestroy(): void {
+    if (this.notificacionTimeout) {
+      clearTimeout(this.notificacionTimeout);
+    }
+    for (const key in this.envioTimeouts) {
+      if (Object.prototype.hasOwnProperty.call(this.envioTimeouts, key)) {
+        clearTimeout(this.envioTimeouts[key]);
+      }
+    }
+  }
+
+  inicializarVisitas(): void {
+    const visitasStr = localStorage.getItem('si_visitas_intranet');
+    let visitas = visitasStr ? parseInt(visitasStr, 10) : 0;
+    visitas++;
+    localStorage.setItem('si_visitas_intranet', visitas.toString());
+    this.totalVisitas = visitas.toLocaleString('es-MX');
+  }
+
+  actualizarUsuariosDisponibles(): void {
+    const activos = this.usuariosSistema.filter(u => u.estado === 'Activo');
+    const activeLabels = activos.map(u => `${u.nombre} - ${u.area}`);
+    this.usuariosDisponibles = activeLabels.filter(label => !this.usuariosSeleccionados.includes(label));
   }
 
   detectarSesionGuardada(): void {
@@ -131,8 +166,6 @@ export class App {
 
   recordatoriosCalendario: EventoCalendario[] = [];
 
-  eventosCalendarioPrueba: EventoCalendario[] = [];
-
   notificacion: { mensaje: string; tipo: 'error' | 'exito' | 'info' } | null = null;
   private notificacionTimeout: ReturnType<typeof setTimeout> | null = null;
 
@@ -158,48 +191,7 @@ export class App {
     tipo: 'normal' as 'normal' | 'admin'
   };
 
-  usuariosSistema: UsuarioSistema[] = [
-    {
-      id: 1,
-      nombre: 'Administrador del sistema',
-      usuario: 'admin',
-      correo: 'admin.intranet@congresoedomex.gob.mx',
-      area: 'Dirección de Informática',
-      rol: 'Administrador',
-      estado: 'Activo',
-      passwordTemporal: ''
-    },
-    {
-      id: 2,
-      nombre: 'Usuario de Prueba Uno',
-      usuario: 'usuario1',
-      correo: 'usuario1.prueba@congresoedomex.gob.mx',
-      area: 'Secretaría Técnica',
-      rol: 'Usuario',
-      estado: 'Activo',
-      passwordTemporal: ''
-    },
-    {
-      id: 3,
-      nombre: 'Usuario de Prueba Dos',
-      usuario: 'usuario2',
-      correo: 'usuario2.prueba@congresoedomex.gob.mx',
-      area: 'Área Pendiente',
-      rol: 'Usuario',
-      estado: 'Inactivo',
-      passwordTemporal: ''
-    },
-    {
-      id: 4,
-      nombre: 'Usuario de Prueba Tres',
-      usuario: 'usuario3',
-      correo: 'usuario3.prueba@congresoedomex.gob.mx',
-      area: 'Dirección de Finanzas',
-      rol: 'Usuario',
-      estado: 'Activo',
-      passwordTemporal: ''
-    }
-  ];
+  usuariosSistema: UsuarioSistema[] = [];
 
   buscarUsuarioAdmin = '';
   filtroRolAdmin = 'Todos';
@@ -219,14 +211,7 @@ export class App {
     { nombre: 'Contraloría del Poder Legislativo', url: 'https://contraloriadelpoderlegislativo.gob.mx/index' }
   ];
 
-  usuariosDisponiblesBase: string[] = [
-    'Administrador del sistema - Dirección de Informática',
-    'Usuario de Prueba Uno - Secretaría Técnica',
-    'Usuario de Prueba Dos - Área Pendiente',
-    'Usuario de Prueba Tres - Dirección de Finanzas'
-  ];
-
-  usuariosDisponibles: string[] = [...this.usuariosDisponiblesBase];
+  usuariosDisponibles: string[] = [];
   usuariosSeleccionados: string[] = [];
 
   selectedDisponibles: string[] = [];
@@ -240,74 +225,7 @@ export class App {
 
   envioTimeouts: { [key: number]: ReturnType<typeof setTimeout> } = {};
 
-  mensajesBandeja: Mensaje[] = [
-    {
-      id: 101,
-      remitente: 'Usuario de Prueba Uno',
-      titulo: 'Oficio de Solicitud de Mantenimiento',
-      descripcion: 'Solicito apoyo para la revisión de los equipos de cómputo en el área de Secretaría Técnica.',
-      fecha: '2026-06-26',
-      hora: '09:00',
-      documento: 'solicitud_mantenimiento.pdf',
-      destinatarios: 'Administrador del sistema',
-      estado: 'Nuevo',
-      estadoLectura: 'Nuevo',
-      estadoRespuesta: 'Pendiente',
-      tipoMensaje: 'recibido'
-    },
-    {
-      id: 102,
-      remitente: 'Usuario de Prueba Tres',
-      titulo: 'Reporte Presupuestal Trimestral',
-      descripcion: 'Envío el reporte consolidado de gastos correspondiente al segundo trimestre para su revisión.',
-      fecha: '2026-06-25',
-      hora: '14:30',
-      documento: 'reporte_trimestral.docx',
-      destinatarios: 'Administrador del sistema',
-      estado: 'Visto',
-      estadoLectura: 'Visto',
-      estadoRespuesta: 'Pendiente',
-      tipoMensaje: 'recibido'
-    },
-    {
-      id: 103,
-      remitente: 'Usuario de Prueba Uno',
-      titulo: 'Minuta de Reunión de Trabajo',
-      descripcion: 'Comparto la minuta de los acuerdos tomados en la sesión del día de ayer.',
-      fecha: '2026-06-24',
-      hora: '11:15',
-      documento: 'minuta_reunion.pdf',
-      destinatarios: 'Administrador del sistema',
-      estado: 'Respondido',
-      estadoLectura: 'Visto',
-      estadoRespuesta: 'Respondido',
-      tipoMensaje: 'recibido'
-    },
-    {
-      id: 104,
-      remitente: 'Administrador del sistema',
-      titulo: 'Circular de Nuevas Políticas de Seguridad',
-      descripcion: 'Se solicita a todo el personal seguir los lineamientos adjuntos para el uso de contraseñas.',
-      fecha: '2026-06-23',
-      hora: '10:00',
-      documento: 'politicas_seguridad.pdf',
-      destinatarios: 'Usuario de Prueba Uno, Usuario de Prueba Tres',
-      estado: 'Enviado',
-      tipoMensaje: 'enviado'
-    },
-    {
-      id: 105,
-      remitente: 'Administrador del sistema',
-      titulo: 'Convocatoria a Capacitación de Intranet',
-      descripcion: 'Sesión de capacitación sobre el uso del nuevo sistema de gestión documental.',
-      fecha: '2026-06-22',
-      hora: '16:00',
-      documento: 'convocatoria_capacitacion.pdf',
-      destinatarios: 'Todos los usuarios',
-      estado: 'Cancelado',
-      tipoMensaje: 'enviado'
-    }
-  ];
+  mensajesBandeja: Mensaje[] = [];
 
   buscarTexto = '';
   buscarEstado = 'Todos';
@@ -340,8 +258,7 @@ export class App {
 
     return [
       ...eventosMensajes,
-      ...this.recordatoriosCalendario,
-      ...this.eventosCalendarioPrueba
+      ...this.recordatoriosCalendario
     ];
   }
 
@@ -670,11 +587,11 @@ export class App {
     this.formTitulo = '';
     this.formDescripcion = '';
     this.formArchivos = [];
-    this.usuariosDisponibles = [...this.usuariosDisponiblesBase];
     this.usuariosSeleccionados = [];
     this.selectedDisponibles = [];
     this.selectedSeleccionados = [];
     this.buscarDestinatario = '';
+    this.actualizarUsuariosDisponibles();
   }
 
   cancelarFormulario(): void {
@@ -752,11 +669,11 @@ export class App {
   eliminarMensaje(msg: Mensaje, event: Event): void {
     event.preventDefault();
     event.stopPropagation();
-    
+
     msg.estadoTemporal = 'Eliminando';
     this.mostrarNotificacion('Eliminando documento...', 'info');
     this.cdr.detectChanges();
-    
+
     setTimeout(() => {
       msg.estadoTemporal = null;
       msg.estado = 'Eliminado';
@@ -797,12 +714,12 @@ export class App {
       }
 
       this.mostrarNotificacion('Respuesta redactada. Complete los detalles y envíe el documento.', 'exito');
-      
+
       const hash = '#mensaje';
       if (window.location.hash !== hash) {
         window.history.pushState({ modulo: 'mensaje' }, '', hash);
       }
-      
+
       this.cdr.detectChanges();
     }, 1500);
   }
@@ -941,6 +858,7 @@ export class App {
       this.usuarioSeleccionadoAdmin = this.usuariosSistema[index];
       this.usuarioEditandoAdmin = null;
       this.modalEditarUsuarioAbierto = false;
+      this.actualizarUsuariosDisponibles();
       this.mostrarNotificacion('Usuario actualizado correctamente.', 'exito');
     }
   }
@@ -951,6 +869,8 @@ export class App {
     if (this.usuarioEditandoAdmin && this.usuarioEditandoAdmin.id === usuario.id) {
       this.usuarioEditandoAdmin.estado = usuario.estado;
     }
+
+    this.actualizarUsuariosDisponibles();
 
     if (usuario.estado === 'Activo') {
       this.mostrarNotificacion('Usuario activado correctamente.', 'exito');
@@ -1223,16 +1143,19 @@ export class App {
     if (partes.length === 3) {
       const anio = parseInt(partes[0], 10);
       const mes = parseInt(partes[1], 10) - 1;
-      this.anioCalendario = anio;
-      this.mesCalendario = mes;
-      this.fechaSeleccionadaCalendario = this.fechaBusquedaCalendario;
-      this.cdr.detectChanges();
+      const dia = parseInt(partes[2], 10);
+      if (!isNaN(anio) && !isNaN(mes) && !isNaN(dia)) {
+        this.anioCalendario = anio;
+        this.mesCalendario = mes;
+        this.fechaSeleccionadaCalendario = this.fechaBusquedaCalendario;
+        this.cdr.detectChanges();
+      }
     }
   }
 
   get eventosFechaSeleccionadaFiltrados(): EventoCalendario[] {
     const todos = this.obtenerEventosPorFecha(this.fechaSeleccionadaCalendario);
-    
+
     const filtrados = todos.filter(ev => {
       if (this.filtroEventosCalendario === 'Todos') return true;
       if (this.filtroEventosCalendario === 'Recibidos') return ev.tipo === 'recibido';
@@ -1248,6 +1171,210 @@ export class App {
       const datetimeB = `${b.fecha}T${timeB}`;
       return datetimeB.localeCompare(datetimeA);
     });
+  }
+
+  inicializarDatosPrueba(): void {
+    const areas = [
+      'Secretaría de Administración y Finanzas',
+      'Secretaría Particular',
+      'Secretaría Técnica',
+      'Unidad de Información, Planeación, Programación y Evaluación',
+      'Coordinación de Normatividad',
+      'Unidad de Igualdad de Género y Erradicación de la Violencia',
+      'Dirección de Administración y Desarrollo de Personal',
+      'Dirección de Recursos Materiales',
+      'Dirección de Finanzas',
+      'Dirección de Informática'
+    ];
+
+    const usersList: UsuarioSistema[] = [];
+
+    // 10 Admin users (1 to 10)
+    for (let i = 1; i <= 10; i++) {
+      const area = areas[(i - 1) % areas.length];
+      usersList.push({
+        id: i,
+        nombre: `Administrador de Prueba ${String(i).padStart(2, '0')}`,
+        usuario: `admin${i}`,
+        correo: `admin${i}.prueba@siintranet.local`,
+        area: area,
+        rol: 'Administrador',
+        estado: i % 3 === 0 ? 'Inactivo' : 'Activo',
+        passwordTemporal: ''
+      });
+    }
+
+    // 10 Normal users (11 to 20)
+    for (let i = 1; i <= 10; i++) {
+      const id = i + 10;
+      const area = areas[(i - 1) % areas.length];
+      usersList.push({
+        id: id,
+        nombre: `Usuario de Prueba ${String(i).padStart(2, '0')}`,
+        usuario: `usuario${i}`,
+        correo: `usuario${i}.prueba@siintranet.local`,
+        area: area,
+        rol: 'Usuario',
+        estado: i % 4 === 0 ? 'Inactivo' : 'Activo',
+        passwordTemporal: ''
+      });
+    }
+
+    this.usuariosSistema = usersList;
+
+    // Generate Messages (60 total)
+    const msgsList: Mensaje[] = [];
+    let msgId = 101;
+
+    // A. 10 Received - Nuevo (unread)
+    for (let i = 1; i <= 10; i++) {
+      msgsList.push({
+        id: msgId++,
+        remitente: `Usuario de Prueba ${String((i % 10) + 1).padStart(2, '0')}`,
+        titulo: `Oficio Recibido Nuevo ${String(i).padStart(2, '0')}`,
+        descripcion: `Descripción del oficio recibido nuevo número ${i} de prueba para validación de bandeja.`,
+        fecha: this.obtenerFechaRelativa(-i),
+        hora: `09:${String(10 + i).padStart(2, '0')}`,
+        documento: `oficio_recibido_nuevo_${i}.pdf`,
+        destinatarios: 'Administrador del sistema',
+        estado: 'Nuevo',
+        tipoMensaje: 'recibido',
+        estadoLectura: 'Nuevo',
+        estadoRespuesta: 'Pendiente'
+      });
+    }
+
+    // B. 10 Received - Visto (read)
+    for (let i = 1; i <= 10; i++) {
+      msgsList.push({
+        id: msgId++,
+        remitente: `Usuario de Prueba ${String(((i + 2) % 10) + 1).padStart(2, '0')}`,
+        titulo: `Circular Recibida Vista ${String(i).padStart(2, '0')}`,
+        descripcion: `Descripción detallada de la circular leída/vista número ${i} de prueba para bandeja de entrada.`,
+        fecha: this.obtenerFechaRelativa(-(i + 2)),
+        hora: `10:${String(15 + i).padStart(2, '0')}`,
+        documento: `circular_vista_${i}.pdf`,
+        destinatarios: 'Administrador del sistema',
+        estado: 'Visto',
+        tipoMensaje: 'recibido',
+        estadoLectura: 'Visto',
+        estadoRespuesta: 'Pendiente'
+      });
+    }
+
+    // C. 10 Received - Respondido (read + replied)
+    for (let i = 1; i <= 10; i++) {
+      msgsList.push({
+        id: msgId++,
+        remitente: `Usuario de Prueba ${String(((i + 5) % 10) + 1).padStart(2, '0')}`,
+        titulo: `Solicitud Respondida ${String(i).padStart(2, '0')}`,
+        descripcion: `Detalle de la solicitud que ya ha sido contestada y marcada como respondida número ${i}.`,
+        fecha: this.obtenerFechaRelativa(-(i + 5)),
+        hora: `11:${String(20 + i).padStart(2, '0')}`,
+        documento: `solicitud_respondida_${i}.docx`,
+        destinatarios: 'Administrador del sistema',
+        estado: 'Respondido',
+        tipoMensaje: 'recibido',
+        estadoLectura: 'Visto',
+        estadoRespuesta: 'Respondido'
+      });
+    }
+
+    // D. 10 Sent - Enviado (sent)
+    for (let i = 1; i <= 10; i++) {
+      msgsList.push({
+        id: msgId++,
+        remitente: 'Administrador del sistema',
+        titulo: `Oficio Enviado Institucional ${String(i).padStart(2, '0')}`,
+        descripcion: `Copia de comunicación oficial interna enviada a departamentos número ${i} de prueba.`,
+        fecha: this.obtenerFechaRelativa(-i),
+        hora: `14:${String(10 + i).padStart(2, '0')}`,
+        documento: `oficio_enviado_${i}.pdf`,
+        destinatarios: `Usuario de Prueba ${String(i).padStart(2, '0')}`,
+        estado: 'Enviado',
+        tipoMensaje: 'enviado'
+      });
+    }
+
+    // E. 10 Sent - Cancelado (cancelled)
+    for (let i = 1; i <= 10; i++) {
+      msgsList.push({
+        id: msgId++,
+        remitente: 'Administrador del sistema',
+        titulo: `Envío cancelado de oficio interno ${String(i).padStart(2, '0')}`,
+        descripcion: `Transmisión anulada o cancelada número ${i} por reestructuración del contenido interno.`,
+        fecha: this.obtenerFechaRelativa(-i),
+        hora: `15:${String(30 + i).padStart(2, '0')}`,
+        documento: `circular_anulada_${i}.pdf`,
+        destinatarios: `Usuario de Prueba ${String((i % 10) + 1).padStart(2, '0')}`,
+        estado: 'Cancelado',
+        tipoMensaje: 'enviado'
+      });
+    }
+
+    // F. 10 Deleted - Eliminado (appearing only in trash filter)
+    for (let i = 1; i <= 10; i++) {
+      msgsList.push({
+        id: msgId++,
+        remitente: i % 2 === 0 ? 'Administrador del sistema' : `Usuario de Prueba ${String(i).padStart(2, '0')}`,
+        titulo: `Documento Eliminado de Prueba ${String(i).padStart(2, '0')}`,
+        descripcion: `Mensaje borrado número ${i} que únicamente debe ser visible bajo el filtro de Papelera.`,
+        fecha: this.obtenerFechaRelativa(-15),
+        hora: `16:00`,
+        documento: `borrador_descartado_${i}.pdf`,
+        destinatarios: i % 2 === 0 ? `Usuario de Prueba ${String(i).padStart(2, '0')}` : 'Administrador del sistema',
+        estado: 'Eliminado',
+        tipoMensaje: i % 2 === 0 ? 'enviado' : 'recibido',
+        estadoLectura: 'Visto'
+      });
+    }
+
+    this.mensajesBandeja = msgsList;
+
+    // Generate 10+ Recordatorios (12 total: 4 today, 8 on other days)
+    const recordatorios: EventoCalendario[] = [];
+    const hoyStr = this.formatearFechaLocal(new Date());
+
+    for (let i = 1; i <= 4; i++) {
+      recordatorios.push({
+        id: i,
+        fecha: hoyStr,
+        tipo: 'recordatorio',
+        titulo: `Recordatorio de Hoy ${String(i).padStart(2, '0')}`,
+        descripcion: `Revisión interna y firma de minutas de hoy, pendiente número ${i}.`,
+        hora: `10:${String(i * 10).padStart(2, '0')}`
+      });
+    }
+
+    for (let i = 5; i <= 12; i++) {
+      const diasDesfase = i % 2 === 0 ? (i * 2) : -(i * 2);
+      recordatorios.push({
+        id: i,
+        fecha: this.obtenerFechaRelativa(diasDesfase),
+        tipo: 'recordatorio',
+        titulo: `Recordatorio Programado ${String(i).padStart(2, '0')}`,
+        descripcion: `Actividad calendarizada para seguimiento del sistema de prueba número ${i}.`,
+        hora: `11:00`
+      });
+    }
+
+    this.recordatoriosCalendario = recordatorios;
+    this.nextRecordatorioId = 13;
+
+    // Reorganize formats documents to populate dynamically
+    this.categoriasFormatos.forEach((cat, index) => {
+      this.documentosFormatos[cat] = [
+        { nombre: `Formato de prueba ${String(index + 1).padStart(2, '0')}A.pdf`, archivo: `formato_prueba_${index + 1}a.pdf` },
+        { nombre: `Solicitud interna de prueba ${String(index + 1).padStart(2, '0')}B.pdf`, archivo: `solicitud_prueba_${index + 1}b.pdf` },
+        { nombre: `Oficio administrativo de prueba ${String(index + 1).padStart(2, '0')}C.pdf`, archivo: `oficio_prueba_${index + 1}c.pdf` }
+      ];
+    });
+  }
+
+  private obtenerFechaRelativa(dias: number): string {
+    const d = new Date();
+    d.setDate(d.getDate() + dias);
+    return this.formatearFechaLocal(d);
   }
 
 }

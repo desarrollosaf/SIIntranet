@@ -140,20 +140,21 @@
                 <p>{{ obtenerResumenParticipantesMensaje(msg) }} · {{ msg.fecha }}</p>
               </div>
 
-              <div class="message-meta" style="flex-direction: row; gap: 4px; flex-wrap: wrap; justify-content: flex-end;">
+              <div class="message-meta"
+                style="flex-direction: row; gap: 4px; flex-wrap: wrap; justify-content: flex-end;">
                 @for (est of obtenerEstadosMensaje(msg); track est) {
-                  <span class="status-badge status-{{ est.toLowerCase() }}">
-                    @if (est === 'Nuevo') { <i class="bi bi-star-fill animate-pulse"></i> }
-                    @else if (est === 'Visto') { <i class="bi bi-eye-fill"></i> }
-                    @else if (est === 'Respondido') { <i class="bi bi-reply-fill"></i> }
-                    @else if (est === 'Enviado') { <i class="bi bi-send-fill"></i> }
-                    @else if (est === 'Cancelado') { <i class="bi bi-x-circle-fill"></i> }
-                    @else if (est === 'Enviando') { <i class="bi bi-arrow-repeat animate-spin"></i> }
-                    @else if (est === 'Respondiendo') { <i class="bi bi-arrow-repeat animate-spin"></i> }
-                    @else if (est === 'Eliminando') { <i class="bi bi-trash3-fill"></i> }
-                    @else if (est === 'Cancelando') { <i class="bi bi-x-circle-fill"></i> }
-                    <span>{{ est }}</span>
-                  </span>
+                <span class="status-badge status-{{ est.toLowerCase() }}">
+                  @if (est === 'Nuevo') { <i class="bi bi-star-fill animate-pulse"></i> }
+                  @else if (est === 'Visto') { <i class="bi bi-eye-fill"></i> }
+                  @else if (est === 'Respondido') { <i class="bi bi-reply-fill"></i> }
+                  @else if (est === 'Enviado') { <i class="bi bi-send-fill"></i> }
+                  @else if (est === 'Cancelado') { <i class="bi bi-x-circle-fill"></i> }
+                  @else if (est === 'Enviando') { <i class="bi bi-arrow-repeat animate-spin"></i> }
+                  @else if (est === 'Respondiendo') { <i class="bi bi-arrow-repeat animate-spin"></i> }
+                  @else if (est === 'Eliminando') { <i class="bi bi-trash3-fill"></i> }
+                  @else if (est === 'Cancelando') { <i class="bi bi-x-circle-fill"></i> }
+                  <span>{{ est }}</span>
+                </span>
                 }
               </div>
             </div>
@@ -210,7 +211,8 @@
               <label for="titulo">Título del documento:</label>
               <div class="input-with-icon">
                 <i class="bi bi-card-text"></i>
-                <input id="titulo" name="titulo" type="text" [(ngModel)]="formTitulo" placeholder="Ingrese el título del documento" />
+                <input id="titulo" name="titulo" type="text" [(ngModel)]="formTitulo"
+                  placeholder="Ingrese el título del documento" />
               </div>
             </div>
 
@@ -265,12 +267,14 @@
                   <span class="file-selector-btn">Buscar archivo</span>
                   <span class="file-selector-text">
                     @if (formArchivos.length === 0) {
-                      No se ha seleccionado ningún archivo.
+                    No se ha seleccionado ningún archivo.
                     } @else {
-                      {{ formArchivos.length === 1 ? '1 archivo seleccionado' : formArchivos.length + ' archivos seleccionados' }}
+                    {{ formArchivos.length === 1 ? '1 archivo seleccionado' : formArchivos.length + ' archivos
+                    seleccionados' }}
                     }
                   </span>
-                  <input id="documento" name="documento" type="file" multiple (change)="onFileSelected($event)" style="display: none;" />
+                  <input id="documento" name="documento" type="file" multiple (change)="onFileSelected($event)"
+                    style="display: none;" />
                 </label>
                 @if (formArchivos.length > 0) {
                 <p class="files-count-hint">
@@ -291,7 +295,8 @@
           <div class="recipients-search-bar">
             <div class="input-with-icon">
               <i class="bi bi-search"></i>
-              <input type="text" name="buscarDestinatario" [(ngModel)]="buscarDestinatario" placeholder="Buscar usuarios disponibles..." />
+              <input type="text" name="buscarDestinatario" [(ngModel)]="buscarDestinatario"
+                placeholder="Buscar usuarios disponibles..." />
             </div>
           </div>
 
@@ -378,13 +383,13 @@
 
             <div class="sent-msg-status-actions">
               @for (est of obtenerEstadosMensaje(msg); track est) {
-                <span class="status-badge status-{{ est.toLowerCase() }}">
-                  @if (est === 'Enviando') { <i class="bi bi-arrow-repeat animate-spin"></i> }
-                  @else if (est === 'Cancelado') { <i class="bi bi-x-circle-fill"></i> }
-                  @else if (est === 'Enviado') { <i class="bi bi-check-circle-fill"></i> }
-                  @else if (est === 'Cancelando') { <i class="bi bi-arrow-repeat animate-spin"></i> }
-                  <span>{{ est }}</span>
-                </span>
+              <span class="status-badge status-{{ est.toLowerCase() }}">
+                @if (est === 'Enviando') { <i class="bi bi-arrow-repeat animate-spin"></i> }
+                @else if (est === 'Cancelado') { <i class="bi bi-x-circle-fill"></i> }
+                @else if (est === 'Enviado') { <i class="bi bi-check-circle-fill"></i> }
+                @else if (est === 'Cancelando') { <i class="bi bi-arrow-repeat animate-spin"></i> }
+                <span>{{ est }}</span>
+              </span>
               }
 
               @if (msg.estado === 'Enviando' && !msg.estadoTemporal) {
@@ -393,7 +398,9 @@
                 <span>Cancelar envío</span>
               </button>
               } @else if (msg.estado === 'Enviado' && !msg.estadoTemporal) {
-              <button type="button" class="btn-cancel-send btn-cancel-sent" (click)="cancelarMensaje(msg)" title="Anular envío" style="background: rgba(133, 0, 63, 0.05); color: #85003f; border: 1px solid rgba(133, 0, 63, 0.2); margin-left: 8px;">
+              <button type="button" class="btn-cancel-send btn-cancel-sent" (click)="cancelarMensaje(msg)"
+                title="Anular envío"
+                style="background: rgba(133, 0, 63, 0.05); color: #85003f; border: 1px solid rgba(133, 0, 63, 0.2); margin-left: 8px;">
                 <i class="bi bi-x-circle"></i>
                 <span>Anular envío</span>
               </button>
@@ -458,17 +465,15 @@
 
           <div class="inbox-list">
             @for (msg of mensajesFiltrados; track msg.id) {
-            <article class="inbox-item" 
-                     [class.unread]="esMensajeRecibido(msg) && msg.estadoLectura === 'Nuevo'"
-                     [class.item-sending]="msg.estado === 'Enviando'" 
-                     [class.item-cancelled]="msg.estado === 'Cancelado'">
+            <article class="inbox-item" [class.unread]="esMensajeRecibido(msg) && msg.estadoLectura === 'Nuevo'"
+              [class.item-sending]="msg.estado === 'Enviando'" [class.item-cancelled]="msg.estado === 'Cancelado'">
               <div class="sender-block">
                 @if (esMensajeRecibido(msg)) {
-                  <span>Envía</span>
-                  <strong>{{ msg.remitente }}</strong>
+                <span>Envía</span>
+                <strong>{{ msg.remitente }}</strong>
                 } @else {
-                  <span>Para</span>
-                  <strong>{{ msg.destinatarios }}</strong>
+                <span>Para</span>
+                <strong>{{ msg.destinatarios }}</strong>
                 }
                 <span class="date-tag"><i class="bi bi-calendar"></i> {{ msg.fecha }}</span>
               </div>
@@ -478,19 +483,19 @@
                   <h4>{{ msg.titulo }}</h4>
                   <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
                     @for (est of obtenerEstadosMensaje(msg); track est) {
-                      <span class="status-badge status-{{ est.toLowerCase() }}">
-                        @if (est === 'Nuevo') { <i class="bi bi-star-fill animate-pulse"></i> }
-                        @else if (est === 'Visto') { <i class="bi bi-eye-fill"></i> }
-                        @else if (est === 'Respondido') { <i class="bi bi-reply-fill"></i> }
-                        @else if (est === 'Enviado') { <i class="bi bi-send-fill"></i> }
-                        @else if (est === 'Cancelado') { <i class="bi bi-x-circle-fill"></i> }
-                        @else if (est === 'Eliminado') { <i class="bi bi-trash3-fill"></i> }
-                        @else if (est === 'Enviando') { <i class="bi bi-arrow-repeat animate-spin"></i> }
-                        @else if (est === 'Respondiendo') { <i class="bi bi-arrow-repeat animate-spin"></i> }
-                        @else if (est === 'Eliminando') { <i class="bi bi-trash3-fill"></i> }
-                        @else if (est === 'Cancelando') { <i class="bi bi-x-circle-fill"></i> }
-                        <span>{{ est }}</span>
-                      </span>
+                    <span class="status-badge status-{{ est.toLowerCase() }}">
+                      @if (est === 'Nuevo') { <i class="bi bi-star-fill animate-pulse"></i> }
+                      @else if (est === 'Visto') { <i class="bi bi-eye-fill"></i> }
+                      @else if (est === 'Respondido') { <i class="bi bi-reply-fill"></i> }
+                      @else if (est === 'Enviado') { <i class="bi bi-send-fill"></i> }
+                      @else if (est === 'Cancelado') { <i class="bi bi-x-circle-fill"></i> }
+                      @else if (est === 'Eliminado') { <i class="bi bi-trash3-fill"></i> }
+                      @else if (est === 'Enviando') { <i class="bi bi-arrow-repeat animate-spin"></i> }
+                      @else if (est === 'Respondiendo') { <i class="bi bi-arrow-repeat animate-spin"></i> }
+                      @else if (est === 'Eliminando') { <i class="bi bi-trash3-fill"></i> }
+                      @else if (est === 'Cancelando') { <i class="bi bi-x-circle-fill"></i> }
+                      <span>{{ est }}</span>
+                    </span>
                     }
                   </div>
                 </div>
@@ -511,7 +516,8 @@
               </div>
 
               <div class="inbox-actions">
-                <button type="button" class="action-link btn-view-message" (click)="verDetallesMensaje(msg)" [disabled]="msg.estadoTemporal">
+                <button type="button" class="action-link btn-view-message" (click)="verDetallesMensaje(msg)"
+                  [disabled]="msg.estadoTemporal">
                   <i class="bi bi-chat-square-text-fill"></i>
                   <span>Ver detalles</span>
                 </button>
@@ -552,11 +558,21 @@
               <span><i class="bi bi-folder2-open-fill"></i> {{ categoria }}</span>
               <span class="accordion-icon"><i class="bi bi-chevron-down"></i></span>
             </summary>
-            <div class="formato-content">
-              <div class="file-empty">
+            <div class="formato-content" style="padding: 8px 0;">
+              @for (doc of documentosFormatos[categoria]; track doc.nombre) {
+              <div class="formato-doc-item" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; border-bottom: 1px solid rgba(226, 232, 240, 0.8); font-size: 13.5px;">
+                <span style="font-weight: 600; color: var(--texto);"><i class="bi bi-file-earmark-pdf-fill" style="color: var(--vino); margin-right: 8px; font-size: 16px;"></i>{{ doc.nombre }}</span>
+                <button type="button" class="btn-admin-action" (click)="mostrarNotificacion('Descargando documento de prueba...', 'info')" style="padding: 4px 10px; font-size: 11px; margin: 0;">
+                  <i class="bi bi-download"></i>
+                  <span>Descargar</span>
+                </button>
+              </div>
+              } @empty {
+              <div class="file-empty" style="margin: 16px;">
                 <i class="bi bi-folder-symlink"></i>
                 <p>No hay documentos disponibles por el momento.</p>
               </div>
+              }
             </div>
           </details>
           }
@@ -628,22 +644,26 @@
                   <td class="font-bold">{{ u.nombre }}</td>
                   <td><code>{{ u.usuario }}</code></td>
                   <td>
-                    <span class="status-badge" [class.status-new]="u.rol === 'Administrador'" [class.status-answered]="u.rol === 'Usuario'">
+                    <span class="status-badge" [class.status-new]="u.rol === 'Administrador'"
+                      [class.status-answered]="u.rol === 'Usuario'">
                       {{ u.rol }}
                     </span>
                   </td>
                   <td>
-                    <span class="status-badge" [class.status-seen-inbox]="u.estado === 'Activo'" [class.status-cancelled]="u.estado === 'Inactivo'">
+                    <span class="status-badge" [class.status-seen-inbox]="u.estado === 'Activo'"
+                      [class.status-cancelled]="u.estado === 'Inactivo'">
                       {{ u.estado }}
                     </span>
                   </td>
                   <td class="actions-cell">
                     <div style="display: flex; gap: 6px; justify-content: flex-end;">
-                      <button type="button" class="btn-admin-action" (click)="seleccionarUsuarioAdmin(u)" title="Ver detalles">
+                      <button type="button" class="btn-admin-action" (click)="seleccionarUsuarioAdmin(u)"
+                        title="Ver detalles">
                         <i class="bi bi-eye-fill"></i>
                         <span>Ver</span>
                       </button>
-                      <button type="button" class="btn-admin-action" (click)="abrirModalEditarUsuario(u)" title="Editar usuario">
+                      <button type="button" class="btn-admin-action" (click)="abrirModalEditarUsuario(u)"
+                        title="Editar usuario">
                         <i class="bi bi-pencil-fill"></i>
                         <span>Editar</span>
                       </button>
@@ -700,19 +720,19 @@
           <span class="detail-label">Estado</span>
           <div class="detail-value" style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
             @for (est of obtenerEstadosMensaje(mensajeSeleccionado); track est) {
-              <span class="status-badge status-{{ est.toLowerCase() }}">
-                @if (est === 'Nuevo') { <i class="bi bi-star-fill animate-pulse"></i> }
-                @else if (est === 'Visto') { <i class="bi bi-eye-fill"></i> }
-                @else if (est === 'Respondido') { <i class="bi bi-reply-fill"></i> }
-                @else if (est === 'Enviado') { <i class="bi bi-send-fill"></i> }
-                @else if (est === 'Cancelado') { <i class="bi bi-x-circle-fill"></i> }
-                @else if (est === 'Eliminado') { <i class="bi bi-trash3-fill"></i> }
-                @else if (est === 'Enviando') { <i class="bi bi-arrow-repeat animate-spin"></i> }
-                @else if (est === 'Respondiendo') { <i class="bi bi-arrow-repeat animate-spin"></i> }
-                @else if (est === 'Eliminando') { <i class="bi bi-trash3-fill"></i> }
-                @else if (est === 'Cancelando') { <i class="bi bi-x-circle-fill"></i> }
-                <span>{{ est }}</span>
-              </span>
+            <span class="status-badge status-{{ est.toLowerCase() }}">
+              @if (est === 'Nuevo') { <i class="bi bi-star-fill animate-pulse"></i> }
+              @else if (est === 'Visto') { <i class="bi bi-eye-fill"></i> }
+              @else if (est === 'Respondido') { <i class="bi bi-reply-fill"></i> }
+              @else if (est === 'Enviado') { <i class="bi bi-send-fill"></i> }
+              @else if (est === 'Cancelado') { <i class="bi bi-x-circle-fill"></i> }
+              @else if (est === 'Eliminado') { <i class="bi bi-trash3-fill"></i> }
+              @else if (est === 'Enviando') { <i class="bi bi-arrow-repeat animate-spin"></i> }
+              @else if (est === 'Respondiendo') { <i class="bi bi-arrow-repeat animate-spin"></i> }
+              @else if (est === 'Eliminando') { <i class="bi bi-trash3-fill"></i> }
+              @else if (est === 'Cancelando') { <i class="bi bi-x-circle-fill"></i> }
+              <span>{{ est }}</span>
+            </span>
             }
           </div>
         </div>
@@ -880,7 +900,8 @@
             <div class="calendar-search-row">
               <label for="buscarFechaInput">Ir a fecha:</label>
               <div class="input-with-button">
-                <input id="buscarFechaInput" type="date" [(ngModel)]="fechaBusquedaCalendario" (change)="irAFechaCalendario()" />
+                <input id="buscarFechaInput" name="fechaBusquedaCalendario" type="date" [(ngModel)]="fechaBusquedaCalendario"
+                  (change)="irAFechaCalendario()" />
               </div>
             </div>
 
@@ -907,32 +928,31 @@
             <!-- Grid de 42 celdas -->
             <div class="calendar-grid">
               @for (dia of diasCalendario; track $index) {
-                @if (!dia.dia) {
-                  <div class="calendar-day-empty"></div>
-                } @else {
-                  <button type="button" class="calendar-day" [class.calendar-day-today]="dia.esHoy"
-                    [class.calendar-day-selected]="dia.fecha === fechaSeleccionadaCalendario"
-                    [class.calendar-day-has-events]="dia.eventos.length > 0"
-                    (click)="seleccionarFechaCalendario(dia.fecha)">
-                    <span>{{ dia.dia }}</span>
+              @if (!dia.dia) {
+              <div class="calendar-day-empty"></div>
+              } @else {
+              <button type="button" class="calendar-day" [class.calendar-day-today]="dia.esHoy"
+                [class.calendar-day-selected]="dia.fecha === fechaSeleccionadaCalendario"
+                [class.calendar-day-has-events]="dia.eventos.length > 0"
+                (click)="seleccionarFechaCalendario(dia.fecha)">
+                <span>{{ dia.dia }}</span>
 
-                    @if (dia.eventos.length > 0) {
-                      <div class="calendar-dots">
-                        @for (evento of dia.eventos; track $index) {
-                          @if ($index < 3) {
-                            <span class="calendar-dot" [class.dot-recibido]="evento.tipo === 'recibido'"
-                              [class.dot-enviado]="evento.tipo === 'enviado'"
-                              [class.dot-recordatorio]="evento.tipo === 'recordatorio'">
-                            </span>
-                          }
-                        }
-                        @if (dia.eventos.length > 3) {
-                          <span class="calendar-more-count">+{{ dia.eventos.length - 3 }}</span>
-                        }
-                      </div>
+                @if (dia.eventos.length > 0) {
+                <div class="calendar-dots">
+                  @for (evento of dia.eventos; track $index) {
+                  @if ($index < 3) { <span class="calendar-dot" [class.dot-recibido]="evento.tipo === 'recibido'"
+                    [class.dot-enviado]="evento.tipo === 'enviado'"
+                    [class.dot-recordatorio]="evento.tipo === 'recordatorio'">
+                    </span>
                     }
-                  </button>
+                    }
+                    @if (dia.eventos.length > 3) {
+                    <span class="calendar-more-count">+{{ dia.eventos.length - 3 }}</span>
+                    }
+                </div>
                 }
+              </button>
+              }
               }
             </div>
 
@@ -953,16 +973,20 @@
 
             <!-- Botones de Filtro -->
             <div class="calendar-filters-row">
-              <button type="button" class="btn-filter" [class.active]="filtroEventosCalendario === 'Todos'" (click)="filtroEventosCalendario = 'Todos'">
+              <button type="button" class="btn-filter" [class.active]="filtroEventosCalendario === 'Todos'"
+                (click)="filtroEventosCalendario = 'Todos'">
                 Todos
               </button>
-              <button type="button" class="btn-filter" [class.active]="filtroEventosCalendario === 'Recibidos'" (click)="filtroEventosCalendario = 'Recibidos'">
+              <button type="button" class="btn-filter" [class.active]="filtroEventosCalendario === 'Recibidos'"
+                (click)="filtroEventosCalendario = 'Recibidos'">
                 Recibidos
               </button>
-              <button type="button" class="btn-filter" [class.active]="filtroEventosCalendario === 'Enviados'" (click)="filtroEventosCalendario = 'Enviados'">
+              <button type="button" class="btn-filter" [class.active]="filtroEventosCalendario === 'Enviados'"
+                (click)="filtroEventosCalendario = 'Enviados'">
                 Enviados
               </button>
-              <button type="button" class="btn-filter" [class.active]="filtroEventosCalendario === 'Recordatorios'" (click)="filtroEventosCalendario = 'Recordatorios'">
+              <button type="button" class="btn-filter" [class.active]="filtroEventosCalendario === 'Recordatorios'"
+                (click)="filtroEventosCalendario = 'Recordatorios'">
                 Recordatorios
               </button>
             </div>
@@ -970,69 +994,74 @@
             <!-- Panel de actividades con scroll vertical -->
             <div class="calendar-activities-scroll">
               @for (evento of eventosFechaSeleccionadaFiltrados; track $index) {
-                <div class="calendar-event-item" 
-                     [class.clickable]="evento.tipo !== 'recordatorio'" 
-                     (click)="evento.tipo !== 'recordatorio' && evento.mensajeAsociado ? verDetallesMensaje(evento.mensajeAsociado) : null"
-                     [title]="evento.tipo !== 'recordatorio' ? 'Ver detalles del mensaje' : ''">
-                  <div class="calendar-event-body" style="width: 100%;">
-                    <div class="calendar-event-title-row" style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
-                      <span class="calendar-event-title" style="font-weight: 700; font-size: 14px; color: var(--texto);">{{ evento.titulo }}</span>
-                      @if (evento.hora) {
-                        <span class="calendar-event-time" style="font-size: 11px; color: var(--texto-mutado);"><i class="bi bi-clock"></i> {{ evento.hora }}</span>
-                      }
-                    </div>
-
-                    @if (evento.tipo !== 'recordatorio' && evento.mensajeAsociado) {
-                      <div class="calendar-event-participants" style="font-size: 12px; color: var(--texto-suave); margin-top: 3px; display: flex; align-items: center; gap: 4px;">
-                        @if (evento.esEnviado) {
-                          <i class="bi bi-people-fill"></i>
-                          <span>Para: {{ evento.mensajeAsociado.destinatarios }}</span>
-                        } @else {
-                          <i class="bi bi-person-fill"></i>
-                          <span>De: {{ evento.mensajeAsociado.remitente }}</span>
-                        }
-                      </div>
+              <div class="calendar-event-item" [class.clickable]="evento.tipo !== 'recordatorio'"
+                (click)="evento.tipo !== 'recordatorio' && evento.mensajeAsociado ? verDetallesMensaje(evento.mensajeAsociado) : null"
+                [title]="evento.tipo !== 'recordatorio' ? 'Ver detalles del mensaje' : ''">
+                <div class="calendar-event-body" style="width: 100%;">
+                  <div class="calendar-event-title-row"
+                    style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                    <span class="calendar-event-title"
+                      style="font-weight: 700; font-size: 14px; color: var(--texto);">{{ evento.titulo }}</span>
+                    @if (evento.hora) {
+                    <span class="calendar-event-time" style="font-size: 11px; color: var(--texto-mutado);"><i
+                        class="bi bi-clock"></i> {{ evento.hora }}</span>
                     }
-
-                    <div class="calendar-event-meta-row" style="margin-top: 6px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                      <span class="calendar-event-type" [class.event-recibido]="evento.tipo === 'recibido'"
-                        [class.event-enviado]="evento.tipo === 'enviado'"
-                        [class.event-recordatorio]="evento.tipo === 'recordatorio'">
-                        {{ evento.tipo }}
-                      </span>
-
-                      @if (evento.estados) {
-                        @for (est of evento.estados; track est) {
-                          <span class="status-badge status-{{ est.toLowerCase() }}">
-                            @if (est === 'Nuevo') { <i class="bi bi-star-fill animate-pulse"></i> }
-                            @else if (est === 'Visto') { <i class="bi bi-eye-fill"></i> }
-                            @else if (est === 'Respondido') { <i class="bi bi-reply-fill"></i> }
-                            @else if (est === 'Enviado') { <i class="bi bi-send-fill"></i> }
-                            @else if (est === 'Cancelado') { <i class="bi bi-x-circle-fill"></i> }
-                            @else if (est === 'Enviando') { <i class="bi bi-arrow-repeat animate-spin"></i> }
-                            @else if (est === 'Respondiendo') { <i class="bi bi-arrow-repeat animate-spin"></i> }
-                            @else if (est === 'Eliminando') { <i class="bi bi-trash3-fill"></i> }
-                            @else if (est === 'Cancelando') { <i class="bi bi-x-circle-fill"></i> }
-                            <span>{{ est }}</span>
-                          </span>
-                        }
-                      } @else {
-                        <p class="calendar-event-desc" style="margin: 4px 0 0; font-size: 13px; color: var(--texto-suave);">{{ evento.descripcion }}</p>
-                      }
-                    </div>
                   </div>
 
-                  @if (evento.tipo === 'recordatorio') {
-                    <button type="button" class="btn-delete-reminder"
-                      (click)="eliminarRecordatorioCalendario(evento.id, $event)" title="Eliminar recordatorio">
-                      <i class="bi bi-x-lg"></i>
-                    </button>
+                  @if (evento.tipo !== 'recordatorio' && evento.mensajeAsociado) {
+                  <div class="calendar-event-participants"
+                    style="font-size: 12px; color: var(--texto-suave); margin-top: 3px; display: flex; align-items: center; gap: 4px;">
+                    @if (evento.esEnviado) {
+                    <i class="bi bi-people-fill"></i>
+                    <span>Para: {{ evento.mensajeAsociado.destinatarios }}</span>
+                    } @else {
+                    <i class="bi bi-person-fill"></i>
+                    <span>De: {{ evento.mensajeAsociado.remitente }}</span>
+                    }
+                  </div>
                   }
+
+                  <div class="calendar-event-meta-row"
+                    style="margin-top: 6px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <span class="calendar-event-type" [class.event-recibido]="evento.tipo === 'recibido'"
+                      [class.event-enviado]="evento.tipo === 'enviado'"
+                      [class.event-recordatorio]="evento.tipo === 'recordatorio'">
+                      {{ evento.tipo }}
+                    </span>
+
+                    @if (evento.estados) {
+                    @for (est of evento.estados; track est) {
+                    <span class="status-badge status-{{ est.toLowerCase() }}">
+                      @if (est === 'Nuevo') { <i class="bi bi-star-fill animate-pulse"></i> }
+                      @else if (est === 'Visto') { <i class="bi bi-eye-fill"></i> }
+                      @else if (est === 'Respondido') { <i class="bi bi-reply-fill"></i> }
+                      @else if (est === 'Enviado') { <i class="bi bi-send-fill"></i> }
+                      @else if (est === 'Cancelado') { <i class="bi bi-x-circle-fill"></i> }
+                      @else if (est === 'Enviando') { <i class="bi bi-arrow-repeat animate-spin"></i> }
+                      @else if (est === 'Respondiendo') { <i class="bi bi-arrow-repeat animate-spin"></i> }
+                      @else if (est === 'Eliminando') { <i class="bi bi-trash3-fill"></i> }
+                      @else if (est === 'Cancelando') { <i class="bi bi-x-circle-fill"></i> }
+                      <span>{{ est }}</span>
+                    </span>
+                    }
+                    } @else {
+                    <p class="calendar-event-desc" style="margin: 4px 0 0; font-size: 13px; color: var(--texto-suave);">
+                      {{ evento.descripcion }}</p>
+                    }
+                  </div>
                 </div>
+
+                @if (evento.tipo === 'recordatorio') {
+                <button type="button" class="btn-delete-reminder"
+                  (click)="eliminarRecordatorioCalendario(evento.id, $event)" title="Eliminar recordatorio">
+                  <i class="bi bi-x-lg"></i>
+                </button>
+                }
+              </div>
               } @empty {
-                <p class="calendar-empty-text">
-                  No hay actividad registrada en esta fecha.
-                </p>
+              <p class="calendar-empty-text">
+                No hay actividad registrada en esta fecha.
+              </p>
               }
             </div>
 
@@ -1074,7 +1103,8 @@
         <div class="detail-grid">
           <div class="detail-row" style="grid-column: span 2;">
             <span class="detail-label">Nombre Completo</span>
-            <div class="detail-value font-bold text-accent" style="font-size: 16.5px;">{{ usuarioSeleccionadoAdmin.nombre }}</div>
+            <div class="detail-value font-bold text-accent" style="font-size: 16.5px;">{{
+              usuarioSeleccionadoAdmin.nombre }}</div>
           </div>
           <div class="detail-row">
             <span class="detail-label">Usuario</span>
@@ -1091,7 +1121,8 @@
           <div class="detail-row">
             <span class="detail-label">Rol</span>
             <div class="detail-value">
-              <span class="status-badge" [class.status-new]="usuarioSeleccionadoAdmin.rol === 'Administrador'" [class.status-answered]="usuarioSeleccionadoAdmin.rol === 'Usuario'">
+              <span class="status-badge" [class.status-new]="usuarioSeleccionadoAdmin.rol === 'Administrador'"
+                [class.status-answered]="usuarioSeleccionadoAdmin.rol === 'Usuario'">
                 {{ usuarioSeleccionadoAdmin.rol }}
               </span>
             </div>
@@ -1099,7 +1130,8 @@
           <div class="detail-row">
             <span class="detail-label">Estado</span>
             <div class="detail-value">
-              <span class="status-badge" [class.status-seen-inbox]="usuarioSeleccionadoAdmin.estado === 'Activo'" [class.status-cancelled]="usuarioSeleccionadoAdmin.estado === 'Inactivo'">
+              <span class="status-badge" [class.status-seen-inbox]="usuarioSeleccionadoAdmin.estado === 'Activo'"
+                [class.status-cancelled]="usuarioSeleccionadoAdmin.estado === 'Inactivo'">
                 {{ usuarioSeleccionadoAdmin.estado }}
               </span>
             </div>
@@ -1108,7 +1140,8 @@
             <span class="detail-label">Contraseña Temporal</span>
             <div class="detail-value">
               @if (usuarioSeleccionadoAdmin.passwordTemporal) {
-              <code class="temp-pwd-code" style="font-size: 13.5px; font-weight: 700;">{{ usuarioSeleccionadoAdmin.passwordTemporal }}</code>
+              <code class="temp-pwd-code"
+                style="font-size: 13.5px; font-weight: 700;">{{ usuarioSeleccionadoAdmin.passwordTemporal }}</code>
               } @else {
               <span class="text-muted-italic">Ninguna generada</span>
               }
@@ -1121,26 +1154,31 @@
           <i class="bi bi-pencil-fill"></i>
           <span>Editar</span>
         </button>
-        <button type="button" class="btn-admin-action-btn btn-secondary" (click)="generarPasswordTemporal(usuarioSeleccionadoAdmin)">
+        <button type="button" class="btn-admin-action-btn btn-secondary"
+          (click)="generarPasswordTemporal(usuarioSeleccionadoAdmin)">
           <i class="bi bi-key-fill"></i>
           <span>Contraseña Temp.</span>
         </button>
-        <button type="button" class="btn-admin-action-btn btn-secondary" (click)="descargarPdfUsuario(usuarioSeleccionadoAdmin)">
+        <button type="button" class="btn-admin-action-btn btn-secondary"
+          (click)="descargarPdfUsuario(usuarioSeleccionadoAdmin)">
           <i class="bi bi-file-earmark-pdf-fill"></i>
           <span>Descargar PDF</span>
         </button>
         @if (usuarioSeleccionadoAdmin.estado === 'Inactivo') {
-        <button type="button" class="btn-admin-action-btn btn-success" (click)="cambiarEstadoUsuario(usuarioSeleccionadoAdmin)">
+        <button type="button" class="btn-admin-action-btn btn-success"
+          (click)="cambiarEstadoUsuario(usuarioSeleccionadoAdmin)">
           <i class="bi bi-check-circle-fill"></i>
           <span>Activar</span>
         </button>
         } @else {
-        <button type="button" class="btn-admin-action-btn btn-danger" (click)="cambiarEstadoUsuario(usuarioSeleccionadoAdmin)">
+        <button type="button" class="btn-admin-action-btn btn-danger"
+          (click)="cambiarEstadoUsuario(usuarioSeleccionadoAdmin)">
           <i class="bi bi-x-circle-fill"></i>
           <span>Desactivar</span>
         </button>
         }
-        <button type="button" class="btn-admin-action-btn" (click)="cerrarModalVerUsuario()" style="background: #e2e8f0; color: #475569; border-color: #cbd5e1;">
+        <button type="button" class="btn-admin-action-btn" (click)="cerrarModalVerUsuario()"
+          style="background: #e2e8f0; color: #475569; border-color: #cbd5e1;">
           <span>Cerrar</span>
         </button>
       </div>
@@ -1158,56 +1196,57 @@
         </button>
       </div>
       <form (submit)="guardarCambiosUsuarioAdmin(); $event.preventDefault();">
-        <div class="modal-body" style="max-height: 420px;">
-          <div class="detail-grid" style="grid-template-columns: 1fr; gap: 14px;">
-            <div class="form-row" style="margin: 0; grid-template-columns: 1fr;">
-              <label for="editNombre" style="margin-bottom: 6px; font-weight: 700; font-size: 12px; color: #475569; text-transform: uppercase;">Nombre completo:</label>
+        <div class="modal-body">
+          <div class="detail-grid grid-1col">
+            <div class="form-row form-row-vertical">
+              <label for="editNombre">Nombre completo:</label>
               <div class="input-with-icon">
                 <i class="bi bi-person-fill"></i>
-                <input id="editNombre" name="editNombre" type="text" [(ngModel)]="usuarioEditandoAdmin.nombre" required style="padding-left: 36px;" />
+                <input id="editNombre" name="editNombre" type="text" [(ngModel)]="usuarioEditandoAdmin.nombre" required />
               </div>
             </div>
 
-            <div class="form-row" style="margin: 0; grid-template-columns: 1fr;">
-              <label for="editUsuario" style="margin-bottom: 6px; font-weight: 700; font-size: 12px; color: #475569; text-transform: uppercase;">Usuario (Login):</label>
+            <div class="form-row form-row-vertical">
+              <label for="editUsuario">Usuario (Login):</label>
               <div class="input-with-icon">
                 <i class="bi bi-shield-lock-fill"></i>
-                <input id="editUsuario" name="editUsuario" type="text" [(ngModel)]="usuarioEditandoAdmin.usuario" required style="padding-left: 36px;" />
+                <input id="editUsuario" name="editUsuario" type="text" [(ngModel)]="usuarioEditandoAdmin.usuario"
+                  required />
               </div>
             </div>
 
-            <div class="form-row" style="margin: 0; grid-template-columns: 1fr;">
-              <label for="editCorreo" style="margin-bottom: 6px; font-weight: 700; font-size: 12px; color: #475569; text-transform: uppercase;">Correo:</label>
+            <div class="form-row form-row-vertical">
+              <label for="editCorreo">Correo:</label>
               <div class="input-with-icon">
                 <i class="bi bi-envelope-fill"></i>
-                <input id="editCorreo" name="editCorreo" type="email" [(ngModel)]="usuarioEditandoAdmin.correo" style="padding-left: 36px;" />
+                <input id="editCorreo" name="editCorreo" type="email" [(ngModel)]="usuarioEditandoAdmin.correo" />
               </div>
             </div>
 
-            <div class="form-row" style="margin: 0; grid-template-columns: 1fr;">
-              <label for="editArea" style="margin-bottom: 6px; font-weight: 700; font-size: 12px; color: #475569; text-transform: uppercase;">Área:</label>
+            <div class="form-row form-row-vertical">
+              <label for="editArea">Área:</label>
               <div class="input-with-icon">
                 <i class="bi bi-building"></i>
-                <input id="editArea" name="editArea" type="text" [(ngModel)]="usuarioEditandoAdmin.area" style="padding-left: 36px;" />
+                <input id="editArea" name="editArea" type="text" [(ngModel)]="usuarioEditandoAdmin.area" />
               </div>
             </div>
 
-            <div class="form-row" style="margin: 0; grid-template-columns: 1fr;">
-              <label for="editRol" style="margin-bottom: 6px; font-weight: 700; font-size: 12px; color: #475569; text-transform: uppercase;">Rol:</label>
+            <div class="form-row form-row-vertical">
+              <label for="editRol">Rol:</label>
               <div class="input-with-icon">
                 <i class="bi bi-person-badge-fill"></i>
-                <select id="editRol" name="editRol" [(ngModel)]="usuarioEditandoAdmin.rol" required style="padding-left: 36px;">
+                <select id="editRol" name="editRol" [(ngModel)]="usuarioEditandoAdmin.rol" required>
                   <option value="Administrador">Administrador</option>
                   <option value="Usuario">Usuario</option>
                 </select>
               </div>
             </div>
 
-            <div class="form-row" style="margin: 0; grid-template-columns: 1fr;">
-              <label for="editEstado" style="margin-bottom: 6px; font-weight: 700; font-size: 12px; color: #475569; text-transform: uppercase;">Estado:</label>
+            <div class="form-row form-row-vertical">
+              <label for="editEstado">Estado:</label>
               <div class="input-with-icon">
                 <i class="bi bi-toggle-on"></i>
-                <select id="editEstado" name="editEstado" [(ngModel)]="usuarioEditandoAdmin.estado" required style="padding-left: 36px;">
+                <select id="editEstado" name="editEstado" [(ngModel)]="usuarioEditandoAdmin.estado" required>
                   <option value="Activo">Activo</option>
                   <option value="Inactivo">Inactivo</option>
                 </select>
@@ -1220,7 +1259,8 @@
             <i class="bi bi-save-fill"></i>
             <span>Guardar cambios</span>
           </button>
-          <button type="button" class="btn-admin-action-btn" (click)="cerrarModalEditarUsuario()" style="background: #e2e8f0; color: #475569; border-color: #cbd5e1;">
+          <button type="button" class="btn-admin-action-btn" (click)="cerrarModalEditarUsuario()"
+            style="background: #e2e8f0; color: #475569; border-color: #cbd5e1;">
             <i class="bi bi-x-circle-fill"></i>
             <span>Cancelar</span>
           </button>

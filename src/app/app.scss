@@ -9,6 +9,37 @@ $texto: #0f172a;
 $texto-suave: #334155;
 $texto-mutado: #64748b;
 
+:root {
+  --vino: #{$vino};
+  --vino-oscuro: #{$vino-oscuro};
+  --vino-claro: #{$vino-claro};
+  --azul-linea: #{$azul-linea};
+  --fondo: #{$fondo};
+  --borde: #{$borde};
+  --borde-focus: #{$borde-focus};
+  --texto: #{$texto};
+  --texto-suave: #{$texto-suave};
+  --texto-mutado: #{$texto-mutado};
+}
+
+.grid-1col {
+  grid-template-columns: 1fr !important;
+  gap: 14px !important;
+}
+
+.form-row-vertical {
+  margin: 0 !important;
+  grid-template-columns: 1fr !important;
+
+  label {
+    margin-bottom: 6px !important;
+    font-weight: 700 !important;
+    font-size: 12px !important;
+    color: #475569 !important;
+    text-transform: uppercase !important;
+  }
+}
+
 // Typography sizes
 $font-xs: 11px;
 $font-sm: 13px;
@@ -1131,13 +1162,11 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-// Green states: visto, activo, enviado, seen, etc.
+// Green states: visto, activo, seen, etc.
 .status-visto,
-.status-enviado,
 .status-seen,
 .status-seen-inbox,
 .status-success-badge,
-.event-enviado,
 .event-recibido {
   background: #f0fdf4;
   color: #166534;
@@ -1147,11 +1176,14 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 // Blue states: respondido, usuario, respondiendo, enviando, cargando, etc.
 .status-respondido,
 .status-answered,
+.status-enviado,
+.status-sent,
 .status-enviando,
 .status-sending,
 .status-sending-badge,
 .status-respondiendo,
-.status-cargando {
+.status-cargando,
+.event-enviado {
   background: #eff6ff;
   color: #1e40af;
   border-color: rgba(30, 64, 175, 0.15);
@@ -1763,7 +1795,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
   gap: 16px;
-  max-height: 480px;
+  flex: 1;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 transparent;
@@ -1950,20 +1982,6 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-.status-new-sm {
-  background: #fdf2f8;
-  color: #9d174d;
-}
-
-.status-sending {
-  background: #f0f9ff;
-  color: #0369a1;
-}
-
-.status-cancelled {
-  background: #fef2f2;
-  color: #991b1b;
-}
 
 .form-row-files {
   align-items: start;
@@ -3262,20 +3280,6 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   text-transform: capitalize;
 }
 
-.event-recibido {
-  background: #f0fdf4;
-  color: #166534;
-}
-
-.event-enviado {
-  background: #f0f9ff;
-  color: #075985;
-}
-
-.event-recordatorio {
-  background: #fdf2f8;
-  color: $vino;
-}
 
 .calendar-empty-text {
   margin: 0;
@@ -3437,6 +3441,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   @media (max-width: 768px) {
+
     &,
     thead,
     tbody,
@@ -3446,9 +3451,11 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       display: block;
       width: 100%;
     }
+
     thead {
       display: none;
     }
+
     tr {
       border: 1px solid rgba(226, 232, 240, 0.8);
       border-radius: $radius-md;
@@ -3456,11 +3463,12 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       padding: 14px 16px;
       background: white;
       box-shadow: $card-shadow;
-      
+
       &:hover td {
         background-color: transparent !important;
       }
     }
+
     td {
       border-bottom: none;
       padding: 8px 0;
@@ -3470,7 +3478,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       white-space: normal;
       text-align: right;
       font-size: 13px;
-      
+
       &::before {
         font-weight: 700;
         color: $texto-suave;
@@ -3479,23 +3487,27 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         letter-spacing: 0.5px;
         text-align: left;
       }
-      
+
       &:nth-child(1)::before {
         content: "Nombre:";
       }
+
       &:nth-child(2)::before {
         content: "Usuario:";
       }
+
       &:nth-child(3)::before {
         content: "Rol:";
       }
+
       &:nth-child(4)::before {
         content: "Estado:";
       }
+
       &:nth-child(5)::before {
         content: "Acciones:";
       }
-      
+
       &.actions-cell {
         border-top: 1px solid rgba(226, 232, 240, 0.8);
         margin-top: 8px;
