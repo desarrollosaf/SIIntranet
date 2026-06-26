@@ -180,145 +180,18 @@
             }
           </div>
 
-          <div class="calendar-card">
-            <div class="card-header">
-              <h3>
+          <div class="calendar-card-compact clickable" (click)="abrirCalendario()" title="Abrir Calendario Completo">
+            <div class="calendar-card-compact-content">
+              <div class="calendar-card-compact-icon">
                 <i class="bi bi-calendar-event-fill"></i>
-                Calendario
-              </h3>
-              <span class="card-header-hint"></span>
-            </div>
-
-            <div class="calendar-controls-row">
-              <button type="button" class="btn-calendar-nav" (click)="mesAnteriorCalendario()" title="Mes anterior">
-                <i class="bi bi-chevron-left"></i>
-              </button>
-              <div class="calendar-month-title">
-                {{ nombreMesCalendario }}
               </div>
-              <button type="button" class="btn-calendar-nav" (click)="mesSiguienteCalendario()" title="Mes siguiente">
-                <i class="bi bi-chevron-right"></i>
-              </button>
-            </div>
-
-            <div class="calendar-weekdays">
-              @for (dia of diasSemanaCalendario; track dia) {
-              <span>{{ dia }}</span>
-              }
-            </div>
-
-            <div class="calendar-grid">
-              @for (dia of diasCalendario; track $index) {
-              @if (!dia.dia) {
-              <div class="calendar-day-empty"></div>
-              } @else {
-              <button type="button" class="calendar-day" [class.calendar-day-today]="dia.esHoy"
-                [class.calendar-day-selected]="dia.fecha === fechaSeleccionadaCalendario"
-                [class.calendar-day-has-events]="dia.eventos.length > 0"
-                (click)="seleccionarFechaCalendario(dia.fecha)">
-                <span>{{ dia.dia }}</span>
-
-                @if (dia.eventos.length > 0) {
-                <div class="calendar-dots">
-                  @for (evento of dia.eventos; track $index) {
-                  @if ($index < 3) { <span class="calendar-dot" [class.dot-recibido]="evento.tipo === 'recibido'"
-                    [class.dot-enviado]="evento.tipo === 'enviado'"
-                    [class.dot-recordatorio]="evento.tipo === 'recordatorio'">
-                    </span>
-                    }
-                    }
-                </div>
-                }
-              </button>
-              }
-              }
-            </div>
-
-            <div class="calendar-legend">
-              <span><i class="dot-recibido"></i> Recibido</span>
-              <span><i class="dot-enviado"></i> Enviado</span>
-              <span><i class="dot-recordatorio"></i> Recordatorio</span>
-            </div>
-
-            <div class="calendar-selected-panel">
-              <strong>{{ fechaSeleccionadaCalendarioTexto }}</strong>
-
-              <div class="calendar-events-list">
-                @for (evento of eventosFechaSeleccionadaCalendario; track $index) {
-                <div class="calendar-event-item" 
-                     [class.clickable]="evento.tipo !== 'recordatorio'" 
-                     (click)="evento.tipo !== 'recordatorio' && evento.mensajeAsociado ? verDetallesMensaje(evento.mensajeAsociado) : null"
-                     [title]="evento.tipo !== 'recordatorio' ? 'Ver detalles del mensaje' : ''">
-                  <div class="calendar-event-body" style="width: 100%;">
-                    <div class="calendar-event-title-row" style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
-                      <span class="calendar-event-title" style="font-weight: 700; font-size: 14px; color: var(--texto);">{{ evento.titulo }}</span>
-                      @if (evento.hora) {
-                      <span class="calendar-event-time" style="font-size: 11px; color: var(--texto-mutado);"><i class="bi bi-clock"></i> {{ evento.hora }}</span>
-                      }
-                    </div>
-
-                    @if (evento.tipo !== 'recordatorio' && evento.mensajeAsociado) {
-                      <div class="calendar-event-participants" style="font-size: 12px; color: var(--texto-suave); margin-top: 3px; display: flex; align-items: center; gap: 4px;">
-                        @if (evento.esEnviado) {
-                          <i class="bi bi-people-fill"></i>
-                          <span>Para: {{ evento.mensajeAsociado.destinatarios }}</span>
-                        } @else {
-                          <i class="bi bi-person-fill"></i>
-                          <span>De: {{ evento.mensajeAsociado.remitente }}</span>
-                        }
-                      </div>
-                    }
-
-                    <div class="calendar-event-meta-row" style="margin-top: 6px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                      <span class="calendar-event-type" [class.event-recibido]="evento.tipo === 'recibido'"
-                        [class.event-enviado]="evento.tipo === 'enviado'"
-                        [class.event-recordatorio]="evento.tipo === 'recordatorio'">
-                        {{ evento.tipo }}
-                      </span>
-
-                      @if (evento.estados) {
-                        @for (est of evento.estados; track est) {
-                          <span class="status-badge status-{{ est.toLowerCase() }}">
-                            @if (est === 'Nuevo') { <i class="bi bi-star-fill animate-pulse"></i> }
-                            @else if (est === 'Visto') { <i class="bi bi-eye-fill"></i> }
-                            @else if (est === 'Respondido') { <i class="bi bi-reply-fill"></i> }
-                            @else if (est === 'Enviado') { <i class="bi bi-send-fill"></i> }
-                            @else if (est === 'Cancelado') { <i class="bi bi-x-circle-fill"></i> }
-                            @else if (est === 'Enviando') { <i class="bi bi-arrow-repeat animate-spin"></i> }
-                            @else if (est === 'Respondiendo') { <i class="bi bi-arrow-repeat animate-spin"></i> }
-                            @else if (est === 'Eliminando') { <i class="bi bi-trash3-fill"></i> }
-                            @else if (est === 'Cancelando') { <i class="bi bi-x-circle-fill"></i> }
-                            <span>{{ est }}</span>
-                          </span>
-                        }
-                      } @else {
-                        <p class="calendar-event-desc" style="margin: 4px 0 0; font-size: 13px; color: var(--texto-suave);">{{ evento.descripcion }}</p>
-                      }
-                    </div>
-                  </div>
-
-                  @if (evento.tipo === 'recordatorio') {
-                  <button type="button" class="btn-delete-reminder"
-                    (click)="eliminarRecordatorioCalendario(evento.id, $event)" title="Eliminar recordatorio">
-                    <i class="bi bi-x-lg"></i>
-                  </button>
-                  }
-                </div>
-                } @empty {
-                <p class="calendar-empty-text">
-                  No hay actividad registrada en esta fecha.
-                </p>
-                }
+              <div class="calendar-card-compact-text">
+                <h4>Calendario</h4>
+                <p>Actividad documental y recordatorios</p>
               </div>
-
-              <form class="calendar-reminder-form" (submit)="agregarRecordatorioCalendario($event)">
-                <input type="text" name="nuevoRecordatorioCalendario" [(ngModel)]="nuevoRecordatorioCalendario"
-                  placeholder="Agregar recordatorio" />
-
-                <button type="submit" title="Guardar recordatorio">
-                  <i class="bi bi-plus-lg"></i>
-                </button>
-              </form>
+            </div>
+            <div class="calendar-card-compact-action">
+              <i class="bi bi-chevron-right"></i>
             </div>
           </div>
         </aside>
@@ -1123,6 +996,204 @@
           <span>Cerrar Sesión</span>
         </button>
         <button type="button" class="btn-modal-close" (click)="cerrarPerfilUsuario()">
+          <span>Cerrar</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  }
+
+  @if (calendarioModalAbierto) {
+  <div class="modal-backdrop" (click)="cerrarCalendario()">
+    <div class="modal-card calendar-modal animate-slide-up" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3><i class="bi bi-calendar-event-fill"></i> Calendario Completo</h3>
+        <button type="button" class="btn-close" (click)="cerrarCalendario()" title="Cerrar">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div class="modal-body calendar-modal-body">
+        <div class="calendar-modal-columns">
+          <!-- Columna Izquierda: Calendario Grid -->
+          <div class="calendar-column-left">
+            <!-- Buscador Ir a Fecha -->
+            <div class="calendar-search-row">
+              <label for="buscarFechaInput">Ir a fecha:</label>
+              <div class="input-with-button">
+                <input id="buscarFechaInput" type="date" [(ngModel)]="fechaBusquedaCalendario" (change)="irAFechaCalendario()" />
+              </div>
+            </div>
+
+            <!-- Navegación de Mes -->
+            <div class="calendar-controls-row">
+              <button type="button" class="btn-calendar-nav" (click)="mesAnteriorCalendario()" title="Mes anterior">
+                <i class="bi bi-chevron-left"></i>
+              </button>
+              <div class="calendar-month-title">
+                {{ nombreMesCalendario }}
+              </div>
+              <button type="button" class="btn-calendar-nav" (click)="mesSiguienteCalendario()" title="Mes siguiente">
+                <i class="bi bi-chevron-right"></i>
+              </button>
+            </div>
+
+            <!-- Cabecera de días de la semana -->
+            <div class="calendar-weekdays">
+              @for (dia of diasSemanaCalendario; track dia) {
+              <span>{{ dia }}</span>
+              }
+            </div>
+
+            <!-- Grid de 42 celdas -->
+            <div class="calendar-grid">
+              @for (dia of diasCalendario; track $index) {
+                @if (!dia.dia) {
+                  <div class="calendar-day-empty"></div>
+                } @else {
+                  <button type="button" class="calendar-day" [class.calendar-day-today]="dia.esHoy"
+                    [class.calendar-day-selected]="dia.fecha === fechaSeleccionadaCalendario"
+                    [class.calendar-day-has-events]="dia.eventos.length > 0"
+                    (click)="seleccionarFechaCalendario(dia.fecha)">
+                    <span>{{ dia.dia }}</span>
+
+                    @if (dia.eventos.length > 0) {
+                      <div class="calendar-dots">
+                        @for (evento of dia.eventos; track $index) {
+                          @if ($index < 3) {
+                            <span class="calendar-dot" [class.dot-recibido]="evento.tipo === 'recibido'"
+                              [class.dot-enviado]="evento.tipo === 'enviado'"
+                              [class.dot-recordatorio]="evento.tipo === 'recordatorio'">
+                            </span>
+                          }
+                        }
+                        @if (dia.eventos.length > 3) {
+                          <span class="calendar-more-count">+{{ dia.eventos.length - 3 }}</span>
+                        }
+                      </div>
+                    }
+                  </button>
+                }
+              }
+            </div>
+
+            <!-- Leyenda de colores -->
+            <div class="calendar-legend">
+              <span><i class="dot-recibido"></i> Recibido</span>
+              <span><i class="dot-enviado"></i> Enviado</span>
+              <span><i class="dot-recordatorio"></i> Recordatorio</span>
+            </div>
+          </div>
+
+          <!-- Columna Derecha: Actividad y Recordatorios -->
+          <div class="calendar-column-right">
+            <!-- Título del día seleccionado -->
+            <div class="calendar-day-title">
+              <strong>{{ fechaSeleccionadaCalendarioTexto }}</strong>
+            </div>
+
+            <!-- Botones de Filtro -->
+            <div class="calendar-filters-row">
+              <button type="button" class="btn-filter" [class.active]="filtroEventosCalendario === 'Todos'" (click)="filtroEventosCalendario = 'Todos'">
+                Todos
+              </button>
+              <button type="button" class="btn-filter" [class.active]="filtroEventosCalendario === 'Recibidos'" (click)="filtroEventosCalendario = 'Recibidos'">
+                Recibidos
+              </button>
+              <button type="button" class="btn-filter" [class.active]="filtroEventosCalendario === 'Enviados'" (click)="filtroEventosCalendario = 'Enviados'">
+                Enviados
+              </button>
+              <button type="button" class="btn-filter" [class.active]="filtroEventosCalendario === 'Recordatorios'" (click)="filtroEventosCalendario = 'Recordatorios'">
+                Recordatorios
+              </button>
+            </div>
+
+            <!-- Panel de actividades con scroll vertical -->
+            <div class="calendar-activities-scroll">
+              @for (evento of eventosFechaSeleccionadaFiltrados; track $index) {
+                <div class="calendar-event-item" 
+                     [class.clickable]="evento.tipo !== 'recordatorio'" 
+                     (click)="evento.tipo !== 'recordatorio' && evento.mensajeAsociado ? verDetallesMensaje(evento.mensajeAsociado) : null"
+                     [title]="evento.tipo !== 'recordatorio' ? 'Ver detalles del mensaje' : ''">
+                  <div class="calendar-event-body" style="width: 100%;">
+                    <div class="calendar-event-title-row" style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                      <span class="calendar-event-title" style="font-weight: 700; font-size: 14px; color: var(--texto);">{{ evento.titulo }}</span>
+                      @if (evento.hora) {
+                        <span class="calendar-event-time" style="font-size: 11px; color: var(--texto-mutado);"><i class="bi bi-clock"></i> {{ evento.hora }}</span>
+                      }
+                    </div>
+
+                    @if (evento.tipo !== 'recordatorio' && evento.mensajeAsociado) {
+                      <div class="calendar-event-participants" style="font-size: 12px; color: var(--texto-suave); margin-top: 3px; display: flex; align-items: center; gap: 4px;">
+                        @if (evento.esEnviado) {
+                          <i class="bi bi-people-fill"></i>
+                          <span>Para: {{ evento.mensajeAsociado.destinatarios }}</span>
+                        } @else {
+                          <i class="bi bi-person-fill"></i>
+                          <span>De: {{ evento.mensajeAsociado.remitente }}</span>
+                        }
+                      </div>
+                    }
+
+                    <div class="calendar-event-meta-row" style="margin-top: 6px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                      <span class="calendar-event-type" [class.event-recibido]="evento.tipo === 'recibido'"
+                        [class.event-enviado]="evento.tipo === 'enviado'"
+                        [class.event-recordatorio]="evento.tipo === 'recordatorio'">
+                        {{ evento.tipo }}
+                      </span>
+
+                      @if (evento.estados) {
+                        @for (est of evento.estados; track est) {
+                          <span class="status-badge status-{{ est.toLowerCase() }}">
+                            @if (est === 'Nuevo') { <i class="bi bi-star-fill animate-pulse"></i> }
+                            @else if (est === 'Visto') { <i class="bi bi-eye-fill"></i> }
+                            @else if (est === 'Respondido') { <i class="bi bi-reply-fill"></i> }
+                            @else if (est === 'Enviado') { <i class="bi bi-send-fill"></i> }
+                            @else if (est === 'Cancelado') { <i class="bi bi-x-circle-fill"></i> }
+                            @else if (est === 'Enviando') { <i class="bi bi-arrow-repeat animate-spin"></i> }
+                            @else if (est === 'Respondiendo') { <i class="bi bi-arrow-repeat animate-spin"></i> }
+                            @else if (est === 'Eliminando') { <i class="bi bi-trash3-fill"></i> }
+                            @else if (est === 'Cancelando') { <i class="bi bi-x-circle-fill"></i> }
+                            <span>{{ est }}</span>
+                          </span>
+                        }
+                      } @else {
+                        <p class="calendar-event-desc" style="margin: 4px 0 0; font-size: 13px; color: var(--texto-suave);">{{ evento.descripcion }}</p>
+                      }
+                    </div>
+                  </div>
+
+                  @if (evento.tipo === 'recordatorio') {
+                    <button type="button" class="btn-delete-reminder"
+                      (click)="eliminarRecordatorioCalendario(evento.id, $event)" title="Eliminar recordatorio">
+                      <i class="bi bi-x-lg"></i>
+                    </button>
+                  }
+                </div>
+              } @empty {
+                <p class="calendar-empty-text">
+                  No hay actividad registrada en esta fecha.
+                </p>
+              }
+            </div>
+
+            <!-- Formulario de Recordatorio con Hora Opcional -->
+            <form class="calendar-reminder-form-expanded" (submit)="agregarRecordatorioCalendario($event)">
+              <div class="reminder-inputs">
+                <input type="text" name="nuevoRecordatorioCalendario" [(ngModel)]="nuevoRecordatorioCalendario"
+                  placeholder="Agregar recordatorio..." required />
+                <input type="time" name="nuevoRecordatorioHoraCalendario" [(ngModel)]="nuevoRecordatorioHoraCalendario"
+                  title="Hora opcional" />
+              </div>
+              <button type="submit" class="btn-add-reminder" title="Guardar recordatorio">
+                <i class="bi bi-plus-lg"></i>
+                <span>Agregar</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-modal-close" (click)="cerrarCalendario()">
           <span>Cerrar</span>
         </button>
       </div>

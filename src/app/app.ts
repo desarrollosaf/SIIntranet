@@ -123,6 +123,10 @@ export class App {
 
   fechaSeleccionadaCalendario = this.formatearFechaLocal(new Date());
   nuevoRecordatorioCalendario = '';
+  nuevoRecordatorioHoraCalendario = '';
+  calendarioModalAbierto = false;
+  fechaBusquedaCalendario = '';
+  filtroEventosCalendario: 'Todos' | 'Recibidos' | 'Enviados' | 'Recordatorios' = 'Todos';
 
   recordatoriosCalendario: EventoCalendario[] = [];
 
@@ -372,6 +376,17 @@ export class App {
       });
     }
 
+    // Rellenar hasta completar exactamente 42 celdas (6 semanas x 7 días)
+    const totalCeldas = 42;
+    while (dias.length < totalCeldas) {
+      dias.push({
+        dia: null,
+        fecha: '',
+        eventos: [],
+        esHoy: false
+      });
+    }
+
     return dias;
   }
 
@@ -434,11 +449,13 @@ export class App {
         fecha: this.fechaSeleccionadaCalendario,
         tipo: 'recordatorio',
         titulo: 'Recordatorio',
-        descripcion
+        descripcion,
+        hora: this.nuevoRecordatorioHoraCalendario || undefined
       }
     ];
 
     this.nuevoRecordatorioCalendario = '';
+    this.nuevoRecordatorioHoraCalendario = '';
     this.mostrarNotificacion('Recordatorio agregado correctamente.', 'exito');
   }
 
@@ -694,10 +711,11 @@ export class App {
         const datetimeB = `${b.fecha}T${b.hora}`;
         return datetimeB.localeCompare(datetimeA);
       })
-      .slice(0, 5);
+      .slice(0, 10);
   }
 
   verDetallesMensaje(msg: Mensaje): void {
+    this.cerrarCalendario();
     this.mensajeSeleccionado = msg;
     this.marcarComoVisto(msg);
   }
@@ -1017,6 +1035,51 @@ export class App {
         this.cdr.detectChanges();
       }, 1500);
     }
+  }
+
+  abrirCalendario(): void {
+    this.calendarioModalAbierto = true;
+    this.filtroEventosCalendario = 'Todos';
+    this.fechaBusquedaCalendario = this.fechaSeleccionadaCalendario;
+    this.cdr.detectChanges();
+  }
+
+  cerrarCalendario(): void {
+    this.calendarioModalAbierto = false;
+    this.cdr.detectChanges();
+  }
+
+  irAFechaCalendario(): void {
+    if (!this.fechaBusquedaCalendario) return;
+    const partes = this.fechaBusquedaCalendario.split('-');
+    if (partes.length === 3) {
+      const anio = parseInt(partes[0], 10);
+      const mes = parseInt(partes[1], 10) - 1;
+      this.anioCalendario = anio;
+      this.mesCalendario = mes;
+      this.fechaSeleccionadaCalendario = this.fechaBusquedaCalendario;
+      this.cdr.detectChanges();
+    }
+  }
+
+  get eventosFechaSeleccionadaFiltrados(): EventoCalendario[] {
+    const todos = this.obtenerEventosPorFecha(this.fechaSeleccionadaCalendario);
+    
+    const filtrados = todos.filter(ev => {
+      if (this.filtroEventosCalendario === 'Todos') return true;
+      if (this.filtroEventosCalendario === 'Recibidos') return ev.tipo === 'recibido';
+      if (this.filtroEventosCalendario === 'Enviados') return ev.tipo === 'enviado';
+      if (this.filtroEventosCalendario === 'Recordatorios') return ev.tipo === 'recordatorio';
+      return true;
+    });
+
+    return [...filtrados].sort((a, b) => {
+      const timeA = a.hora || '00:00';
+      const timeB = b.hora || '00:00';
+      const datetimeA = `${a.fecha}T${timeA}`;
+      const datetimeB = `${b.fecha}T${timeB}`;
+      return datetimeB.localeCompare(datetimeA);
+    });
   }
 
 }
