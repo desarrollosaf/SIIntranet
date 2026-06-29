@@ -168,7 +168,7 @@
             } @empty {
             <div class="file-empty" style="margin: 16px; border-radius: 10px;">
               <i class="bi bi-inbox"></i>
-              <p>No hay mensajes disponibles por el momento</p>
+              <p>No hay mensajes recientes por el momento.</p>
             </div>
             }
           </div>
@@ -316,7 +316,7 @@
                 @for (usuario of usuariosDisponiblesFiltrados; track usuario) {
                 <option [value]="usuario" (dblclick)="pasarDirecto(usuario)">{{ usuario }}</option>
                 } @empty {
-                <option disabled>No hay destinatarios cargados</option>
+                <option disabled>No hay usuarios disponibles por el momento.</option>
                 }
               </select>
             </div>
@@ -488,7 +488,7 @@
           <div class="file-empty" style="margin: 20px; border-radius: 10px;">
             <i class="bi bi-send-x-fill"></i>
             @if (mensajesEnviados.length === 0) {
-            <p>Aún no has enviado ningún mensaje en esta sesión.</p>
+            <p>No hay mensajes enviados por el momento.</p>
             } @else {
             <p>No se encontraron mensajes enviados con los filtros seleccionados.</p>
             }
@@ -642,7 +642,7 @@
             } @empty {
             <div class="file-empty">
               <i class="bi bi-chat-left-x-fill"></i>
-              <p>No hay documentos recibidos por el momento.</p>
+              <p>No hay mensajes en la bandeja.</p>
             </div>
             }
           </div>
@@ -676,7 +676,7 @@
               } @empty {
               <div class="file-empty" style="margin: 16px;">
                 <i class="bi bi-folder-symlink"></i>
-                <p>No hay documentos disponibles por el momento.</p>
+                <p>No hay formatos cargados por el momento.</p>
               </div>
               }
             </div>
@@ -782,7 +782,11 @@
                   <td colspan="5">
                     <div class="file-empty" style="margin: 20px;">
                       <i class="bi bi-people"></i>
+                      @if (usuariosSistema.length === 0) {
+                      <p>No hay usuarios registrados por el momento.</p>
+                      } @else {
                       <p>No se encontraron usuarios con los filtros seleccionados.</p>
+                      }
                     </div>
                   </td>
                 </tr>
@@ -1072,7 +1076,7 @@
               </div>
               } @empty {
               <p class="calendar-empty-text">
-                No hay actividad registrada en esta fecha.
+                No hay actividad registrada para esta fecha.
               </p>
               }
             </div>
