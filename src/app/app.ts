@@ -1,4 +1,4 @@
-import { Component, ChangeDetectorRef, HostListener } from '@angular/core';
+import { Component, ChangeDetectorRef, HostListener, OnDestroy, NgZone } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 export interface Mensaje {
@@ -15,6 +15,7 @@ export interface Mensaje {
   estadoLectura?: 'Nuevo' | 'Visto';
   estadoRespuesta?: 'Pendiente' | 'Respondido';
   estadoTemporal?: 'Enviando' | 'Respondiendo' | 'Eliminando' | 'Cancelando' | 'Guardando' | 'Cargando' | null;
+  confirmarEliminarSent?: boolean;
 }
 
 export interface EventoCalendario {
@@ -40,6 +41,11 @@ export interface UsuarioSistema {
   passwordTemporal?: string;
 }
 
+export interface DocumentoFormato {
+  nombre: string;
+  archivo: string;
+}
+
 
 @Component({
   selector: 'app-root',
@@ -47,11 +53,46 @@ export interface UsuarioSistema {
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
-export class App {
+export class App implements OnDestroy {
 
-  constructor(private cdr: ChangeDetectorRef) {
+  ultimoElementoEnfocado: HTMLElement | null = null;
+
+  documentosFormatos: { [categoria: string]: DocumentoFormato[] } = {};
+
+  constructor(private cdr: ChangeDetectorRef, private zone: NgZone) {
     this.detectarSesionGuardada();
     this.detectarModuloInicial();
+    // Initialize empty document categories
+    this.categoriasFormatos.forEach(cat => {
+      this.documentosFormatos[cat] = [];
+    });
+    this.inicializarVisitas();
+    this.actualizarUsuariosDisponibles();
+  }
+
+  ngOnDestroy(): void {
+    if (this.notificacionTimeout) {
+      clearTimeout(this.notificacionTimeout);
+    }
+    for (const key in this.envioTimeouts) {
+      if (Object.prototype.hasOwnProperty.call(this.envioTimeouts, key)) {
+        clearTimeout(this.envioTimeouts[key]);
+      }
+    }
+  }
+
+  inicializarVisitas(): void {
+    const visitasStr = localStorage.getItem('si_visitas_intranet');
+    let visitas = visitasStr ? parseInt(visitasStr, 10) : 0;
+    visitas++;
+    localStorage.setItem('si_visitas_intranet', visitas.toString());
+    this.totalVisitas = visitas.toLocaleString('es-MX');
+  }
+
+  actualizarUsuariosDisponibles(): void {
+    const activos = this.usuariosSistema.filter(u => u.estado === 'Activo');
+    const activeLabels = activos.map(u => `${u.nombre} - ${u.area}`);
+    this.usuariosDisponibles = activeLabels.filter(label => !this.usuariosSeleccionados.includes(label));
   }
 
   detectarSesionGuardada(): void {
@@ -131,19 +172,46 @@ export class App {
 
   recordatoriosCalendario: EventoCalendario[] = [];
 
-  eventosCalendarioPrueba: EventoCalendario[] = [];
-
-  notificacion: { mensaje: string; tipo: 'error' | 'exito' | 'info' } | null = null;
+  notificacion: { mensaje: string; tipo: 'error' | 'exito' | 'info' | 'advertencia' } | null = null;
   private notificacionTimeout: ReturnType<typeof setTimeout> | null = null;
 
-  mostrarNotificacion(mensaje: string, tipo: 'error' | 'exito' | 'info' = 'info'): void {
-    if (this.notificacionTimeout) clearTimeout(this.notificacionTimeout);
-    this.notificacion = { mensaje, tipo };
-    this.cdr.detectChanges();
-    this.notificacionTimeout = setTimeout(() => {
+  mostrarNotificacion(mensaje: string, tipo: 'error' | 'exito' | 'info' | 'advertencia' = 'info'): void {
+    if (this.notificacionTimeout) {
+      clearTimeout(this.notificacionTimeout);
+      this.notificacionTimeout = null;
+    }
+    this.zone.run(() => {
+      this.notificacion = { mensaje, tipo };
+      this.cdr.detectChanges();
+    });
+
+    let duration = 3000;
+    if (tipo === 'error') {
+      duration = 5000;
+    } else if (tipo === 'advertencia') {
+      duration = 4000;
+    }
+
+    this.zone.runOutsideAngular(() => {
+      this.notificacionTimeout = setTimeout(() => {
+        this.zone.run(() => {
+          this.notificacion = null;
+          this.cdr.detectChanges();
+          this.notificacionTimeout = null;
+        });
+      }, duration);
+    });
+  }
+
+  cerrarNotificacion(): void {
+    if (this.notificacionTimeout) {
+      clearTimeout(this.notificacionTimeout);
+      this.notificacionTimeout = null;
+    }
+    this.zone.run(() => {
       this.notificacion = null;
       this.cdr.detectChanges();
-    }, 3000);
+    });
   }
 
   isLoggedIn = false;
@@ -158,48 +226,7 @@ export class App {
     tipo: 'normal' as 'normal' | 'admin'
   };
 
-  usuariosSistema: UsuarioSistema[] = [
-    {
-      id: 1,
-      nombre: 'Administrador del sistema',
-      usuario: 'admin',
-      correo: 'admin.intranet@congresoedomex.gob.mx',
-      area: 'Dirección de Informática',
-      rol: 'Administrador',
-      estado: 'Activo',
-      passwordTemporal: ''
-    },
-    {
-      id: 2,
-      nombre: 'Usuario de Prueba Uno',
-      usuario: 'usuario1',
-      correo: 'usuario1.prueba@congresoedomex.gob.mx',
-      area: 'Secretaría Técnica',
-      rol: 'Usuario',
-      estado: 'Activo',
-      passwordTemporal: ''
-    },
-    {
-      id: 3,
-      nombre: 'Usuario de Prueba Dos',
-      usuario: 'usuario2',
-      correo: 'usuario2.prueba@congresoedomex.gob.mx',
-      area: 'Área Pendiente',
-      rol: 'Usuario',
-      estado: 'Inactivo',
-      passwordTemporal: ''
-    },
-    {
-      id: 4,
-      nombre: 'Usuario de Prueba Tres',
-      usuario: 'usuario3',
-      correo: 'usuario3.prueba@congresoedomex.gob.mx',
-      area: 'Dirección de Finanzas',
-      rol: 'Usuario',
-      estado: 'Activo',
-      passwordTemporal: ''
-    }
-  ];
+  usuariosSistema: UsuarioSistema[] = [];
 
   buscarUsuarioAdmin = '';
   filtroRolAdmin = 'Todos';
@@ -219,14 +246,7 @@ export class App {
     { nombre: 'Contraloría del Poder Legislativo', url: 'https://contraloriadelpoderlegislativo.gob.mx/index' }
   ];
 
-  usuariosDisponiblesBase: string[] = [
-    'Administrador del sistema - Dirección de Informática',
-    'Usuario de Prueba Uno - Secretaría Técnica',
-    'Usuario de Prueba Dos - Área Pendiente',
-    'Usuario de Prueba Tres - Dirección de Finanzas'
-  ];
-
-  usuariosDisponibles: string[] = [...this.usuariosDisponiblesBase];
+  usuariosDisponibles: string[] = [];
   usuariosSeleccionados: string[] = [];
 
   selectedDisponibles: string[] = [];
@@ -240,78 +260,14 @@ export class App {
 
   envioTimeouts: { [key: number]: ReturnType<typeof setTimeout> } = {};
 
-  mensajesBandeja: Mensaje[] = [
-    {
-      id: 101,
-      remitente: 'Usuario de Prueba Uno',
-      titulo: 'Oficio de Solicitud de Mantenimiento',
-      descripcion: 'Solicito apoyo para la revisión de los equipos de cómputo en el área de Secretaría Técnica.',
-      fecha: '2026-06-26',
-      hora: '09:00',
-      documento: 'solicitud_mantenimiento.pdf',
-      destinatarios: 'Administrador del sistema',
-      estado: 'Nuevo',
-      estadoLectura: 'Nuevo',
-      estadoRespuesta: 'Pendiente',
-      tipoMensaje: 'recibido'
-    },
-    {
-      id: 102,
-      remitente: 'Usuario de Prueba Tres',
-      titulo: 'Reporte Presupuestal Trimestral',
-      descripcion: 'Envío el reporte consolidado de gastos correspondiente al segundo trimestre para su revisión.',
-      fecha: '2026-06-25',
-      hora: '14:30',
-      documento: 'reporte_trimestral.docx',
-      destinatarios: 'Administrador del sistema',
-      estado: 'Visto',
-      estadoLectura: 'Visto',
-      estadoRespuesta: 'Pendiente',
-      tipoMensaje: 'recibido'
-    },
-    {
-      id: 103,
-      remitente: 'Usuario de Prueba Uno',
-      titulo: 'Minuta de Reunión de Trabajo',
-      descripcion: 'Comparto la minuta de los acuerdos tomados en la sesión del día de ayer.',
-      fecha: '2026-06-24',
-      hora: '11:15',
-      documento: 'minuta_reunion.pdf',
-      destinatarios: 'Administrador del sistema',
-      estado: 'Respondido',
-      estadoLectura: 'Visto',
-      estadoRespuesta: 'Respondido',
-      tipoMensaje: 'recibido'
-    },
-    {
-      id: 104,
-      remitente: 'Administrador del sistema',
-      titulo: 'Circular de Nuevas Políticas de Seguridad',
-      descripcion: 'Se solicita a todo el personal seguir los lineamientos adjuntos para el uso de contraseñas.',
-      fecha: '2026-06-23',
-      hora: '10:00',
-      documento: 'politicas_seguridad.pdf',
-      destinatarios: 'Usuario de Prueba Uno, Usuario de Prueba Tres',
-      estado: 'Enviado',
-      tipoMensaje: 'enviado'
-    },
-    {
-      id: 105,
-      remitente: 'Administrador del sistema',
-      titulo: 'Convocatoria a Capacitación de Intranet',
-      descripcion: 'Sesión de capacitación sobre el uso del nuevo sistema de gestión documental.',
-      fecha: '2026-06-22',
-      hora: '16:00',
-      documento: 'convocatoria_capacitacion.pdf',
-      destinatarios: 'Todos los usuarios',
-      estado: 'Cancelado',
-      tipoMensaje: 'enviado'
-    }
-  ];
+  mensajesBandeja: Mensaje[] = [];
 
   buscarTexto = '';
   buscarEstado = 'Todos';
   buscarFecha = '';
+
+  buscarTextoEnviados = '';
+  buscarEstadoEnviados = 'Todos';
 
   mensajeSeleccionado: Mensaje | null = null;
 
@@ -340,8 +296,7 @@ export class App {
 
     return [
       ...eventosMensajes,
-      ...this.recordatoriosCalendario,
-      ...this.eventosCalendarioPrueba
+      ...this.recordatoriosCalendario
     ];
   }
 
@@ -438,10 +393,15 @@ export class App {
   agregarRecordatorioCalendario(event: Event): void {
     event.preventDefault();
 
-    const descripcion = this.nuevoRecordatorioCalendario.trim();
+    const descripcion = (this.nuevoRecordatorioCalendario || '').trim();
 
     if (!descripcion) {
-      this.mostrarNotificacion('Ingrese una descripción para el recordatorio.', 'error');
+      this.mostrarNotificacion('El recordatorio no puede estar vacío.', 'error');
+      return;
+    }
+
+    if (!this.validarLongitudRecordatorio(descripcion)) {
+      this.mostrarNotificacion('El recordatorio no puede exceder los 150 caracteres.', 'error');
       return;
     }
 
@@ -526,21 +486,6 @@ export class App {
     }
   }
 
-  get descripcionModulo(): string {
-    switch (this.moduloActual) {
-      case 'mensaje':
-        return 'Registro y envío de documentos internos';
-      case 'bandeja':
-        return 'Consulta de mensajes y documentos recibidos';
-      case 'formatos':
-        return 'Consulta de formatos y manuales institucionales';
-      case 'administracion':
-        return 'Gestión administrativa del sistema';
-      default:
-        return 'Sistema interno de gestión documental';
-    }
-  }
-
   actualizarFechaHora(): void {
     const actual = new Date();
     const año = actual.getFullYear();
@@ -572,28 +517,48 @@ export class App {
 
   pasar(): void {
     if (this.selectedDisponibles.length === 0) return;
-    this.usuariosSeleccionados = [...this.usuariosSeleccionados, ...this.selectedDisponibles];
+    const aPasar = this.selectedDisponibles.filter(u => !this.usuariosSeleccionados.includes(u));
+    this.usuariosSeleccionados = [...this.usuariosSeleccionados, ...aPasar];
     this.usuariosDisponibles = this.usuariosDisponibles.filter(u => !this.selectedDisponibles.includes(u));
     this.selectedDisponibles = [];
   }
 
   quitar(): void {
     if (this.selectedSeleccionados.length === 0) return;
-    this.usuariosDisponibles = [...this.usuariosDisponibles, ...this.selectedSeleccionados];
+    const aQuitar = this.selectedSeleccionados.filter(u => !this.usuariosDisponibles.includes(u));
+    this.usuariosDisponibles = [...this.usuariosDisponibles, ...aQuitar];
     this.usuariosSeleccionados = this.usuariosSeleccionados.filter(u => !this.selectedSeleccionados.includes(u));
     this.selectedSeleccionados = [];
   }
 
   pasarTodos(): void {
-    this.usuariosSeleccionados = [...this.usuariosSeleccionados, ...this.usuariosDisponibles];
+    const aPasar = this.usuariosDisponibles.filter(u => !this.usuariosSeleccionados.includes(u));
+    this.usuariosSeleccionados = [...this.usuariosSeleccionados, ...aPasar];
     this.usuariosDisponibles = [];
     this.selectedDisponibles = [];
   }
 
   quitarTodos(): void {
-    this.usuariosDisponibles = [...this.usuariosDisponibles, ...this.usuariosSeleccionados];
+    const aQuitar = this.usuariosSeleccionados.filter(u => !this.usuariosDisponibles.includes(u));
+    this.usuariosDisponibles = [...this.usuariosDisponibles, ...aQuitar];
     this.usuariosSeleccionados = [];
     this.selectedSeleccionados = [];
+  }
+
+  pasarDirecto(usuario: string): void {
+    if (!this.usuariosSeleccionados.includes(usuario)) {
+      this.usuariosSeleccionados = [...this.usuariosSeleccionados, usuario];
+      this.usuariosDisponibles = this.usuariosDisponibles.filter(u => u !== usuario);
+    }
+    this.selectedDisponibles = this.selectedDisponibles.filter(u => u !== usuario);
+  }
+
+  quitarDirecto(usuario: string): void {
+    if (!this.usuariosDisponibles.includes(usuario)) {
+      this.usuariosDisponibles = [...this.usuariosDisponibles, usuario];
+      this.usuariosSeleccionados = this.usuariosSeleccionados.filter(u => u !== usuario);
+    }
+    this.selectedSeleccionados = this.selectedSeleccionados.filter(u => u !== usuario);
   }
 
   enviarMensaje(event: Event): void {
@@ -658,6 +623,38 @@ export class App {
     return this.mensajesBandeja.filter(m => this.esMensajeEnviado(m));
   }
 
+  get mensajesEnviadosFiltrados(): Mensaje[] {
+    let list = this.mensajesBandeja.filter(m => this.esMensajeEnviado(m));
+
+    // Sort: newest first
+    list.sort((a, b) => {
+      const datetimeA = `${a.fecha}T${a.hora}`;
+      const datetimeB = `${b.fecha}T${b.hora}`;
+      return datetimeB.localeCompare(datetimeA);
+    });
+
+    // Text filter
+    const textQuery = (this.buscarTextoEnviados || '').trim().toLowerCase();
+    if (textQuery) {
+      list = list.filter(m =>
+        (m.titulo || '').toLowerCase().includes(textQuery) ||
+        (m.descripcion || '').toLowerCase().includes(textQuery) ||
+        (m.destinatarios || '').toLowerCase().includes(textQuery) ||
+        (m.documento || '').toLowerCase().includes(textQuery)
+      );
+    }
+
+    // Status filter
+    const statusQuery = this.buscarEstadoEnviados;
+    if (statusQuery === 'Todos') {
+      list = list.filter(m => m.estado !== 'Eliminado');
+    } else {
+      list = list.filter(m => m.estado === statusQuery);
+    }
+
+    return list;
+  }
+
   get usuariosDisponiblesFiltrados(): string[] {
     if (!this.buscarDestinatario.trim()) {
       return this.usuariosDisponibles;
@@ -670,11 +667,11 @@ export class App {
     this.formTitulo = '';
     this.formDescripcion = '';
     this.formArchivos = [];
-    this.usuariosDisponibles = [...this.usuariosDisponiblesBase];
     this.usuariosSeleccionados = [];
     this.selectedDisponibles = [];
     this.selectedSeleccionados = [];
     this.buscarDestinatario = '';
+    this.actualizarUsuariosDisponibles();
   }
 
   cancelarFormulario(): void {
@@ -684,10 +681,11 @@ export class App {
 
   get mensajesFiltrados(): Mensaje[] {
     return this.mensajesBandeja.filter(msg => {
-      const matchesText = !this.buscarTexto ||
-        msg.remitente.toLowerCase().includes(this.buscarTexto.toLowerCase()) ||
-        msg.titulo.toLowerCase().includes(this.buscarTexto.toLowerCase()) ||
-        msg.descripcion.toLowerCase().includes(this.buscarTexto.toLowerCase());
+      const query = (this.buscarTexto || '').toLowerCase().trim();
+      const matchesText = !query ||
+        (msg.remitente || '').toLowerCase().includes(query) ||
+        (msg.titulo || '').toLowerCase().includes(query) ||
+        (msg.descripcion || '').toLowerCase().includes(query);
 
       let matchesEstado = false;
       const esEnviado = this.esMensajeEnviado(msg);
@@ -727,23 +725,30 @@ export class App {
   }
 
   verDetallesMensaje(msg: Mensaje): void {
-    this.cerrarCalendario();
+    this.guardarFoco();
     this.mensajeSeleccionado = msg;
     this.marcarComoVisto(msg);
+    setTimeout(() => {
+      const closeBtn = document.querySelector('.details-modal-backdrop .btn-close') as HTMLElement;
+      if (closeBtn) closeBtn.focus();
+    }, 50);
   }
 
   cerrarDetalles(): void {
     this.mensajeSeleccionado = null;
+    this.restaurarFoco();
   }
 
-  marcarComoVisto(msg: Mensaje): void {
+  marcarComoVisto(msg: Mensaje, mostrarNotif = false): void {
     if (this.esMensajeRecibido(msg)) {
       if (msg.estadoLectura !== 'Visto') {
         msg.estadoLectura = 'Visto';
         if (msg.estado === 'Nuevo') {
           msg.estado = 'Visto';
         }
-        this.mostrarNotificacion(`Documento "${msg.titulo}" marcado como visto.`, 'info');
+        if (mostrarNotif) {
+          this.mostrarNotificacion(`Documento "${msg.titulo}" marcado como visto.`, 'info');
+        }
         this.cdr.detectChanges();
       }
     }
@@ -752,11 +757,11 @@ export class App {
   eliminarMensaje(msg: Mensaje, event: Event): void {
     event.preventDefault();
     event.stopPropagation();
-    
+
     msg.estadoTemporal = 'Eliminando';
     this.mostrarNotificacion('Eliminando documento...', 'info');
     this.cdr.detectChanges();
-    
+
     setTimeout(() => {
       msg.estadoTemporal = null;
       msg.estado = 'Eliminado';
@@ -764,6 +769,42 @@ export class App {
         this.mensajeSeleccionado = null;
       }
       this.mostrarNotificacion(`El documento "${msg.titulo}" ha sido movido a la Papelera.`, 'exito');
+      this.cdr.detectChanges();
+    }, 1500);
+  }
+
+  eliminarMensajeEnviado(msg: Mensaje, event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!msg.confirmarEliminarSent) {
+      // Reset confirmation on other messages to avoid confusion
+      this.mensajesBandeja.forEach(m => m.confirmarEliminarSent = false);
+      msg.confirmarEliminarSent = true;
+      this.cdr.detectChanges();
+
+      // Auto cancel after 5 seconds
+      setTimeout(() => {
+        if (msg.confirmarEliminarSent) {
+          msg.confirmarEliminarSent = false;
+          this.cdr.detectChanges();
+        }
+      }, 5000);
+      return;
+    }
+
+    msg.confirmarEliminarSent = false;
+    msg.estadoTemporal = 'Eliminando';
+    this.mostrarNotificacion('Eliminando mensaje...', 'info');
+    this.cdr.detectChanges();
+
+    setTimeout(() => {
+      msg.estadoTemporal = null;
+      msg.estado = 'Eliminado';
+      if (this.mensajeSeleccionado && this.mensajeSeleccionado.id === msg.id) {
+        this.mensajeSeleccionado = null;
+      }
+      this.mostrarNotificacion('Mensaje eliminado.', 'exito');
       this.cdr.detectChanges();
     }, 1500);
   }
@@ -797,12 +838,12 @@ export class App {
       }
 
       this.mostrarNotificacion('Respuesta redactada. Complete los detalles y envíe el documento.', 'exito');
-      
+
       const hash = '#mensaje';
       if (window.location.hash !== hash) {
         window.history.pushState({ modulo: 'mensaje' }, '', hash);
       }
-      
+
       this.cdr.detectChanges();
     }, 1500);
   }
@@ -864,11 +905,17 @@ export class App {
   }
 
   verPerfilUsuario(): void {
+    this.guardarFoco();
     this.mostrarPerfilModal = true;
+    setTimeout(() => {
+      const closeBtn = document.querySelector('.profile-modal .btn-close') as HTMLElement;
+      if (closeBtn) closeBtn.focus();
+    }, 50);
   }
 
   cerrarPerfilUsuario(): void {
     this.mostrarPerfilModal = false;
+    this.restaurarFoco();
   }
 
   get usuariosFiltrados(): UsuarioSistema[] {
@@ -889,30 +936,57 @@ export class App {
   }
 
   seleccionarUsuarioAdmin(usuario: UsuarioSistema): void {
+    this.guardarFoco();
     this.usuarioSeleccionadoAdmin = usuario;
     this.usuarioEditandoAdmin = null;
     this.modalVerUsuarioAbierto = true;
+    setTimeout(() => {
+      const closeBtn = document.querySelector('.modal-card .btn-close') as HTMLElement;
+      if (closeBtn) closeBtn.focus();
+    }, 50);
   }
 
   cerrarModalVerUsuario(): void {
     this.modalVerUsuarioAbierto = false;
     this.usuarioSeleccionadoAdmin = null;
+    this.restaurarFoco();
   }
 
   abrirModalEditarUsuario(usuario: UsuarioSistema): void {
+    this.guardarFoco();
     this.usuarioEditandoAdmin = { ...usuario };
     this.modalEditarUsuarioAbierto = true;
     this.modalVerUsuarioAbierto = false;
+    setTimeout(() => {
+      const firstInput = document.querySelector('#editNombre') as HTMLElement;
+      if (firstInput) firstInput.focus();
+    }, 50);
   }
 
   cerrarModalEditarUsuario(): void {
+    if (this.usuarioEditandoAdmin) {
+      const original = this.usuariosSistema.find(u => u.id === this.usuarioEditandoAdmin!.id);
+      if (original) {
+        const isDirty = this.usuarioEditandoAdmin.nombre !== original.nombre ||
+          this.usuarioEditandoAdmin.usuario !== original.usuario ||
+          this.usuarioEditandoAdmin.correo !== original.correo ||
+          this.usuarioEditandoAdmin.area !== original.area ||
+          this.usuarioEditandoAdmin.rol !== original.rol ||
+          this.usuarioEditandoAdmin.estado !== original.estado;
+        if (isDirty) {
+          if (!confirm('Tiene cambios sin guardar en el usuario. ¿Desea descartar los cambios?')) {
+            return;
+          }
+        }
+      }
+    }
     this.modalEditarUsuarioAbierto = false;
     this.usuarioEditandoAdmin = null;
+    this.restaurarFoco();
   }
 
   cancelarEdicionUsuarioAdmin(): void {
-    this.usuarioEditandoAdmin = null;
-    this.modalEditarUsuarioAbierto = false;
+    this.cerrarModalEditarUsuario();
   }
 
   guardarCambiosUsuarioAdmin(): void {
@@ -941,6 +1015,7 @@ export class App {
       this.usuarioSeleccionadoAdmin = this.usuariosSistema[index];
       this.usuarioEditandoAdmin = null;
       this.modalEditarUsuarioAbierto = false;
+      this.actualizarUsuariosDisponibles();
       this.mostrarNotificacion('Usuario actualizado correctamente.', 'exito');
     }
   }
@@ -951,6 +1026,8 @@ export class App {
     if (this.usuarioEditandoAdmin && this.usuarioEditandoAdmin.id === usuario.id) {
       this.usuarioEditandoAdmin.estado = usuario.estado;
     }
+
+    this.actualizarUsuariosDisponibles();
 
     if (usuario.estado === 'Activo') {
       this.mostrarNotificacion('Usuario activado correctamente.', 'exito');
@@ -1135,7 +1212,12 @@ export class App {
   }
 
   obtenerResumenParticipantesMensaje(msg: Mensaje): string {
-    return this.esMensajeEnviado(msg) ? `Para: ${msg.destinatarios}` : msg.remitente;
+    if (this.esMensajeEnviado(msg)) {
+      const resumen = this.obtenerDestinatariosResumen(msg, 2);
+      const extra = this.obtenerCantidadDestinatariosExtra(msg, 2);
+      return `Para: ${resumen}${extra > 0 ? ` y ${extra} más` : ''}`;
+    }
+    return `De: ${msg.remitente}`;
   }
 
   obtenerEtiquetaTipoMensaje(msg: Mensaje): string {
@@ -1206,15 +1288,26 @@ export class App {
   }
 
   abrirCalendario(): void {
+    this.guardarFoco();
     this.calendarioModalAbierto = true;
     this.filtroEventosCalendario = 'Todos';
     this.fechaBusquedaCalendario = this.fechaSeleccionadaCalendario;
     this.cdr.detectChanges();
+    setTimeout(() => {
+      const closeBtn = document.querySelector('.calendar-modal .btn-close') as HTMLElement;
+      if (closeBtn) closeBtn.focus();
+    }, 50);
   }
 
   cerrarCalendario(): void {
+    if ((this.nuevoRecordatorioCalendario || '').trim() || (this.nuevoRecordatorioHoraCalendario || '').trim()) {
+      if (!confirm('Tiene un recordatorio sin guardar. ¿Desea cerrar el calendario de todos modos?')) {
+        return;
+      }
+    }
     this.calendarioModalAbierto = false;
     this.cdr.detectChanges();
+    this.restaurarFoco();
   }
 
   irAFechaCalendario(): void {
@@ -1223,16 +1316,19 @@ export class App {
     if (partes.length === 3) {
       const anio = parseInt(partes[0], 10);
       const mes = parseInt(partes[1], 10) - 1;
-      this.anioCalendario = anio;
-      this.mesCalendario = mes;
-      this.fechaSeleccionadaCalendario = this.fechaBusquedaCalendario;
-      this.cdr.detectChanges();
+      const dia = parseInt(partes[2], 10);
+      if (!isNaN(anio) && !isNaN(mes) && !isNaN(dia)) {
+        this.anioCalendario = anio;
+        this.mesCalendario = mes;
+        this.fechaSeleccionadaCalendario = this.fechaBusquedaCalendario;
+        this.cdr.detectChanges();
+      }
     }
   }
 
   get eventosFechaSeleccionadaFiltrados(): EventoCalendario[] {
     const todos = this.obtenerEventosPorFecha(this.fechaSeleccionadaCalendario);
-    
+
     const filtrados = todos.filter(ev => {
       if (this.filtroEventosCalendario === 'Todos') return true;
       if (this.filtroEventosCalendario === 'Recibidos') return ev.tipo === 'recibido';
@@ -1248,6 +1344,249 @@ export class App {
       const datetimeB = `${b.fecha}T${timeB}`;
       return datetimeB.localeCompare(datetimeA);
     });
+  }
+
+  inicializarDatosPrueba(): void {
+    // Método vacío para la versión de producción limpia.
+  }
+
+  normalizarListaDestinatarios(destinatarios: string): string[] {
+    if (!destinatarios) return [];
+    return destinatarios.split(',').map(d => d.trim()).filter(d => d.length > 0);
+  }
+
+  obtenerDestinatariosResumen(msg: Mensaje | null, limite = 2): string {
+    if (!msg || !msg.destinatarios) return '';
+    const list = this.normalizarListaDestinatarios(msg.destinatarios);
+    if (list.length === 0) return '';
+    return list.slice(0, limite).join(', ');
+  }
+
+  obtenerCantidadDestinatariosExtra(msg: Mensaje | null, limite = 2): number {
+    if (!msg || !msg.destinatarios) return 0;
+    const list = this.normalizarListaDestinatarios(msg.destinatarios);
+    return Math.max(0, list.length - limite);
+  }
+
+  normalizarListaDocumentos(documento: string): string[] {
+    if (!documento || documento === 'Sin adjunto') return [];
+    return documento.split(',').map(d => d.trim()).filter(d => d.length > 0);
+  }
+
+  obtenerDocumentosResumen(msg: Mensaje | null, limite = 2): string {
+    if (!msg || !msg.documento || msg.documento === 'Sin adjunto') return 'Sin adjunto';
+    const list = this.normalizarListaDocumentos(msg.documento);
+    if (list.length === 0) return 'Sin adjunto';
+    return list.slice(0, limite).join(', ');
+  }
+
+  obtenerCantidadDocumentosExtra(msg: Mensaje | null, limite = 2): number {
+    if (!msg || !msg.documento || msg.documento === 'Sin adjunto') return 0;
+    const list = this.normalizarListaDocumentos(msg.documento);
+    return Math.max(0, list.length - limite);
+  }
+
+  validarLongitudRecordatorio(texto: string): boolean {
+    if (!texto) return false;
+    return texto.trim().length <= 150;
+  }
+
+  abrirMensajeDesdeVista(msg: Mensaje, event?: Event): void {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    this.verDetallesMensaje(msg);
+  }
+
+  guardarFoco(): void {
+    if (!this.ultimoElementoEnfocado) {
+      this.ultimoElementoEnfocado = document.activeElement as HTMLElement;
+    }
+  }
+
+  restaurarFoco(): void {
+    if (this.ultimoElementoEnfocado) {
+      this.ultimoElementoEnfocado.focus();
+      this.ultimoElementoEnfocado = null;
+    }
+  }
+
+  esCampoEditable(el: any): boolean {
+    if (!el) return false;
+    const tagName = el.tagName ? el.tagName.toLowerCase() : '';
+    return tagName === 'input' || tagName === 'textarea' || tagName === 'select' || el.isContentEditable;
+  }
+
+  manejarTecladoLista(event: KeyboardEvent, selectorElementos: string): void {
+    const target = event.target as HTMLElement;
+    if (this.esCampoEditable(target)) return;
+
+    if (['ArrowDown', 'ArrowUp', 'Space', 'Enter'].includes(event.key)) {
+      const elements = Array.from(document.querySelectorAll(selectorElementos)) as HTMLElement[];
+      if (elements.length === 0) return;
+
+      const currentIndex = elements.indexOf(target);
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        const nextIndex = (currentIndex + 1) % elements.length;
+        elements[nextIndex].focus();
+      } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        const prevIndex = (currentIndex - 1 + elements.length) % elements.length;
+        elements[prevIndex].focus();
+      } else if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        target.click();
+      }
+    }
+  }
+
+  manejarTecladoRecent(event: KeyboardEvent): void {
+    this.manejarTecladoLista(event, '.recent-messages-scroll .recent-message');
+  }
+
+  manejarTecladoInbox(event: KeyboardEvent): void {
+    this.manejarTecladoLista(event, '.inbox-list .inbox-item');
+  }
+
+  manejarTecladoSent(event: KeyboardEvent): void {
+    this.manejarTecladoLista(event, '.sent-messages-list .sent-message-item');
+  }
+
+  manejarTecladoCalendarEvent(event: KeyboardEvent): void {
+    this.manejarTecladoLista(event, '.calendar-activities-scroll .calendar-event-item[tabindex="0"]');
+  }
+
+  manejarTecladoCalendarioCompact(event: KeyboardEvent): void {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.abrirCalendario();
+    }
+  }
+
+  manejarTecladoUsuarioAdmin(event: KeyboardEvent, usuario: UsuarioSistema): void {
+    const target = event.target as HTMLElement;
+    if (this.esCampoEditable(target)) return;
+
+    const isRow = target.tagName.toLowerCase() === 'tr';
+    if (!isRow) return;
+
+    if (['ArrowDown', 'ArrowUp', 'Space', 'Enter'].includes(event.key)) {
+      const rows = Array.from(document.querySelectorAll('.admin-table tbody tr')) as HTMLElement[];
+      if (rows.length === 0) return;
+
+      const currentIndex = rows.indexOf(target);
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        const nextIndex = (currentIndex + 1) % rows.length;
+        rows[nextIndex].focus();
+      } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        const prevIndex = (currentIndex - 1 + rows.length) % rows.length;
+        rows[prevIndex].focus();
+      } else if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        this.seleccionarUsuarioAdmin(usuario);
+      }
+    }
+  }
+
+  manejarTecladoFormatos(event: KeyboardEvent): void {
+    if (['ArrowDown', 'ArrowUp'].includes(event.key)) {
+      const summaries = Array.from(document.querySelectorAll('.formato-category summary')) as HTMLElement[];
+      if (summaries.length === 0) return;
+
+      const target = event.target as HTMLElement;
+      const currentIndex = summaries.indexOf(target);
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        const nextIndex = (currentIndex + 1) % summaries.length;
+        summaries[nextIndex].focus();
+      } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        const prevIndex = (currentIndex - 1 + summaries.length) % summaries.length;
+        summaries[prevIndex].focus();
+      }
+    }
+  }
+
+  manejarTecladoCalendario(event: KeyboardEvent, index: number): void {
+    if (['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Space', 'Enter'].includes(event.key)) {
+      const cells = Array.from(document.querySelectorAll('.calendar-grid > *')) as HTMLElement[];
+      if (cells.length === 0) return;
+
+      let nextIndex = index;
+      if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        nextIndex = index + 1;
+        while (nextIndex < 42 && cells[nextIndex].classList.contains('calendar-day-empty')) {
+          nextIndex++;
+        }
+        if (nextIndex >= 42) nextIndex = index;
+      } else if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        nextIndex = index - 1;
+        while (nextIndex >= 0 && cells[nextIndex].classList.contains('calendar-day-empty')) {
+          nextIndex--;
+        }
+        if (nextIndex < 0) nextIndex = index;
+      } else if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        nextIndex = index + 7;
+        while (nextIndex < 42 && cells[nextIndex].classList.contains('calendar-day-empty')) {
+          nextIndex += 7;
+        }
+        if (nextIndex >= 42) nextIndex = index;
+      } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        nextIndex = index - 7;
+        while (nextIndex >= 0 && cells[nextIndex].classList.contains('calendar-day-empty')) {
+          nextIndex -= 7;
+        }
+        if (nextIndex < 0) nextIndex = index;
+      } else if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        const button = cells[index].querySelector('button') || cells[index];
+        button.click();
+        return;
+      }
+
+      if (nextIndex !== index && nextIndex >= 0 && nextIndex < 42) {
+        const targetBtn = cells[nextIndex].querySelector('button') as HTMLElement;
+        if (targetBtn) {
+          targetBtn.focus();
+        } else if (cells[nextIndex].tagName.toLowerCase() === 'button') {
+          cells[nextIndex].focus();
+        }
+      }
+    }
+  }
+
+  @HostListener('document:keydown.escape', ['$event'])
+  manejarEscapeModales(event: Event): void {
+    if (this.mensajeSeleccionado) {
+      event.preventDefault();
+      this.cerrarDetalles();
+    } else if (this.modalEditarUsuarioAbierto) {
+      event.preventDefault();
+      this.cerrarModalEditarUsuario();
+    } else if (this.modalVerUsuarioAbierto) {
+      event.preventDefault();
+      this.cerrarModalVerUsuario();
+    } else if (this.mostrarPerfilModal) {
+      event.preventDefault();
+      this.cerrarPerfilUsuario();
+    } else if (this.calendarioModalAbierto) {
+      event.preventDefault();
+      this.cerrarCalendario();
+    }
+  }
+
+  private obtenerFechaRelativa(dias: number): string {
+    const d = new Date();
+    d.setDate(d.getDate() + dias);
+    return this.formatearFechaLocal(d);
   }
 
 }
