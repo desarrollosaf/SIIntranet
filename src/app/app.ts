@@ -1,4 +1,4 @@
-import { Component, ChangeDetectorRef, HostListener, OnDestroy } from '@angular/core';
+import { Component, ChangeDetectorRef, HostListener, OnDestroy, NgZone } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 export interface Mensaje {
@@ -55,9 +55,11 @@ export interface DocumentoFormato {
 })
 export class App implements OnDestroy {
 
+  ultimoElementoEnfocado: HTMLElement | null = null;
+
   documentosFormatos: { [categoria: string]: DocumentoFormato[] } = {};
 
-  constructor(private cdr: ChangeDetectorRef) {
+  constructor(private cdr: ChangeDetectorRef, private zone: NgZone) {
     this.detectarSesionGuardada();
     this.detectarModuloInicial();
     this.inicializarDatosPrueba();
@@ -167,17 +169,46 @@ export class App implements OnDestroy {
 
   recordatoriosCalendario: EventoCalendario[] = [];
 
-  notificacion: { mensaje: string; tipo: 'error' | 'exito' | 'info' } | null = null;
+  notificacion: { mensaje: string; tipo: 'error' | 'exito' | 'info' | 'advertencia' } | null = null;
   private notificacionTimeout: ReturnType<typeof setTimeout> | null = null;
 
-  mostrarNotificacion(mensaje: string, tipo: 'error' | 'exito' | 'info' = 'info'): void {
-    if (this.notificacionTimeout) clearTimeout(this.notificacionTimeout);
-    this.notificacion = { mensaje, tipo };
-    this.cdr.detectChanges();
-    this.notificacionTimeout = setTimeout(() => {
+  mostrarNotificacion(mensaje: string, tipo: 'error' | 'exito' | 'info' | 'advertencia' = 'info'): void {
+    if (this.notificacionTimeout) {
+      clearTimeout(this.notificacionTimeout);
+      this.notificacionTimeout = null;
+    }
+    this.zone.run(() => {
+      this.notificacion = { mensaje, tipo };
+      this.cdr.detectChanges();
+    });
+
+    let duration = 3000;
+    if (tipo === 'error') {
+      duration = 5000;
+    } else if (tipo === 'advertencia') {
+      duration = 4000;
+    }
+
+    this.zone.runOutsideAngular(() => {
+      this.notificacionTimeout = setTimeout(() => {
+        this.zone.run(() => {
+          this.notificacion = null;
+          this.cdr.detectChanges();
+          this.notificacionTimeout = null;
+        });
+      }, duration);
+    });
+  }
+
+  cerrarNotificacion(): void {
+    if (this.notificacionTimeout) {
+      clearTimeout(this.notificacionTimeout);
+      this.notificacionTimeout = null;
+    }
+    this.zone.run(() => {
       this.notificacion = null;
       this.cdr.detectChanges();
-    }, 3000);
+    });
   }
 
   isLoggedIn = false;
@@ -452,21 +483,6 @@ export class App implements OnDestroy {
     }
   }
 
-  get descripcionModulo(): string {
-    switch (this.moduloActual) {
-      case 'mensaje':
-        return 'Registro y envío de documentos internos';
-      case 'bandeja':
-        return 'Consulta de mensajes y documentos recibidos';
-      case 'formatos':
-        return 'Consulta de formatos y manuales institucionales';
-      case 'administracion':
-        return 'Gestión administrativa del sistema';
-      default:
-        return 'Sistema interno de gestión documental';
-    }
-  }
-
   actualizarFechaHora(): void {
     const actual = new Date();
     const año = actual.getFullYear();
@@ -617,7 +633,7 @@ export class App implements OnDestroy {
     // Text filter
     const textQuery = (this.buscarTextoEnviados || '').trim().toLowerCase();
     if (textQuery) {
-      list = list.filter(m => 
+      list = list.filter(m =>
         (m.titulo || '').toLowerCase().includes(textQuery) ||
         (m.descripcion || '').toLowerCase().includes(textQuery) ||
         (m.destinatarios || '').toLowerCase().includes(textQuery) ||
@@ -662,10 +678,11 @@ export class App implements OnDestroy {
 
   get mensajesFiltrados(): Mensaje[] {
     return this.mensajesBandeja.filter(msg => {
-      const matchesText = !this.buscarTexto ||
-        msg.remitente.toLowerCase().includes(this.buscarTexto.toLowerCase()) ||
-        msg.titulo.toLowerCase().includes(this.buscarTexto.toLowerCase()) ||
-        msg.descripcion.toLowerCase().includes(this.buscarTexto.toLowerCase());
+      const query = (this.buscarTexto || '').toLowerCase().trim();
+      const matchesText = !query ||
+        (msg.remitente || '').toLowerCase().includes(query) ||
+        (msg.titulo || '').toLowerCase().includes(query) ||
+        (msg.descripcion || '').toLowerCase().includes(query);
 
       let matchesEstado = false;
       const esEnviado = this.esMensajeEnviado(msg);
@@ -705,12 +722,18 @@ export class App implements OnDestroy {
   }
 
   verDetallesMensaje(msg: Mensaje): void {
+    this.guardarFoco();
     this.mensajeSeleccionado = msg;
     this.marcarComoVisto(msg);
+    setTimeout(() => {
+      const closeBtn = document.querySelector('.details-modal-backdrop .btn-close') as HTMLElement;
+      if (closeBtn) closeBtn.focus();
+    }, 50);
   }
 
   cerrarDetalles(): void {
     this.mensajeSeleccionado = null;
+    this.restaurarFoco();
   }
 
   marcarComoVisto(msg: Mensaje, mostrarNotif = false): void {
@@ -756,7 +779,7 @@ export class App implements OnDestroy {
       this.mensajesBandeja.forEach(m => m.confirmarEliminarSent = false);
       msg.confirmarEliminarSent = true;
       this.cdr.detectChanges();
-      
+
       // Auto cancel after 5 seconds
       setTimeout(() => {
         if (msg.confirmarEliminarSent) {
@@ -769,7 +792,7 @@ export class App implements OnDestroy {
 
     msg.confirmarEliminarSent = false;
     msg.estadoTemporal = 'Eliminando';
-    this.mostrarNotificacion('Eliminando mensaje de la vista...', 'info');
+    this.mostrarNotificacion('Eliminando mensaje...', 'info');
     this.cdr.detectChanges();
 
     setTimeout(() => {
@@ -778,7 +801,7 @@ export class App implements OnDestroy {
       if (this.mensajeSeleccionado && this.mensajeSeleccionado.id === msg.id) {
         this.mensajeSeleccionado = null;
       }
-      this.mostrarNotificacion('Mensaje eliminado de la vista.', 'exito');
+      this.mostrarNotificacion('Mensaje eliminado.', 'exito');
       this.cdr.detectChanges();
     }, 1500);
   }
@@ -879,11 +902,17 @@ export class App implements OnDestroy {
   }
 
   verPerfilUsuario(): void {
+    this.guardarFoco();
     this.mostrarPerfilModal = true;
+    setTimeout(() => {
+      const closeBtn = document.querySelector('.profile-modal .btn-close') as HTMLElement;
+      if (closeBtn) closeBtn.focus();
+    }, 50);
   }
 
   cerrarPerfilUsuario(): void {
     this.mostrarPerfilModal = false;
+    this.restaurarFoco();
   }
 
   get usuariosFiltrados(): UsuarioSistema[] {
@@ -904,30 +933,57 @@ export class App implements OnDestroy {
   }
 
   seleccionarUsuarioAdmin(usuario: UsuarioSistema): void {
+    this.guardarFoco();
     this.usuarioSeleccionadoAdmin = usuario;
     this.usuarioEditandoAdmin = null;
     this.modalVerUsuarioAbierto = true;
+    setTimeout(() => {
+      const closeBtn = document.querySelector('.modal-card .btn-close') as HTMLElement;
+      if (closeBtn) closeBtn.focus();
+    }, 50);
   }
 
   cerrarModalVerUsuario(): void {
     this.modalVerUsuarioAbierto = false;
     this.usuarioSeleccionadoAdmin = null;
+    this.restaurarFoco();
   }
 
   abrirModalEditarUsuario(usuario: UsuarioSistema): void {
+    this.guardarFoco();
     this.usuarioEditandoAdmin = { ...usuario };
     this.modalEditarUsuarioAbierto = true;
     this.modalVerUsuarioAbierto = false;
+    setTimeout(() => {
+      const firstInput = document.querySelector('#editNombre') as HTMLElement;
+      if (firstInput) firstInput.focus();
+    }, 50);
   }
 
   cerrarModalEditarUsuario(): void {
+    if (this.usuarioEditandoAdmin) {
+      const original = this.usuariosSistema.find(u => u.id === this.usuarioEditandoAdmin!.id);
+      if (original) {
+        const isDirty = this.usuarioEditandoAdmin.nombre !== original.nombre ||
+          this.usuarioEditandoAdmin.usuario !== original.usuario ||
+          this.usuarioEditandoAdmin.correo !== original.correo ||
+          this.usuarioEditandoAdmin.area !== original.area ||
+          this.usuarioEditandoAdmin.rol !== original.rol ||
+          this.usuarioEditandoAdmin.estado !== original.estado;
+        if (isDirty) {
+          if (!confirm('Tiene cambios sin guardar en el usuario. ¿Desea descartar los cambios?')) {
+            return;
+          }
+        }
+      }
+    }
     this.modalEditarUsuarioAbierto = false;
     this.usuarioEditandoAdmin = null;
+    this.restaurarFoco();
   }
 
   cancelarEdicionUsuarioAdmin(): void {
-    this.usuarioEditandoAdmin = null;
-    this.modalEditarUsuarioAbierto = false;
+    this.cerrarModalEditarUsuario();
   }
 
   guardarCambiosUsuarioAdmin(): void {
@@ -1229,15 +1285,26 @@ export class App implements OnDestroy {
   }
 
   abrirCalendario(): void {
+    this.guardarFoco();
     this.calendarioModalAbierto = true;
     this.filtroEventosCalendario = 'Todos';
     this.fechaBusquedaCalendario = this.fechaSeleccionadaCalendario;
     this.cdr.detectChanges();
+    setTimeout(() => {
+      const closeBtn = document.querySelector('.calendar-modal .btn-close') as HTMLElement;
+      if (closeBtn) closeBtn.focus();
+    }, 50);
   }
 
   cerrarCalendario(): void {
+    if ((this.nuevoRecordatorioCalendario || '').trim() || (this.nuevoRecordatorioHoraCalendario || '').trim()) {
+      if (!confirm('Tiene un recordatorio sin guardar. ¿Desea cerrar el calendario de todos modos?')) {
+        return;
+      }
+    }
     this.calendarioModalAbierto = false;
     this.cdr.detectChanges();
+    this.restaurarFoco();
   }
 
   irAFechaCalendario(): void {
@@ -1521,6 +1588,190 @@ export class App implements OnDestroy {
       event.stopPropagation();
     }
     this.verDetallesMensaje(msg);
+  }
+
+  guardarFoco(): void {
+    if (!this.ultimoElementoEnfocado) {
+      this.ultimoElementoEnfocado = document.activeElement as HTMLElement;
+    }
+  }
+
+  restaurarFoco(): void {
+    if (this.ultimoElementoEnfocado) {
+      this.ultimoElementoEnfocado.focus();
+      this.ultimoElementoEnfocado = null;
+    }
+  }
+
+  esCampoEditable(el: any): boolean {
+    if (!el) return false;
+    const tagName = el.tagName ? el.tagName.toLowerCase() : '';
+    return tagName === 'input' || tagName === 'textarea' || tagName === 'select' || el.isContentEditable;
+  }
+
+  manejarTecladoLista(event: KeyboardEvent, selectorElementos: string): void {
+    const target = event.target as HTMLElement;
+    if (this.esCampoEditable(target)) return;
+
+    if (['ArrowDown', 'ArrowUp', 'Space', 'Enter'].includes(event.key)) {
+      const elements = Array.from(document.querySelectorAll(selectorElementos)) as HTMLElement[];
+      if (elements.length === 0) return;
+
+      const currentIndex = elements.indexOf(target);
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        const nextIndex = (currentIndex + 1) % elements.length;
+        elements[nextIndex].focus();
+      } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        const prevIndex = (currentIndex - 1 + elements.length) % elements.length;
+        elements[prevIndex].focus();
+      } else if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        target.click();
+      }
+    }
+  }
+
+  manejarTecladoRecent(event: KeyboardEvent): void {
+    this.manejarTecladoLista(event, '.recent-messages-scroll .recent-message');
+  }
+
+  manejarTecladoInbox(event: KeyboardEvent): void {
+    this.manejarTecladoLista(event, '.inbox-list .inbox-item');
+  }
+
+  manejarTecladoSent(event: KeyboardEvent): void {
+    this.manejarTecladoLista(event, '.sent-messages-list .sent-message-item');
+  }
+
+  manejarTecladoCalendarEvent(event: KeyboardEvent): void {
+    this.manejarTecladoLista(event, '.calendar-activities-scroll .calendar-event-item[tabindex="0"]');
+  }
+
+  manejarTecladoCalendarioCompact(event: KeyboardEvent): void {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.abrirCalendario();
+    }
+  }
+
+  manejarTecladoUsuarioAdmin(event: KeyboardEvent, usuario: UsuarioSistema): void {
+    const target = event.target as HTMLElement;
+    if (this.esCampoEditable(target)) return;
+
+    const isRow = target.tagName.toLowerCase() === 'tr';
+    if (!isRow) return;
+
+    if (['ArrowDown', 'ArrowUp', 'Space', 'Enter'].includes(event.key)) {
+      const rows = Array.from(document.querySelectorAll('.admin-table tbody tr')) as HTMLElement[];
+      if (rows.length === 0) return;
+
+      const currentIndex = rows.indexOf(target);
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        const nextIndex = (currentIndex + 1) % rows.length;
+        rows[nextIndex].focus();
+      } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        const prevIndex = (currentIndex - 1 + rows.length) % rows.length;
+        rows[prevIndex].focus();
+      } else if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        this.seleccionarUsuarioAdmin(usuario);
+      }
+    }
+  }
+
+  manejarTecladoFormatos(event: KeyboardEvent): void {
+    if (['ArrowDown', 'ArrowUp'].includes(event.key)) {
+      const summaries = Array.from(document.querySelectorAll('.formato-category summary')) as HTMLElement[];
+      if (summaries.length === 0) return;
+
+      const target = event.target as HTMLElement;
+      const currentIndex = summaries.indexOf(target);
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        const nextIndex = (currentIndex + 1) % summaries.length;
+        summaries[nextIndex].focus();
+      } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        const prevIndex = (currentIndex - 1 + summaries.length) % summaries.length;
+        summaries[prevIndex].focus();
+      }
+    }
+  }
+
+  manejarTecladoCalendario(event: KeyboardEvent, index: number): void {
+    if (['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Space', 'Enter'].includes(event.key)) {
+      const cells = Array.from(document.querySelectorAll('.calendar-grid > *')) as HTMLElement[];
+      if (cells.length === 0) return;
+
+      let nextIndex = index;
+      if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        nextIndex = index + 1;
+        while (nextIndex < 42 && cells[nextIndex].classList.contains('calendar-day-empty')) {
+          nextIndex++;
+        }
+        if (nextIndex >= 42) nextIndex = index;
+      } else if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        nextIndex = index - 1;
+        while (nextIndex >= 0 && cells[nextIndex].classList.contains('calendar-day-empty')) {
+          nextIndex--;
+        }
+        if (nextIndex < 0) nextIndex = index;
+      } else if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        nextIndex = index + 7;
+        while (nextIndex < 42 && cells[nextIndex].classList.contains('calendar-day-empty')) {
+          nextIndex += 7;
+        }
+        if (nextIndex >= 42) nextIndex = index;
+      } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        nextIndex = index - 7;
+        while (nextIndex >= 0 && cells[nextIndex].classList.contains('calendar-day-empty')) {
+          nextIndex -= 7;
+        }
+        if (nextIndex < 0) nextIndex = index;
+      } else if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        const button = cells[index].querySelector('button') || cells[index];
+        button.click();
+        return;
+      }
+
+      if (nextIndex !== index && nextIndex >= 0 && nextIndex < 42) {
+        const targetBtn = cells[nextIndex].querySelector('button') as HTMLElement;
+        if (targetBtn) {
+          targetBtn.focus();
+        } else if (cells[nextIndex].tagName.toLowerCase() === 'button') {
+          cells[nextIndex].focus();
+        }
+      }
+    }
+  }
+
+  @HostListener('document:keydown.escape', ['$event'])
+  manejarEscapeModales(event: Event): void {
+    if (this.mensajeSeleccionado) {
+      event.preventDefault();
+      this.cerrarDetalles();
+    } else if (this.modalEditarUsuarioAbierto) {
+      event.preventDefault();
+      this.cerrarModalEditarUsuario();
+    } else if (this.modalVerUsuarioAbierto) {
+      event.preventDefault();
+      this.cerrarModalVerUsuario();
+    } else if (this.mostrarPerfilModal) {
+      event.preventDefault();
+      this.cerrarPerfilUsuario();
+    } else if (this.calendarioModalAbierto) {
+      event.preventDefault();
+      this.cerrarCalendario();
+    }
   }
 
   private obtenerFechaRelativa(dias: number): string {

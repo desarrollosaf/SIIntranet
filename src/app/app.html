@@ -64,29 +64,33 @@
     </div>
 
     <nav class="main-menu">
-      <button type="button" (click)="cambiarModulo('inicio')" [class.active]="moduloActual === 'inicio'">
+      <button type="button" (click)="cambiarModulo('inicio')" [class.active]="moduloActual === 'inicio'"
+        [attr.aria-current]="moduloActual === 'inicio' ? 'page' : null">
         <i class="bi bi-house-door-fill"></i>
         <span>Inicio</span>
       </button>
 
-      <button type="button" (click)="cambiarModulo('mensaje')" [class.active]="moduloActual === 'mensaje'">
+      <button type="button" (click)="cambiarModulo('mensaje')" [class.active]="moduloActual === 'mensaje'"
+        [attr.aria-current]="moduloActual === 'mensaje' ? 'page' : null">
         <i class="bi bi-pencil-square"></i>
         <span>Mensaje nuevo</span>
       </button>
 
-      <button type="button" (click)="cambiarModulo('bandeja')" [class.active]="moduloActual === 'bandeja'">
+      <button type="button" (click)="cambiarModulo('bandeja')" [class.active]="moduloActual === 'bandeja'"
+        [attr.aria-current]="moduloActual === 'bandeja' ? 'page' : null">
         <i class="bi bi-inbox-fill"></i>
         <span>Bandeja de entrada</span>
       </button>
 
-      <button type="button" (click)="cambiarModulo('formatos')" [class.active]="moduloActual === 'formatos'">
+      <button type="button" (click)="cambiarModulo('formatos')" [class.active]="moduloActual === 'formatos'"
+        [attr.aria-current]="moduloActual === 'formatos' ? 'page' : null">
         <i class="bi bi-folder-fill"></i>
         <span>Formatos</span>
       </button>
 
       @if (usuarioActual.tipo === 'admin') {
-      <button type="button" (click)="cambiarModulo('administracion')"
-        [class.active]="moduloActual === 'administracion'">
+      <button type="button" (click)="cambiarModulo('administracion')" [class.active]="moduloActual === 'administracion'"
+        [attr.aria-current]="moduloActual === 'administracion' ? 'page' : null">
         <i class="bi bi-sliders2-vertical"></i>
         <span>Administración</span>
       </button>
@@ -111,7 +115,6 @@
     <section class="hero-section">
       <div class="hero-content">
         <h1>{{ tituloModulo }}</h1>
-        <p>{{ descripcionModulo }}</p>
       </div>
 
       <div class="hero-user-badge clickable" (click)="verPerfilUsuario()" title="Ver detalles de perfil">
@@ -134,10 +137,13 @@
 
           <div class="recent-messages-scroll">
             @for (msg of mensajesRecientes; track msg.id) {
-            <div class="recent-message clickable" (click)="abrirMensajeDesdeVista(msg, $event)">
+            <div class="recent-message clickable" (click)="abrirMensajeDesdeVista(msg, $event)" tabindex="0"
+              role="button" (keydown)="manejarTecladoRecent($event)" aria-label="Ver detalles del mensaje">
               <div class="message-info">
                 <strong>{{ msg.titulo }}</strong>
-                <p class="msg-date-time" style="font-weight: 600; font-size: 11.5px; color: var(--texto-mutado); margin: 2px 0 0;"><i class="bi bi-calendar3"></i> {{ msg.fecha }} · <i class="bi bi-clock"></i> {{ msg.hora }}</p>
+                <p class="msg-date-time"
+                  style="font-weight: 600; font-size: 11.5px; color: var(--texto-mutado); margin: 2px 0 0;"><i
+                    class="bi bi-calendar3"></i> {{ msg.fecha }} · <i class="bi bi-clock"></i> {{ msg.hora }}</p>
                 <p class="msg-participants" style="margin: 2px 0 0;">{{ obtenerResumenParticipantesMensaje(msg) }}</p>
               </div>
 
@@ -182,7 +188,8 @@
             }
           </div>
 
-          <div class="calendar-card-compact clickable" (click)="abrirCalendario()" title="Abrir Calendario Completo">
+          <div class="calendar-card-compact clickable" (click)="abrirCalendario()" title="Abrir Calendario Completo"
+            tabindex="0" role="button" (keydown)="manejarTecladoCalendarioCompact($event)">
             <div class="calendar-card-compact-content">
               <div class="calendar-card-compact-icon">
                 <i class="bi bi-calendar-event-fill"></i>
@@ -270,7 +277,8 @@
                     @if (formArchivos.length === 0) {
                     No se ha seleccionado ningún archivo
                     } @else {
-                    {{ formArchivos.length === 1 ? '1 archivo seleccionado' : formArchivos.length + ' archivos seleccionados' }}
+                    {{ formArchivos.length === 1 ? '1 archivo seleccionado' : formArchivos.length + ' archivos
+                    seleccionados' }}
                     }
                   </span>
                   <input id="documento" name="documento" type="file" multiple (change)="onFileSelected($event)"
@@ -303,8 +311,8 @@
           <div class="recipients-container">
             <div class="select-box">
               <span class="select-title">Usuarios disponibles ({{ usuariosDisponiblesFiltrados.length }})</span>
-              <select multiple aria-label="Usuarios disponibles" [(ngModel)]="selectedDisponibles"
-                name="selDisponibles" (keydown.enter)="$event.preventDefault(); pasar()">
+              <select multiple aria-label="Usuarios disponibles" [(ngModel)]="selectedDisponibles" name="selDisponibles"
+                (keydown.enter)="$event.preventDefault(); pasar()">
                 @for (usuario of usuariosDisponiblesFiltrados; track usuario) {
                 <option [value]="usuario" (dblclick)="pasarDirecto(usuario)">{{ usuario }}</option>
                 } @empty {
@@ -335,7 +343,8 @@
             <div class="select-box">
               <span class="select-title">Usuarios seleccionados ({{ usuariosSeleccionados.length }})</span>
               <select multiple aria-label="Usuarios seleccionados" [(ngModel)]="selectedSeleccionados"
-                name="selSeleccionados" (keydown.delete)="$event.preventDefault(); quitar()" (keydown.backspace)="$event.preventDefault(); quitar()">
+                name="selSeleccionados" (keydown.delete)="$event.preventDefault(); quitar()"
+                (keydown.backspace)="$event.preventDefault(); quitar()">
                 @for (usuario of usuariosSeleccionados; track usuario) {
                 <option [value]="usuario" (dblclick)="quitarDirecto(usuario)">{{ usuario }}</option>
                 } @empty {
@@ -393,27 +402,31 @@
         <div class="sent-messages-list">
           @for (msg of mensajesEnviadosFiltrados; track msg.id) {
           <div class="sent-message-item clickable" [class.item-sending]="msg.estado === 'Enviando'"
-            [class.item-cancelled]="msg.estado === 'Cancelado'"
-            [class.item-deleted]="msg.estado === 'Eliminado'"
-            (click)="abrirMensajeDesdeVista(msg, $event)">
+            [class.item-cancelled]="msg.estado === 'Cancelado'" [class.item-deleted]="msg.estado === 'Eliminado'"
+            (click)="abrirMensajeDesdeVista(msg, $event)" tabindex="0" role="button"
+            (keydown)="manejarTecladoSent($event)" aria-label="Ver detalles del mensaje enviado">
             <div class="sent-msg-info">
               <strong>{{ msg.titulo }}</strong>
               <div class="sent-msg-details" style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
-                <span class="sent-msg-meta"><i class="bi bi-calendar-event-fill"></i> {{ msg.fecha }} a las {{ msg.hora }}</span>
+                <span class="sent-msg-meta"><i class="bi bi-calendar-event-fill"></i> {{ msg.fecha }} a las {{ msg.hora
+                  }}</span>
                 <span class="sent-msg-meta">
                   <i class="bi bi-people-fill"></i> Para: {{ obtenerDestinatariosResumen(msg, 2) || 'Destinatarios' }}
                   @if (obtenerCantidadDestinatariosExtra(msg, 2) > 0) {
-                    (+{{ obtenerCantidadDestinatariosExtra(msg, 2) }} más)
+                  (+{{ obtenerCantidadDestinatariosExtra(msg, 2) }} más)
                   }
                 </span>
                 @if (normalizarListaDocumentos(msg.documento).length > 0) {
-                <span class="sent-msg-meta" style="display: inline-flex; align-items: center; flex-wrap: wrap; gap: 4px;">
-                  <i class="bi bi-paperclip"></i> Adjuntos: 
+                <span class="sent-msg-meta"
+                  style="display: inline-flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+                  <i class="bi bi-paperclip"></i> Adjuntos:
                   @for (doc of normalizarListaDocumentos(msg.documento).slice(0, 2); track doc) {
-                    <span style="background: rgba(133, 0, 63, 0.05); padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-right: 4px;">{{ doc }}</span>
+                  <span
+                    style="background: rgba(133, 0, 63, 0.05); padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-right: 4px;">{{
+                    doc }}</span>
                   }
                   @if (obtenerCantidadDocumentosExtra(msg, 2) > 0) {
-                    <span class="text-muted">(+{{ obtenerCantidadDocumentosExtra(msg, 2) }} más)</span>
+                  <span class="text-muted">(+{{ obtenerCantidadDocumentosExtra(msg, 2) }} más)</span>
                   }
                 </span>
                 }
@@ -434,13 +447,14 @@
               }
 
               @if (msg.estado === 'Enviando' && !msg.estadoTemporal) {
-              <button type="button" class="btn-cancel-send" (click)="cancelarMensaje(msg); $event.stopPropagation()" title="Cancelar envío">
+              <button type="button" class="btn-cancel-send" (click)="cancelarMensaje(msg); $event.stopPropagation()"
+                title="Cancelar envío">
                 <i class="bi bi-x-circle-fill"></i>
                 <span>Cancelar envío</span>
               </button>
               } @else if (msg.estado === 'Enviado' && !msg.estadoTemporal) {
-              <button type="button" class="btn-cancel-send btn-cancel-sent" (click)="cancelarMensaje(msg); $event.stopPropagation()"
-                title="Anular envío"
+              <button type="button" class="btn-cancel-send btn-cancel-sent"
+                (click)="cancelarMensaje(msg); $event.stopPropagation()" title="Anular envío"
                 style="background: rgba(133, 0, 63, 0.05); color: #85003f; border: 1px solid rgba(133, 0, 63, 0.2); margin-left: 8px;">
                 <i class="bi bi-x-circle"></i>
                 <span>Anular envío</span>
@@ -448,21 +462,25 @@
               }
 
               @if (msg.estado !== 'Eliminado' && !msg.estadoTemporal) {
-                @if (!msg.confirmarEliminarSent) {
-                <button type="button" class="btn-delete-view" (click)="eliminarMensajeEnviado(msg, $event)" title="Eliminar de la vista">
-                  <i class="bi bi-trash"></i>
-                  <span>Eliminar de la vista</span>
+              @if (!msg.confirmarEliminarSent) {
+              <button type="button" class="btn-delete-view" (click)="eliminarMensajeEnviado(msg, $event)"
+                title="Eliminar">
+                <i class="bi bi-trash"></i>
+                <span>Eliminar</span>
+              </button>
+              } @else {
+              <div style="display: inline-flex; gap: 4px; margin-left: 8px; align-items: center;"
+                (click)="$event.stopPropagation()">
+                <button type="button" class="btn-confirm-delete" (click)="eliminarMensajeEnviado(msg, $event)"
+                  title="Confirmar eliminación">
+                  Confirmar
                 </button>
-                } @else {
-                <div style="display: inline-flex; gap: 4px; margin-left: 8px; align-items: center;" (click)="$event.stopPropagation()">
-                  <button type="button" class="btn-confirm-delete" (click)="eliminarMensajeEnviado(msg, $event)" title="Confirmar eliminación">
-                    Confirmar
-                  </button>
-                  <button type="button" class="btn-cancel-delete" (click)="msg.confirmarEliminarSent = false; $event.stopPropagation()" title="Cancelar">
-                    Cancelar
-                  </button>
-                </div>
-                }
+                <button type="button" class="btn-cancel-delete"
+                  (click)="msg.confirmarEliminarSent = false; $event.stopPropagation()" title="Cancelar">
+                  Cancelar
+                </button>
+              </div>
+              }
               }
             </div>
           </div>
@@ -528,20 +546,25 @@
 
           <div class="inbox-list">
             @for (msg of mensajesFiltrados; track msg.id) {
-            <article class="inbox-item clickable" [class.unread]="esMensajeRecibido(msg) && msg.estadoLectura === 'Nuevo'"
+            <article class="inbox-item clickable"
+              [class.unread]="esMensajeRecibido(msg) && msg.estadoLectura === 'Nuevo'"
               [class.item-sending]="msg.estado === 'Enviando'" [class.item-cancelled]="msg.estado === 'Cancelado'"
-              (click)="abrirMensajeDesdeVista(msg, $event)">
+              (click)="abrirMensajeDesdeVista(msg, $event)" tabindex="0" role="button"
+              (keydown)="manejarTecladoInbox($event)" aria-label="Ver detalles del mensaje">
               <div class="sender-block">
-                <span class="date-tag" style="margin-bottom: 6px;"><i class="bi bi-calendar3"></i> {{ msg.fecha }} · <i class="bi bi-clock"></i> {{ msg.hora }}</span>
+                <span class="date-tag" style="margin-bottom: 6px;"><i class="bi bi-calendar3"></i> {{ msg.fecha }} · <i
+                    class="bi bi-clock"></i> {{ msg.hora }}</span>
                 @if (esMensajeRecibido(msg)) {
                 <span>De:</span>
-                <strong style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 100%;">{{ msg.remitente }}</strong>
+                <strong style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 100%;">{{
+                  msg.remitente }}</strong>
                 } @else {
                 <span>Para:</span>
                 <strong style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 100%;">
                   {{ obtenerDestinatariosResumen(msg, 2) }}
                   @if (obtenerCantidadDestinatariosExtra(msg, 2) > 0) {
-                    <span class="text-muted" style="font-size: 12px; font-weight: normal;"> (+{{ obtenerCantidadDestinatariosExtra(msg, 2) }} más)</span>
+                  <span class="text-muted" style="font-size: 12px; font-weight: normal;"> (+{{
+                    obtenerCantidadDestinatariosExtra(msg, 2) }} más)</span>
                   }
                 </strong>
                 }
@@ -574,21 +597,22 @@
                 <div class="document-row" style="flex-wrap: wrap; gap: 6px;">
                   <span>Documento:</span>
                   @if (normalizarListaDocumentos(msg.documento).length === 0) {
-                    <span>Sin adjunto</span>
+                  <span>Sin adjunto</span>
                   } @else {
-                    @for (doc of normalizarListaDocumentos(msg.documento).slice(0, 2); track doc) {
-                      <a href="#" style="display: inline-flex; align-items: center; gap: 4px; margin-right: 8px;"
-                        (click)="marcarComoVisto(msg); $event.preventDefault(); $event.stopPropagation(); mostrarNotificacion('Abriendo vista previa del documento: ' + doc, 'info')">
-                        <i class="bi" [class.bi-file-earmark-pdf-fill]="doc.endsWith('.pdf')"
-                          [class.bi-file-earmark-word-fill]="doc.endsWith('.docx')"
-                          [class.bi-files]="!doc.endsWith('.pdf') && !doc.endsWith('.docx')">
-                        </i>
-                        <span>{{ doc }}</span>
-                      </a>
-                    }
-                    @if (obtenerCantidadDocumentosExtra(msg, 2) > 0) {
-                      <span class="text-muted" style="font-size: 12px; font-weight: normal;"> (+{{ obtenerCantidadDocumentosExtra(msg, 2) }} documentos)</span>
-                    }
+                  @for (doc of normalizarListaDocumentos(msg.documento).slice(0, 2); track doc) {
+                  <a href="#" style="display: inline-flex; align-items: center; gap: 4px; margin-right: 8px;"
+                    (click)="marcarComoVisto(msg); $event.preventDefault(); $event.stopPropagation(); mostrarNotificacion('Abriendo vista previa del documento: ' + doc, 'info')">
+                    <i class="bi" [class.bi-file-earmark-pdf-fill]="doc.endsWith('.pdf')"
+                      [class.bi-file-earmark-word-fill]="doc.endsWith('.docx')"
+                      [class.bi-files]="!doc.endsWith('.pdf') && !doc.endsWith('.docx')">
+                    </i>
+                    <span>{{ doc }}</span>
+                  </a>
+                  }
+                  @if (obtenerCantidadDocumentosExtra(msg, 2) > 0) {
+                  <span class="text-muted" style="font-size: 12px; font-weight: normal;"> (+{{
+                    obtenerCantidadDocumentosExtra(msg, 2) }} documentos)</span>
+                  }
                   }
                 </div>
               </div>
@@ -632,15 +656,19 @@
 
           @for (categoria of categoriasFormatos; track categoria) {
           <details class="formato-category">
-            <summary>
+            <summary (keydown)="manejarTecladoFormatos($event)">
               <span><i class="bi bi-folder2-open-fill"></i> {{ categoria }}</span>
               <span class="accordion-icon"><i class="bi bi-chevron-down"></i></span>
             </summary>
             <div class="formato-content" style="padding: 8px 0;">
               @for (doc of documentosFormatos[categoria]; track doc.nombre) {
-              <div class="formato-doc-item" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; border-bottom: 1px solid rgba(226, 232, 240, 0.8); font-size: 13.5px;">
-                <span style="font-weight: 600; color: var(--texto);"><i class="bi bi-file-earmark-pdf-fill" style="color: var(--vino); margin-right: 8px; font-size: 16px;"></i>{{ doc.nombre }}</span>
-                <button type="button" class="btn-admin-action" (click)="mostrarNotificacion('Descargando documento de prueba...', 'info')" style="padding: 4px 10px; font-size: 11px; margin: 0;">
+              <div class="formato-doc-item"
+                style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; border-bottom: 1px solid rgba(226, 232, 240, 0.8); font-size: 13.5px;">
+                <span style="font-weight: 600; color: var(--texto);"><i class="bi bi-file-earmark-pdf-fill"
+                    style="color: var(--vino); margin-right: 8px; font-size: 16px;"></i>{{ doc.nombre }}</span>
+                <button type="button" class="btn-admin-action"
+                  (click)="mostrarNotificacion('Descargando documento de prueba...', 'info')"
+                  style="padding: 4px 10px; font-size: 11px; margin: 0;">
                   <i class="bi bi-download"></i>
                   <span>Descargar</span>
                 </button>
@@ -718,7 +746,8 @@
               </thead>
               <tbody>
                 @for (u of usuariosFiltrados; track u.id) {
-                <tr [class.selected-row]="usuarioSeleccionadoAdmin?.id === u.id">
+                <tr [class.selected-row]="usuarioSeleccionadoAdmin?.id === u.id" tabindex="0"
+                  (keydown)="manejarTecladoUsuarioAdmin($event, u)">
                   <td class="font-bold">{{ u.nombre }}</td>
                   <td><code>{{ u.usuario }}</code></td>
                   <td>
@@ -870,8 +899,8 @@
             <div class="calendar-search-row">
               <label for="buscarFechaInput">Ir a fecha:</label>
               <div class="input-with-button">
-                <input id="buscarFechaInput" name="fechaBusquedaCalendario" type="date" [(ngModel)]="fechaBusquedaCalendario"
-                  (change)="irAFechaCalendario()" />
+                <input id="buscarFechaInput" name="fechaBusquedaCalendario" type="date"
+                  [(ngModel)]="fechaBusquedaCalendario" (change)="irAFechaCalendario()" />
               </div>
             </div>
 
@@ -903,8 +932,9 @@
               } @else {
               <button type="button" class="calendar-day" [class.calendar-day-today]="dia.esHoy"
                 [class.calendar-day-selected]="dia.fecha === fechaSeleccionadaCalendario"
-                [class.calendar-day-has-events]="dia.eventos.length > 0"
-                (click)="seleccionarFechaCalendario(dia.fecha)">
+                [class.calendar-day-has-events]="dia.eventos.length > 0" (click)="seleccionarFechaCalendario(dia.fecha)"
+                (keydown)="manejarTecladoCalendario($event, $index)"
+                [attr.aria-selected]="dia.fecha === fechaSeleccionadaCalendario ? 'true' : 'false'">
                 <span>{{ dia.dia }}</span>
 
                 @if (dia.eventos.length > 0) {
@@ -966,18 +996,23 @@
               @for (evento of eventosFechaSeleccionadaFiltrados; track $index) {
               <div class="calendar-event-item" [class.clickable]="evento.tipo !== 'recordatorio'"
                 (click)="evento.tipo !== 'recordatorio' && evento.mensajeAsociado ? abrirMensajeDesdeVista(evento.mensajeAsociado, $event) : null"
+                [attr.tabindex]="evento.tipo !== 'recordatorio' ? 0 : null"
+                [attr.role]="evento.tipo !== 'recordatorio' ? 'button' : null"
+                (keydown)="evento.tipo !== 'recordatorio' ? manejarTecladoCalendarEvent($event) : null"
                 [title]="evento.tipo !== 'recordatorio' ? 'Ver detalles del mensaje' : ''">
                 <div class="calendar-event-body" style="width: 100%; display: flex; flex-direction: column; gap: 3px;">
                   <span class="calendar-event-title"
-                    style="font-weight: 700; font-size: 14px; color: var(--texto); display: block;">{{ evento.titulo }}</span>
-                  
-                  <div class="calendar-event-time-row" style="font-size: 11px; color: var(--texto-mutado); display: flex; align-items: center; gap: 4px;">
-                    <i class="bi bi-calendar3"></i> 
+                    style="font-weight: 700; font-size: 14px; color: var(--texto); display: block;">{{ evento.titulo
+                    }}</span>
+
+                  <div class="calendar-event-time-row"
+                    style="font-size: 11px; color: var(--texto-mutado); display: flex; align-items: center; gap: 4px;">
+                    <i class="bi bi-calendar3"></i>
                     <span>{{ evento.fecha }}</span>
                     @if (evento.hora) {
-                      <span>·</span>
-                      <i class="bi bi-clock"></i>
-                      <span>{{ evento.hora }}</span>
+                    <span>·</span>
+                    <i class="bi bi-clock"></i>
+                    <span>{{ evento.hora }}</span>
                     }
                   </div>
 
@@ -988,7 +1023,7 @@
                     <i class="bi bi-people-fill"></i>
                     <span>Para: {{ obtenerDestinatariosResumen(evento.mensajeAsociado, 2) }}
                       @if (obtenerCantidadDestinatariosExtra(evento.mensajeAsociado, 2) > 0) {
-                        (+{{ obtenerCantidadDestinatariosExtra(evento.mensajeAsociado, 2) }} más)
+                      (+{{ obtenerCantidadDestinatariosExtra(evento.mensajeAsociado, 2) }} más)
                       }
                     </span>
                     } @else {
@@ -1050,8 +1085,10 @@
                 <input type="time" name="nuevoRecordatorioHoraCalendario" [(ngModel)]="nuevoRecordatorioHoraCalendario"
                   title="Hora opcional" />
               </div>
-              <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: -5px; padding: 0 4px; margin-bottom: 5px;">
-                <span class="char-counter" style="font-size: 11px; color: var(--texto-mutado);">{{ nuevoRecordatorioCalendario?.length || 0 }}/150</span>
+              <div
+                style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: -5px; padding: 0 4px; margin-bottom: 5px;">
+                <span class="char-counter" style="font-size: 11px; color: var(--texto-mutado);">{{
+                  nuevoRecordatorioCalendario?.length || 0 }}/150</span>
               </div>
               <button type="submit" class="btn-add-reminder" title="Guardar recordatorio">
                 <i class="bi bi-plus-lg"></i>
@@ -1148,24 +1185,26 @@
         </div>
         <div class="detail-row text-block-row">
           <span class="detail-label">Contenido / Descripción</span>
-          <div class="detail-text-content" style="word-break: break-word; overflow-wrap: anywhere; white-space: pre-wrap;">{{ mensajeSeleccionado.descripcion }}</div>
+          <div class="detail-text-content"
+            style="word-break: break-word; overflow-wrap: anywhere; white-space: pre-wrap;">{{
+            mensajeSeleccionado.descripcion }}</div>
         </div>
         <div class="detail-row">
           <span class="detail-label">Documentos Adjuntos</span>
           <div class="detail-doc-link" style="display: flex; flex-direction: column; gap: 8px;">
             @if (normalizarListaDocumentos(mensajeSeleccionado.documento).length === 0) {
-              <span>Sin adjunto</span>
+            <span>Sin adjunto</span>
             } @else {
-              @for (doc of normalizarListaDocumentos(mensajeSeleccionado.documento); track doc) {
-                <a href="#"
-                  (click)="marcarComoVisto(mensajeSeleccionado); $event.preventDefault(); $event.stopPropagation(); mostrarNotificacion('Abriendo vista previa del documento: ' + doc, 'info')">
-                  <i class="bi" [class.bi-file-earmark-pdf-fill]="doc.endsWith('.pdf')"
-                    [class.bi-file-earmark-word-fill]="doc.endsWith('.docx')"
-                    [class.bi-files]="!doc.endsWith('.pdf') && !doc.endsWith('.docx')">
-                  </i>
-                  <span>{{ doc }}</span>
-                </a>
-              }
+            @for (doc of normalizarListaDocumentos(mensajeSeleccionado.documento); track doc) {
+            <a href="#"
+              (click)="marcarComoVisto(mensajeSeleccionado); $event.preventDefault(); $event.stopPropagation(); mostrarNotificacion('Abriendo vista previa del documento: ' + doc, 'info')">
+              <i class="bi" [class.bi-file-earmark-pdf-fill]="doc.endsWith('.pdf')"
+                [class.bi-file-earmark-word-fill]="doc.endsWith('.docx')"
+                [class.bi-files]="!doc.endsWith('.pdf') && !doc.endsWith('.docx')">
+              </i>
+              <span>{{ doc }}</span>
+            </a>
+            }
             }
           </div>
         </div>
@@ -1298,7 +1337,8 @@
               <label for="editNombre">Nombre completo:</label>
               <div class="input-with-icon">
                 <i class="bi bi-person-fill"></i>
-                <input id="editNombre" name="editNombre" type="text" [(ngModel)]="usuarioEditandoAdmin.nombre" required />
+                <input id="editNombre" name="editNombre" type="text" [(ngModel)]="usuarioEditandoAdmin.nombre"
+                  required />
               </div>
             </div>
 
@@ -1371,12 +1411,15 @@
 
 @if (notificacion) {
 <div class="notificacion-banner" [class.notif-error]="notificacion.tipo === 'error'"
-  [class.notif-exito]="notificacion.tipo === 'exito'" [class.notif-info]="notificacion.tipo === 'info'">
+  [class.notif-exito]="notificacion.tipo === 'exito'" [class.notif-info]="notificacion.tipo === 'info'"
+  [class.notif-advertencia]="notificacion.tipo === 'advertencia'">
   <div class="notif-content">
     @if (notificacion.tipo === 'error') {
     <i class="bi bi-exclamation-circle-fill"></i>
     } @else if (notificacion.tipo === 'exito') {
     <i class="bi bi-check-circle-fill"></i>
+    } @else if (notificacion.tipo === 'advertencia') {
+    <i class="bi bi-exclamation-triangle-fill"></i>
     } @else {
     <i class="bi bi-info-circle-fill"></i>
     }
