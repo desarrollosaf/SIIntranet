@@ -1317,7 +1317,6 @@ export class App implements OnDestroy {
   }
 
   inicializarDatosPrueba(): void {
-    // ---
   }
 
   normalizarListaDestinatarios(destinatarios: string): string[] {

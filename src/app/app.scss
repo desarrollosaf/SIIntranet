@@ -48,13 +48,13 @@ $font-xl: 19px;
 $font-xxl: 24px;
 $font-giant: 32px;
 
-$radius-sm: 6px;
-$radius-md: 10px;
-$radius-lg: 16px;
+$radius-sm: 5px;
+$radius-md: 8px;
+$radius-lg: 12px;
 
-$card-shadow: 0 1px 3px rgba(15, 23, 42, 0.03), 0 10px 25px -5px rgba(15, 23, 42, 0.05), 0 8px 10px -6px rgba(15, 23, 42, 0.03);
-$hover-shadow: 0 20px 30px -10px rgba(133, 0, 63, 0.08), 0 10px 16px -8px rgba(133, 0, 63, 0.04);
-$modal-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.15);
+$card-shadow: 0 1px 2px rgba(15, 23, 42, 0.02), 0 4px 12px rgba(15, 23, 42, 0.04);
+$hover-shadow: 0 6px 20px rgba(133, 0, 63, 0.06), 0 2px 8px rgba(133, 0, 63, 0.03);
+$modal-shadow: 0 12px 32px rgba(15, 23, 42, 0.1);
 $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
 * {
@@ -243,7 +243,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   max-width: 1280px;
   width: 100%;
   margin: 0 auto;
-  padding: 32px 48px;
+  padding: 20px 32px;
 }
 
 .hero-section {
@@ -251,13 +251,13 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
   color: white;
-  min-height: 170px;
+  min-height: 120px;
   border-radius: 20px;
-  padding: 40px 48px;
+  padding: 24px 36px;
   display: flex;
   align-items: center;
-  box-shadow: 0 12px 30px rgba(133, 0, 63, 0.15);
-  margin-bottom: 32px;
+  box-shadow: 0 4px 16px rgba(133, 0, 63, 0.08);
+  margin-bottom: 24px;
 
   &::before {
     content: '';
@@ -278,7 +278,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
   h1 {
     margin: 0;
-    font-size: 36px;
+    font-size: 26px;
     font-weight: 800;
     letter-spacing: -0.5px;
     line-height: 1.15;
@@ -286,8 +286,8 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   p {
-    margin: 10px 0 0;
-    font-size: 15px;
+    margin: 6px 0 0;
+    font-size: 13.5px;
     opacity: 0.85;
     font-weight: 500;
     line-height: 1.5;
@@ -297,14 +297,14 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 .inicio-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 390px;
-  gap: 26px;
+  gap: 20px;
   align-items: stretch;
 }
 
 .inicio-side-panel {
   display: flex;
   flex-direction: column;
-  gap: 26px;
+  gap: 20px;
   height: 100%;
 }
 
@@ -344,7 +344,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .card-header {
-  padding: 18px 24px;
+  padding: 12px 20px;
   border-bottom: 1px solid rgba(226, 232, 240, 0.8);
   background: linear-gradient(180deg, #ffffff 0%, #fcfcfc 100%);
   display: flex;
@@ -429,7 +429,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 20px;
-  padding: 16px 24px;
+  padding: 12px 20px;
   border-bottom: 1px solid $borde;
   align-items: center;
   transition: $transition;
@@ -646,14 +646,14 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
   i {
     position: absolute;
-    left: 14px;
+    left: 12px;
     color: $texto-mutado;
-    font-size: 16px;
+    font-size: 15px;
     pointer-events: none;
   }
 
   &.align-start i {
-    top: 14px;
+    top: 11px;
   }
 
   input,
@@ -664,7 +664,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     background: #ffffff;
     color: $texto;
     border-radius: $radius-md;
-    padding: 10px 14px 10px 40px;
+    padding: 8px 12px 8px 36px;
     font-size: $font-md;
     font-weight: 500;
     outline: none;
@@ -686,7 +686,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   textarea {
-    min-height: 110px;
+    min-height: 90px;
     resize: vertical;
     line-height: 1.5;
   }
@@ -875,20 +875,20 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     background: $vino;
     color: white;
     border-radius: $radius-md;
-    padding: 10px 20px;
+    padding: 8px 16px;
     font-size: $font-md;
     font-weight: 700;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    box-shadow: 0 3px 8px rgba(133, 0, 63, 0.12);
+    box-shadow: 0 2px 6px rgba(133, 0, 63, 0.08);
     transition: $transition;
 
     &:hover {
       background: $vino-oscuro;
       transform: translateY(-1px);
-      box-shadow: 0 5px 12px rgba(133, 0, 63, 0.18);
+      box-shadow: 0 4px 10px rgba(133, 0, 63, 0.12);
     }
 
     &.btn-secondary {
@@ -941,7 +941,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .inbox-header {
-  padding: 18px 24px;
+  padding: 12px 20px;
   background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
   border-bottom: 1px solid $borde;
   display: flex;
@@ -963,7 +963,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   h3 {
     margin: 0;
     color: $vino;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 800;
     display: flex;
     align-items: center;
@@ -1024,7 +1024,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   display: grid;
   grid-template-columns: 220px minmax(0, 1fr) 190px;
   gap: 24px;
-  padding: 20px 24px;
+  padding: 14px 20px;
   border-bottom: 1px solid $borde;
   align-items: start;
   transition: $transition;
@@ -1036,13 +1036,13 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   &:hover {
     background: rgba(133, 0, 63, 0.025);
     border-left: 2px solid rgba(133, 0, 63, 0.25);
-    padding-left: 22px;
+    padding-left: 18px;
   }
 
   &.unread {
     background: rgba(133, 0, 63, 0.025);
     border-left: 4px solid $vino;
-    padding-left: 20px;
+    padding-left: 16px;
 
     .message-title-row h4 {
       font-weight: 800;
@@ -1373,64 +1373,64 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .file-empty {
-  border: 2px dashed $borde;
-  border-radius: 12px;
-  padding: 30px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 8px;
+  padding: 20px 16px;
   background: #fafafa;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 8px;
   text-align: center;
 
   i {
-    font-size: 32px;
+    font-size: 24px;
     color: $texto-mutado;
   }
 
   p {
     margin: 0;
     color: $texto-suave;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
   }
 }
 
 .empty-module {
-  padding: 48px;
+  padding: 32px;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   max-width: 600px;
-  margin: 40px auto;
+  margin: 24px auto;
 
   .empty-state-icon {
-    width: 64px;
-    height: 64px;
-    border-radius: 20px;
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
     background: rgba(133, 0, 63, 0.06);
     display: flex;
     align-items: center;
     justify-content: center;
     color: $vino;
-    font-size: 28px;
-    margin-bottom: 20px;
+    font-size: 20px;
+    margin-bottom: 12px;
   }
 
   h3 {
-    margin: 0 0 8px;
+    margin: 0 0 6px;
     color: $vino;
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 800;
   }
 
   p {
     margin: 0;
     color: $texto-suave;
-    font-size: 14px;
+    font-size: 13.5px;
     line-height: 1.5;
   }
 }
@@ -1551,11 +1551,12 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .hero-section {
-    padding: 30px 24px;
+    padding: 16px 20px;
+    min-height: auto;
   }
 
   .hero-content h1 {
-    font-size: 28px;
+    font-size: 20px;
   }
 
   .form-row {
@@ -2178,8 +2179,8 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 16px;
-  padding: 12px 20px;
+  border-radius: 12px;
+  padding: 8px 16px;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -2189,7 +2190,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   transition: $transition;
 
   i {
-    font-size: 28px;
+    font-size: 22px;
     color: white;
   }
 
@@ -2752,7 +2753,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       color: #dc2626;
       border: 1px solid rgba(220, 38, 38, 0.2);
       border-radius: $radius-md;
-      padding: 10px 16px;
+      padding: 8px 14px;
       font-size: $font-sm;
       font-weight: 700;
       cursor: pointer;
@@ -2780,14 +2781,14 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   color: $texto-suave;
   border: 1px solid $borde;
   border-radius: 999px;
-  padding: 11px 18px;
-  min-width: 125px;
+  padding: 8px 14px;
+  min-width: 110px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
-  font-size: 14px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+  font-size: 13px;
   font-weight: 700;
 
   i {
@@ -2901,7 +2902,6 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-/* Full Calendar Modal & Columns */
 .calendar-modal {
   max-width: 900px;
   width: 90%;
@@ -3485,7 +3485,6 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-/* Administración de Usuarios */
 .admin-module {
   max-width: 1200px;
   margin: 0 auto;
@@ -3527,7 +3526,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
   th,
   td {
-    padding: 12px 18px;
+    padding: 10px 14px;
     border-bottom: 1px solid rgba(226, 232, 240, 0.8);
     vertical-align: middle;
   }
@@ -3757,7 +3756,7 @@ tr.selected-row td:first-child {
   background: white;
   color: $texto-suave;
   border-radius: $radius-md;
-  padding: 10px 18px;
+  padding: 8px 14px;
   font-size: $font-sm;
   font-weight: 700;
   cursor: pointer;
@@ -3834,9 +3833,6 @@ tr.selected-row td:first-child {
   }
 }
 
-/* Redundant state badges removed, styled globally above */
-
-/* Clickable Calendar Events Interactive Styles */
 .calendar-event-item.clickable {
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -3848,7 +3844,6 @@ tr.selected-row td:first-child {
   }
 }
 
-/* Optimized Message Form Layout */
 .message-form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -3902,7 +3897,6 @@ tr.selected-row td:first-child {
   }
 }
 
-/* Custom overlay stacks, cursors and text wraps added for UX bugfixes */
 .details-modal-backdrop {
   z-index: 250 !important;
 }
