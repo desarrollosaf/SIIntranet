@@ -62,7 +62,6 @@ export class App implements OnDestroy {
   constructor(private cdr: ChangeDetectorRef, private zone: NgZone) {
     this.detectarSesionGuardada();
     this.detectarModuloInicial();
-    // Initialize empty document categories
     this.categoriasFormatos.forEach(cat => {
       this.documentosFormatos[cat] = [];
     });
@@ -323,7 +322,6 @@ export class App implements OnDestroy {
       });
     }
 
-    // Rellenar hasta completar exactamente 42 celdas (6 semanas x 7 días)
     const totalCeldas = 42;
     while (dias.length < totalCeldas) {
       dias.push({
@@ -615,14 +613,12 @@ export class App implements OnDestroy {
   get mensajesEnviadosFiltrados(): Mensaje[] {
     let list = this.mensajesBandeja.filter(m => this.esMensajeEnviado(m));
 
-    // Sort: newest first
     list.sort((a, b) => {
       const datetimeA = `${a.fecha}T${a.hora}`;
       const datetimeB = `${b.fecha}T${b.hora}`;
       return datetimeB.localeCompare(datetimeA);
     });
 
-    // Text filter
     const textQuery = (this.buscarTextoEnviados || '').trim().toLowerCase();
     if (textQuery) {
       list = list.filter(m =>
@@ -633,7 +629,6 @@ export class App implements OnDestroy {
       );
     }
 
-    // Status filter
     const statusQuery = this.buscarEstadoEnviados;
     if (statusQuery === 'Todos') {
       list = list.filter(m => m.estado !== 'Eliminado');
@@ -767,12 +762,10 @@ export class App implements OnDestroy {
     event.stopPropagation();
 
     if (!msg.confirmarEliminarSent) {
-      // Reset confirmation on other messages to avoid confusion
       this.mensajesBandeja.forEach(m => m.confirmarEliminarSent = false);
       msg.confirmarEliminarSent = true;
       this.cdr.detectChanges();
 
-      // Auto cancel after 5 seconds
       setTimeout(() => {
         if (msg.confirmarEliminarSent) {
           msg.confirmarEliminarSent = false;
@@ -1324,7 +1317,7 @@ export class App implements OnDestroy {
   }
 
   inicializarDatosPrueba(): void {
-    // Método vacío para la versión de producción limpia.
+    // ---
   }
 
   normalizarListaDestinatarios(destinatarios: string): string[] {
@@ -1569,4 +1562,4 @@ export class App implements OnDestroy {
     }
   }
 
-}
+}

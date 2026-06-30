@@ -169,7 +169,7 @@
             } @empty {
             <div class="file-empty" style="margin: 16px; border-radius: 10px;">
               <i class="bi bi-inbox"></i>
-              <p>No hay mensajes recientes por el momento.</p>
+              <p>No hay mensajes recientes por el momento</p>
             </div>
             }
           </div>
@@ -197,7 +197,7 @@
               </div>
               <div class="calendar-card-compact-text">
                 <h4>Calendario</h4>
-                <p>Actividad documental y recordatorios</p>
+                <p>Actividad y recordatorios</p>
               </div>
             </div>
             <div class="calendar-card-compact-action">
@@ -226,7 +226,7 @@
             </div>
 
             <div class="form-group">
-              <label for="fecha">Fecha de creación:</label>
+              <label for="fecha">Fecha y hora de creación:</label>
               <div class="input-with-icon">
                 <i class="bi bi-calendar3"></i>
                 <input id="fecha" name="fecha" type="date" [(ngModel)]="formFecha" readonly class="readonly-input"
@@ -306,7 +306,7 @@
             <div class="input-with-icon">
               <i class="bi bi-search"></i>
               <input type="text" name="buscarDestinatario" [(ngModel)]="buscarDestinatario"
-                placeholder="Buscar usuarios disponibles..." />
+                placeholder="Buscar usuarios disponibles" />
             </div>
           </div>
 
@@ -318,7 +318,7 @@
                 @for (usuario of usuariosDisponiblesFiltrados; track usuario) {
                 <option [value]="usuario" (dblclick)="pasarDirecto(usuario)">{{ usuario }}</option>
                 } @empty {
-                <option disabled>No hay usuarios disponibles por el momento.</option>
+                <option disabled>No hay usuarios disponibles por el momento</option>
                 }
               </select>
             </div>
@@ -364,7 +364,7 @@
           </button>
           <button type="button" class="btn-secondary" (click)="cancelarFormulario()">
             <i class="bi bi-x-circle-fill"></i>
-            <span>Limpiar formulario</span>
+            <span>Limpiar</span>
           </button>
         </div>
       </form>
@@ -377,11 +377,11 @@
 
         <div class="sent-messages-toolbar">
           <div class="search-box">
-            <label for="buscarTextoEnviados">Buscar documento enviado</label>
+            <label for="buscarTextoEnviados">Buscar mensaje enviado</label>
             <div class="input-with-icon">
               <i class="bi bi-search"></i>
               <input id="buscarTextoEnviados" name="buscarTextoEnviados" type="text" [(ngModel)]="buscarTextoEnviados"
-                placeholder="Buscar por título, destinatario, descripción o documento..." />
+                placeholder="Buscar por título, destinatario, descripción o documento" />
             </div>
           </div>
 
@@ -490,7 +490,7 @@
           <div class="file-empty" style="margin: 20px; border-radius: 10px;">
             <i class="bi bi-send-x-fill"></i>
             @if (mensajesEnviados.length === 0) {
-            <p>No hay mensajes enviados por el momento.</p>
+            <p>No hay mensajes enviados por el momento</p>
             } @else {
             <p>No se encontraron mensajes enviados con los filtros seleccionados.</p>
             }
@@ -508,7 +508,7 @@
             <div class="input-with-icon">
               <i class="bi bi-search"></i>
               <input id="buscarMensaje" name="buscarMensaje" type="text" [(ngModel)]="buscarTexto"
-                placeholder="Buscar por remitente, título o descripción..." />
+                placeholder="Buscar por remitente, título o descripción" />
             </div>
           </div>
 
@@ -643,8 +643,8 @@
             </article>
             } @empty {
             <div class="file-empty">
-              <i class="bi bi-chat-left-x-fill"></i>
-              <p>No hay mensajes en la bandeja.</p>
+              <i class="bi bi-inbox"></i>
+              <p>No hay mensajes en la bandeja de entrada por el momento</p>
             </div>
             }
           </div>
@@ -678,7 +678,7 @@
               } @empty {
               <div class="file-empty" style="margin: 16px;">
                 <i class="bi bi-folder-symlink"></i>
-                <p>No hay formatos cargados por el momento.</p>
+                <p>No hay formatos cargados por el momento</p>
               </div>
               }
             </div>
@@ -697,7 +697,7 @@
             <div class="input-with-icon">
               <i class="bi bi-search"></i>
               <input id="buscarUsuarioAdmin" name="buscarUsuarioAdmin" type="text" [(ngModel)]="buscarUsuarioAdmin"
-                placeholder="Buscar por nombre, usuario, correo, área, rol o estado..." />
+                placeholder="Buscar por nombre, usuario, correo, área, rol o estado" />
             </div>
           </div>
 
@@ -785,7 +785,7 @@
                     <div class="file-empty" style="margin: 20px;">
                       <i class="bi bi-people"></i>
                       @if (usuariosSistema.length === 0) {
-                      <p>No hay usuarios registrados por el momento.</p>
+                      <p>No hay usuarios registrados por el momento</p>
                       } @else {
                       <p>No se encontraron usuarios con los filtros seleccionados.</p>
                       }
@@ -899,18 +899,15 @@
       </div>
       <div class="modal-body calendar-modal-body">
         <div class="calendar-modal-columns">
-          <!-- Columna Izquierda: Calendario Grid -->
           <div class="calendar-column-left">
-            <!-- Buscador Ir a Fecha -->
             <div class="calendar-search-row">
-              <label for="buscarFechaInput">Ir a fecha:</label>
+              <label for="buscarFechaInput">fecha:</label>
               <div class="input-with-button">
                 <input id="buscarFechaInput" name="fechaBusquedaCalendario" type="date"
                   [(ngModel)]="fechaBusquedaCalendario" (change)="irAFechaCalendario()" />
               </div>
             </div>
 
-            <!-- Navegación de Mes -->
             <div class="calendar-controls-row">
               <button type="button" class="btn-calendar-nav" (click)="mesAnteriorCalendario()" title="Mes anterior">
                 <i class="bi bi-chevron-left"></i>
@@ -923,14 +920,12 @@
               </button>
             </div>
 
-            <!-- Cabecera de días de la semana -->
             <div class="calendar-weekdays">
               @for (dia of diasSemanaCalendario; track dia) {
               <span>{{ dia }}</span>
               }
             </div>
 
-            <!-- Grid de 42 celdas -->
             <div class="calendar-grid">
               @for (dia of diasCalendario; track $index) {
               @if (!dia.dia) {
@@ -962,7 +957,6 @@
               }
             </div>
 
-            <!-- Leyenda de colores -->
             <div class="calendar-legend">
               <span><i class="dot-recibido"></i> Recibido</span>
               <span><i class="dot-enviado"></i> Enviado</span>
@@ -970,14 +964,11 @@
             </div>
           </div>
 
-          <!-- Columna Derecha: Actividad y Recordatorios -->
           <div class="calendar-column-right">
-            <!-- Título del día seleccionado -->
             <div class="calendar-day-title">
               <strong>{{ fechaSeleccionadaCalendarioTexto }}</strong>
             </div>
 
-            <!-- Botones de Filtro -->
             <div class="calendar-filters-row">
               <button type="button" class="btn-filter" [class.active]="filtroEventosCalendario === 'Todos'"
                 (click)="filtroEventosCalendario = 'Todos'">
@@ -997,7 +988,6 @@
               </button>
             </div>
 
-            <!-- Panel de actividades con scroll vertical -->
             <div class="calendar-activities-scroll">
               @for (evento of eventosFechaSeleccionadaFiltrados; track $index) {
               <div class="calendar-event-item" [class.clickable]="evento.tipo !== 'recordatorio'"
@@ -1078,16 +1068,15 @@
               </div>
               } @empty {
               <p class="calendar-empty-text">
-                No hay actividad registrada para esta fecha.
+                No hay actividad para esta fecha.
               </p>
               }
             </div>
 
-            <!-- Formulario de Recordatorio con Hora Opcional -->
             <form class="calendar-reminder-form-expanded" (submit)="agregarRecordatorioCalendario($event)">
               <div class="reminder-inputs">
                 <input type="text" name="nuevoRecordatorioCalendario" [(ngModel)]="nuevoRecordatorioCalendario"
-                  placeholder="Agregar recordatorio (máx. 150 caracteres)..." required maxlength="150" />
+                  placeholder="Agregar recordatorio" required maxlength="150" />
                 <input type="time" name="nuevoRecordatorioHoraCalendario" [(ngModel)]="nuevoRecordatorioHoraCalendario"
                   title="Hora opcional" />
               </div>
