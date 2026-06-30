@@ -117,7 +117,8 @@
         <h1>{{ tituloModulo }}</h1>
       </div>
 
-      <div class="hero-user-badge clickable" (click)="verPerfilUsuario()" title="Ver detalles de perfil">
+      <div class="hero-user-badge clickable" (click)="verPerfilUsuario()" title="Ver detalles de perfil"
+        tabindex="0" role="button" (keydown.enter)="verPerfilUsuario()" (keydown.space)="$event.preventDefault(); verPerfilUsuario()">
         <i class="bi bi-person-circle"></i>
         <div class="user-info-text">
           <span class="user-name">{{ usuarioActual.nombre }}</span>
@@ -270,7 +271,8 @@
                   }
                 </div>
                 }
-                <label class="file-input-container" for="documento">
+                <label class="file-input-container" for="documento" tabindex="0" role="button"
+                  aria-label="Buscar y adjuntar archivos" (keydown)="manejarTecladoArchivo($event)">
                   <i class="bi bi-file-earmark-arrow-up"></i>
                   <span class="file-selector-btn">Buscar archivo</span>
                   <span class="file-selector-text" [class.has-file]="formArchivos.length > 0">
