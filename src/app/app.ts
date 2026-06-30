@@ -203,17 +203,6 @@ export class App implements OnDestroy {
     });
   }
 
-  cerrarNotificacion(): void {
-    if (this.notificacionTimeout) {
-      clearTimeout(this.notificacionTimeout);
-      this.notificacionTimeout = null;
-    }
-    this.zone.run(() => {
-      this.notificacion = null;
-      this.cdr.detectChanges();
-    });
-  }
-
   isLoggedIn = false;
   loginUsuario = '';
   loginPassword = '';
@@ -240,7 +229,7 @@ export class App implements OnDestroy {
 
   enlacesExternos = [
     { nombre: 'Cámara de Diputados del Estado de México', url: 'https://congresoedomex.gob.mx/' },
-    { nombre: 'Instituto de Estudios Legislativos', url: 'https://inesle.gob.mx/' },
+    { nombre: 'Instituto de Estudios Legislativos', url: 'https://www.inesle.gob.mx/' },
     { nombre: 'Órgano Superior de Fiscalización', url: 'https://www.osfem.gob.mx/' },
     { nombre: 'Secretaría de Asuntos Parlamentarios', url: 'https://legislacion.congresoedomex.gob.mx/asuntosparlamentarios/secretaria' },
     { nombre: 'Contraloría del Poder Legislativo', url: 'https://contraloriadelpoderlegislativo.gob.mx/index' }
@@ -1203,14 +1192,6 @@ export class App implements OnDestroy {
     return msg.remitente !== this.usuarioActual.nombre;
   }
 
-  obtenerTextoOrigenMensaje(msg: Mensaje): string {
-    return this.esMensajeEnviado(msg) ? 'Enviado por ti' : msg.remitente;
-  }
-
-  obtenerTextoDestinoMensaje(msg: Mensaje): string {
-    return this.esMensajeEnviado(msg) ? msg.destinatarios : 'Para mí';
-  }
-
   obtenerResumenParticipantesMensaje(msg: Mensaje): string {
     if (this.esMensajeEnviado(msg)) {
       const resumen = this.obtenerDestinatariosResumen(msg, 2);
@@ -1218,10 +1199,6 @@ export class App implements OnDestroy {
       return `Para: ${resumen}${extra > 0 ? ` y ${extra} más` : ''}`;
     }
     return `De: ${msg.remitente}`;
-  }
-
-  obtenerEtiquetaTipoMensaje(msg: Mensaje): string {
-    return this.esMensajeEnviado(msg) ? 'Enviado' : 'Recibido';
   }
 
   puedeResponderMensaje(msg: Mensaje | null): boolean {
@@ -1371,13 +1348,6 @@ export class App implements OnDestroy {
   normalizarListaDocumentos(documento: string): string[] {
     if (!documento || documento === 'Sin adjunto') return [];
     return documento.split(',').map(d => d.trim()).filter(d => d.length > 0);
-  }
-
-  obtenerDocumentosResumen(msg: Mensaje | null, limite = 2): string {
-    if (!msg || !msg.documento || msg.documento === 'Sin adjunto') return 'Sin adjunto';
-    const list = this.normalizarListaDocumentos(msg.documento);
-    if (list.length === 0) return 'Sin adjunto';
-    return list.slice(0, limite).join(', ');
   }
 
   obtenerCantidadDocumentosExtra(msg: Mensaje | null, limite = 2): number {
@@ -1589,4 +1559,14 @@ export class App implements OnDestroy {
     return this.formatearFechaLocal(d);
   }
 
-}
+  manejarTecladoArchivo(event: KeyboardEvent): void {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      const fileInput = document.getElementById('documento') as HTMLInputElement;
+      if (fileInput) {
+        fileInput.click();
+      }
+    }
+  }
+
+}

@@ -3518,6 +3518,10 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     background: #cbd5e1;
     border-radius: 10px;
   }
+
+  @media (min-width: 769px) and (max-width: 1024px) {
+    overflow-x: auto;
+  }
 }
 
 .admin-table {
@@ -3531,7 +3535,29 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     padding: 12px 18px;
     border-bottom: 1px solid rgba(226, 232, 240, 0.8);
     vertical-align: middle;
+  }
+
+  th:nth-child(1),
+  td:nth-child(1) {
+    white-space: normal;
+    word-break: break-word;
+    min-width: 140px;
+  }
+
+  th:nth-child(2),
+  td:nth-child(2),
+  th:nth-child(3),
+  td:nth-child(3),
+  th:nth-child(4),
+  td:nth-child(4) {
     white-space: nowrap;
+  }
+
+  th.actions-header,
+  td.actions-cell {
+    white-space: nowrap;
+    width: 1%;
+    text-align: right;
   }
 
   th {
