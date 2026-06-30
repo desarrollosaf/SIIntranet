@@ -117,8 +117,9 @@
         <h1>{{ tituloModulo }}</h1>
       </div>
 
-      <div class="hero-user-badge clickable" (click)="verPerfilUsuario()" title="Ver detalles de perfil"
-        tabindex="0" role="button" (keydown.enter)="verPerfilUsuario()" (keydown.space)="$event.preventDefault(); verPerfilUsuario()">
+      <div class="hero-user-badge clickable" (click)="verPerfilUsuario()" title="Ver detalles de perfil" tabindex="0"
+        role="button" (keydown.enter)="verPerfilUsuario()"
+        (keydown.space)="$event.preventDefault(); verPerfilUsuario()">
         <i class="bi bi-person-circle"></i>
         <div class="user-info-text">
           <span class="user-name">{{ usuarioActual.nombre }}</span>
@@ -523,7 +524,7 @@
                 <option value="Respondido">Respondido</option>
                 <option value="Enviado">Enviado</option>
                 <option value="Cancelado">Cancelado</option>
-                <option value="Eliminado">🗑 Papelera</option>
+                <option value="Eliminado">Papelera</option>
               </select>
             </div>
           </div>
@@ -1068,7 +1069,7 @@
               </div>
               } @empty {
               <p class="calendar-empty-text">
-                No hay actividad para esta fecha.
+                No hay actividad registrada para esta fecha.
               </p>
               }
             </div>

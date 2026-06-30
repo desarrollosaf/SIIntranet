@@ -270,7 +270,7 @@ export class App implements OnDestroy {
 
   get eventosCalendario(): EventoCalendario[] {
     const eventosMensajes = this.mensajesBandeja
-      .filter(msg => msg.fecha && msg.estado !== 'Eliminado')
+      .filter(msg => msg.fecha && msg.estado !== 'Eliminado' && msg.estadoTemporal !== 'Eliminando')
       .map(msg => ({
         fecha: msg.fecha,
         tipo: (this.esMensajeEnviado(msg) ? 'enviado' : 'recibido') as 'enviado' | 'recibido' | 'recordatorio',
