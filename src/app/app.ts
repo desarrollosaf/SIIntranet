@@ -1,5 +1,6 @@
 import { Component, ChangeDetectorRef, HostListener, OnDestroy, NgZone } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { USUARIOS_PRUEBA, MENSAJES_PRUEBA, RECORDATORIOS_PRUEBA, DOCUMENTOS_FORMATOS_PRUEBA } from './datos-prueba';
 
 export interface Mensaje {
   id: number;
@@ -63,7 +64,7 @@ export class App implements OnDestroy {
     this.detectarSesionGuardada();
     this.detectarModuloInicial();
     this.categoriasFormatos.forEach(cat => {
-      this.documentosFormatos[cat] = [];
+      this.documentosFormatos[cat] = DOCUMENTOS_FORMATOS_PRUEBA[cat] || [];
     });
     this.inicializarVisitas();
     this.actualizarUsuariosDisponibles();
@@ -152,9 +153,9 @@ export class App implements OnDestroy {
 
   moduloActual = 'inicio';
 
-  private nextId = 1;
+  private nextId = 111;
 
-  private nextRecordatorioId = 1;
+  private nextRecordatorioId = 6;
 
   diasSemanaCalendario = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 
@@ -169,7 +170,7 @@ export class App implements OnDestroy {
   filtroEventosCalendario: 'Todos' | 'Recibidos' | 'Enviados' | 'Recordatorios' = 'Todos';
   buscarDestinatario = '';
 
-  recordatoriosCalendario: EventoCalendario[] = [];
+  recordatoriosCalendario: EventoCalendario[] = RECORDATORIOS_PRUEBA;
 
   notificacion: { mensaje: string; tipo: 'error' | 'exito' | 'info' | 'advertencia' } | null = null;
   private notificacionTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -214,7 +215,7 @@ export class App implements OnDestroy {
     tipo: 'normal' as 'normal' | 'admin'
   };
 
-  usuariosSistema: UsuarioSistema[] = [];
+  usuariosSistema: UsuarioSistema[] = USUARIOS_PRUEBA;
 
   buscarUsuarioAdmin = '';
   filtroRolAdmin = 'Todos';
@@ -248,7 +249,7 @@ export class App implements OnDestroy {
 
   envioTimeouts: { [key: number]: ReturnType<typeof setTimeout> } = {};
 
-  mensajesBandeja: Mensaje[] = [];
+  mensajesBandeja: Mensaje[] = MENSAJES_PRUEBA;
 
   buscarTexto = '';
   buscarEstado = 'Todos';
