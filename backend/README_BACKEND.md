@@ -1,6 +1,6 @@
-# SIIntranet Backend - Base Inicial
+# SIIntranet Backend - Base Inicial con Contratos de API
 
-Este proyecto constituye la base inicial del backend para la intranet del Poder Legislativo del Estado de México (SIIntranet). Está desarrollado utilizando **NestJS** y configurado para servir como API REST para el cliente de Angular.
+Este proyecto constituye el backend para la intranet del Poder Legislativo del Estado de México (SIIntranet). Está desarrollado utilizando **NestJS** y configurado para servir como API REST para el cliente de Angular.
 
 ---
 
@@ -8,27 +8,55 @@ Este proyecto constituye la base inicial del backend para la intranet del Poder 
 Todos los módulos de la aplicación se ubican en `src/modules/` y cuentan con sus respectivos controladores, servicios y módulos:
 
 1. **health**: Endpoint de verificación de estado y salud general de la API.
-2. **auth**: Gestión inicial de autenticación.
-3. **usuarios**: Gestión de cuentas de usuario del sistema.
-4. **mensajes**: Servicio de mensajería digital e institucional.
+2. **auth**: Gestión inicial y simulación de inicio de sesión.
+3. **usuarios**: Gestión de cuentas de usuario del sistema (CRUD completo en memoria).
+4. **mensajes**: Servicio de envío, recepción y edición de mensajes institucionales (CRUD completo en memoria).
 5. **formatos**: Módulo de categorías y archivos de formato.
 6. **recordatorios**: Gestión de calendario y recordatorios asociados.
 7. **archivos**: Gestión de almacenamiento y subida de archivos adjuntos.
 
 ---
 
-## Rutas Iniciales Disponibles
+## Rutas de la API (Fase 2 - Contratos de API)
 Todas las rutas de la API utilizan el prefijo global `/api` configurado en `src/main.ts`:
 
-* **Salud del Sistema:**
-  * `GET /api/health` — Verifica el estado de salud del backend y la hora actual del servidor.
-* **Endpoints de Estado (Mock status):**
-  * `GET /api/auth/status`
-  * `GET /api/usuarios/status`
-  * `GET /api/mensajes/status`
-  * `GET /api/formatos/status`
-  * `GET /api/recordatorios/status`
-  * `GET /api/archivos/status`
+### 🔑 Autenticación (Módulo `auth`)
+* `POST /api/auth/login` — Autenticación simulada.
+  * **Cuerpo (LoginDto):** `{ "usuario": "admin", "password": "any" }`
+  * **Reglas:**
+    * Si el usuario es `"admin"`, responde con privilegios de **Administrador**.
+    * Si el usuario coincide con algún registro en memoria (`/usuarios`), inicia con dicho perfil.
+    * Cualquier otro texto inicia sesión como **Usuario Normal**.
+* `GET /api/auth/status` — Endpoint de verificación de estado.
+
+### 👥 Usuarios (Módulo `usuarios` - CRUD en Memoria)
+* `GET /api/usuarios` — Lista todos los usuarios en memoria.
+* `GET /api/usuarios/:id` — Obtiene los detalles de un usuario específico.
+* `POST /api/usuarios` — Registra un nuevo usuario.
+  * **Cuerpo (CreateUsuarioDto):** `{ "nombre": "...", "usuario": "...", "correo": "...", "area": "...", "rol": "...", "estado": "..." }`
+* `PATCH /api/usuarios/:id` — Actualiza información de un usuario.
+  * **Cuerpo (UpdateUsuarioDto):** Campos opcionales a modificar.
+* `PATCH /api/usuarios/:id/password` — Actualiza manualmente la contraseña de un usuario.
+  * **Cuerpo (ChangePasswordDto):** `{ "passwordNueva": "..." }`
+* `DELETE /api/usuarios/:id` — Desactiva a un usuario (cambia su estado a `"Inactivo"` sin borrarlo físicamente).
+* `GET /api/usuarios/status` — Endpoint de verificación de estado.
+
+### ✉️ Mensajería (Módulo `mensajes` - CRUD en Memoria)
+* `GET /api/mensajes` — Lista todos los mensajes en memoria (excluye eliminados).
+* `GET /api/mensajes/recibidos` — Obtiene los mensajes con tipo `"recibido"`.
+* `GET /api/mensajes/enviados` — Obtiene los mensajes con tipo `"enviado"`.
+* `GET /api/mensajes/:id` — Obtiene el detalle de un mensaje específico.
+* `POST /api/mensajes` — Registra un nuevo mensaje enviado.
+  * **Cuerpo (CreateMensajeDto):** `{ "titulo": "...", "descripcion": "...", "remitente": "...", "destinatarios": "...", "documento": "..." }`
+* `PATCH /api/mensajes/:id` — Edita las propiedades de un mensaje en memoria.
+* `DELETE /api/mensajes/:id` — Marca un mensaje como `"Eliminado"` (sin borrarlo físicamente).
+* `GET /api/mensajes/status` — Endpoint de verificación de estado.
+
+### 📁 Otros Módulos (En espera de Fase 3)
+* `GET /api/health` — Verificación de salud.
+* `GET /api/formatos/status` — Módulo Formatos.
+* `GET /api/recordatorios/status` — Módulo Recordatorios.
+* `GET /api/archivos/status` — Módulo Archivos.
 
 ---
 
@@ -69,6 +97,6 @@ npm run test
 ---
 
 ## Estado Actual de la Integración
-* ⚠️ **Base de Datos (MySQL):** No está conectada todavía. Los módulos responden con estados mock indicando `"database": "not-connected"`.
-* ⚠️ **Seguridad (JWT/Auth):** La autenticación real mediante tokens JWT no está implementada todavía.
-* ⚠️ **Consumo de Angular:** El frontend Angular consumirá esta API desde `http://localhost:3000/api` una vez que se inicie la fase de llamadas HTTP.
+* ⚠️ **Base de Datos (MySQL):** No está conectada todavía. Las bases de datos se simulan con arreglos en memoria en los servicios de NestJS.
+* ⚠️ **Seguridad (JWT/Auth):** La autenticación real mediante tokens JWT no está activa todavía (los tokens retornados en login son `null`).
+* 🔗 **Conexión Frontend-Backend:** Esta fase define los contratos de API y endpoints para comenzar a conectar Angular con NestJS consumiendo datos dinámicos simulados.
