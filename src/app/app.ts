@@ -39,6 +39,8 @@ export interface UsuarioSistema {
   rol: string;
   estado: 'Activo' | 'Inactivo';
   passwordTemporal?: string;
+  password?: string;
+  requiereCambioPassword?: boolean;
 }
 
 export interface DocumentoFormato {
@@ -59,8 +61,74 @@ export class App implements OnDestroy {
 
   documentosFormatos: { [categoria: string]: DocumentoFormato[] } = {};
 
+  verPasswordEditUsuario = false;
+  verPasswordVerUsuario = false;
+  mostrarCambioObligatorioModal = false;
+  usuarioPendienteCambio: UsuarioSistema | null = null;
+  nuevaPassword = '';
+  confirmarNuevaPassword = '';
+  verNuevaPassword = false;
+  verConfirmarPassword = false;
+
+  mensajeEditando: Mensaje | null = null;
+  detalleEditandoMensaje = false;
+  editMsgTitulo = '';
+  editMsgDescripcion = '';
+  editMsgFecha = '';
+  editMsgHora = '';
+  editMsgDocumentos: string[] = [];
+  editMsgNuevosArchivos: File[] = [];
+
+  esMensajeNuevo(msg: Mensaje | null | undefined): boolean {
+    if (!msg) return false;
+    return msg.estado === 'Nuevo' || msg.estadoLectura === 'Nuevo';
+  }
+
+  formatearFechaMensaje(fecha: string | null | undefined): string {
+    if (!fecha) {
+      fecha = this.formatearFechaLocal(new Date());
+    }
+    const partes = fecha.split('-');
+    if (partes.length === 3) {
+      const año = partes[0];
+      const mes = partes[1];
+      const dia = partes[2];
+      return `${dia}/${mes}/${año}`;
+    }
+    if (fecha.includes('/')) {
+      return fecha;
+    }
+    return fecha;
+  }
+
+  formatearHoraMensaje(hora: string | null | undefined): string {
+    if (!hora) {
+      const d = new Date();
+      const h = String(d.getHours()).padStart(2, '0');
+      const m = String(d.getMinutes()).padStart(2, '0');
+      hora = `${h}:${m}`;
+    }
+    if (hora.length > 5) {
+      return hora.substring(0, 5);
+    }
+    return hora;
+  }
+
+  asegurarFechaHoraMensajes(): void {
+    if (!this.mensajesBandeja) return;
+    const hoyStr = this.formatearFechaLocal(new Date());
+    const d = new Date();
+    const hStr = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    this.mensajesBandeja.forEach(m => {
+      if (!m.fecha) m.fecha = hoyStr;
+      if (!m.hora) m.hora = hStr;
+    });
+  }
+
   constructor(private cdr: ChangeDetectorRef, private zone: NgZone) {
+    this.inicializarDatosPrueba();
     this.detectarSesionGuardada();
+    this.asegurarFechaHoraMensajes();
     this.detectarModuloInicial();
     this.categoriasFormatos.forEach(cat => {
       this.documentosFormatos[cat] = [];
@@ -78,6 +146,7 @@ export class App implements OnDestroy {
         clearTimeout(this.envioTimeouts[key]);
       }
     }
+    this.generalTimeouts.forEach(t => clearTimeout(t));
   }
 
   inicializarVisitas(): void {
@@ -166,7 +235,7 @@ export class App implements OnDestroy {
   nuevoRecordatorioHoraCalendario = '';
   calendarioModalAbierto = false;
   fechaBusquedaCalendario = '';
-  filtroEventosCalendario: 'Todos' | 'Recibidos' | 'Enviados' | 'Recordatorios' = 'Todos';
+  filtroEventosCalendario: 'Todos' | 'Mensajes' | 'Recordatorios' = 'Todos';
   buscarDestinatario = '';
 
   recordatoriosCalendario: EventoCalendario[] = [];
@@ -247,6 +316,7 @@ export class App implements OnDestroy {
   formArchivos: File[] = [];
 
   envioTimeouts: { [key: number]: ReturnType<typeof setTimeout> } = {};
+  private generalTimeouts: ReturnType<typeof setTimeout>[] = [];
 
   mensajesBandeja: Mensaje[] = [];
 
@@ -564,13 +634,17 @@ export class App implements OnDestroy {
       ? this.formArchivos.map(f => f.name).join(', ')
       : 'Sin adjunto';
 
+    const actual = new Date();
+    const hoyStr = this.formatearFechaLocal(actual);
+    const horaStr = `${String(actual.getHours()).padStart(2, '0')}:${String(actual.getMinutes()).padStart(2, '0')}`;
+
     const nuevoMsg: Mensaje = {
       id: nuevoId,
       remitente: this.usuarioActual.nombre,
       titulo: this.formTitulo,
       descripcion: this.formDescripcion || 'Sin descripción adicional.',
-      fecha: this.formFecha,
-      hora: this.formHora,
+      fecha: this.formFecha || hoyStr,
+      hora: this.formHora || horaStr,
       documento: documentosAdjuntos,
       destinatarios: this.usuariosSeleccionados.join(', '),
       estado: 'Enviando',
@@ -611,13 +685,9 @@ export class App implements OnDestroy {
   }
 
   get mensajesEnviadosFiltrados(): Mensaje[] {
-    let list = this.mensajesBandeja.filter(m => this.esMensajeEnviado(m));
+    let list = this.mensajesBandeja.filter(m => this.esMensajeEnviado(m) && m.estado !== 'Eliminado');
 
-    list.sort((a, b) => {
-      const datetimeA = `${a.fecha}T${a.hora}`;
-      const datetimeB = `${b.fecha}T${b.hora}`;
-      return datetimeB.localeCompare(datetimeA);
-    });
+    list.sort((a, b) => this.compararMensajes(a, b));
 
     const textQuery = (this.buscarTextoEnviados || '').trim().toLowerCase();
     if (textQuery) {
@@ -664,7 +734,9 @@ export class App implements OnDestroy {
   }
 
   get mensajesFiltrados(): Mensaje[] {
-    return this.mensajesBandeja.filter(msg => {
+    const list = this.mensajesBandeja.filter(msg => {
+      if (msg.estado === 'Eliminado') return false;
+
       const query = (this.buscarTexto || '').toLowerCase().trim();
       const matchesText = !query ||
         (msg.remitente || '').toLowerCase().includes(query) ||
@@ -676,35 +748,32 @@ export class App implements OnDestroy {
       const esRecibido = this.esMensajeRecibido(msg);
 
       if (this.buscarEstado === 'Todos') {
-        matchesEstado = msg.estado !== 'Eliminado';
+        matchesEstado = true;
       } else if (this.buscarEstado === 'Nuevo') {
-        matchesEstado = esRecibido && msg.estadoLectura === 'Nuevo' && msg.estado !== 'Eliminado';
+        matchesEstado = esRecibido && msg.estadoLectura === 'Nuevo';
       } else if (this.buscarEstado === 'Visto') {
-        matchesEstado = esRecibido && msg.estadoLectura === 'Visto' && msg.estado !== 'Eliminado';
+        matchesEstado = esRecibido && msg.estadoLectura === 'Visto';
       } else if (this.buscarEstado === 'Respondido') {
-        matchesEstado = esRecibido && msg.estadoRespuesta === 'Respondido' && msg.estado !== 'Eliminado';
+        matchesEstado = esRecibido && msg.estadoRespuesta === 'Respondido';
       } else if (this.buscarEstado === 'Enviado') {
         matchesEstado = esEnviado && msg.estado === 'Enviado';
       } else if (this.buscarEstado === 'Cancelado') {
         matchesEstado = esEnviado && msg.estado === 'Cancelado';
       } else if (this.buscarEstado === 'Eliminado') {
-        matchesEstado = msg.estado === 'Eliminado';
+        matchesEstado = false;
       }
 
       const matchesFecha = !this.buscarFecha || msg.fecha === this.buscarFecha;
 
       return matchesText && matchesEstado && matchesFecha;
     });
+    return list.sort((a, b) => this.compararMensajes(a, b));
   }
 
   get mensajesRecientes(): Mensaje[] {
     return [...this.mensajesBandeja]
       .filter(m => m.estado !== 'Eliminado')
-      .sort((a, b) => {
-        const datetimeA = `${a.fecha}T${a.hora}`;
-        const datetimeB = `${b.fecha}T${b.hora}`;
-        return datetimeB.localeCompare(datetimeA);
-      })
+      .sort((a, b) => this.compararMensajes(a, b))
       .slice(0, 10);
   }
 
@@ -712,14 +781,16 @@ export class App implements OnDestroy {
     this.guardarFoco();
     this.mensajeSeleccionado = msg;
     this.marcarComoVisto(msg);
-    setTimeout(() => {
+    this.generalTimeouts.push(setTimeout(() => {
       const closeBtn = document.querySelector('.details-modal-backdrop .btn-close') as HTMLElement;
       if (closeBtn) closeBtn.focus();
-    }, 50);
+    }, 50));
   }
 
   cerrarDetalles(): void {
     this.mensajeSeleccionado = null;
+    this.detalleEditandoMensaje = false;
+    this.mensajeEditando = null;
     this.restaurarFoco();
   }
 
@@ -742,11 +813,16 @@ export class App implements OnDestroy {
     event.preventDefault();
     event.stopPropagation();
 
+    if (msg.estado === 'Enviando' && this.envioTimeouts[msg.id]) {
+      clearTimeout(this.envioTimeouts[msg.id]);
+      delete this.envioTimeouts[msg.id];
+    }
+
     msg.estadoTemporal = 'Eliminando';
     this.mostrarNotificacion('Eliminando documento...', 'info');
     this.cdr.detectChanges();
 
-    setTimeout(() => {
+    this.generalTimeouts.push(setTimeout(() => {
       msg.estadoTemporal = null;
       msg.estado = 'Eliminado';
       if (this.mensajeSeleccionado && this.mensajeSeleccionado.id === msg.id) {
@@ -754,7 +830,7 @@ export class App implements OnDestroy {
       }
       this.mostrarNotificacion(`El documento "${msg.titulo}" ha sido movido a la Papelera.`, 'exito');
       this.cdr.detectChanges();
-    }, 1500);
+    }, 1500));
   }
 
   eliminarMensajeEnviado(msg: Mensaje, event: Event): void {
@@ -766,21 +842,27 @@ export class App implements OnDestroy {
       msg.confirmarEliminarSent = true;
       this.cdr.detectChanges();
 
-      setTimeout(() => {
+      this.generalTimeouts.push(setTimeout(() => {
         if (msg.confirmarEliminarSent) {
           msg.confirmarEliminarSent = false;
           this.cdr.detectChanges();
         }
-      }, 5000);
+      }, 5000));
       return;
     }
 
     msg.confirmarEliminarSent = false;
+
+    if (msg.estado === 'Enviando' && this.envioTimeouts[msg.id]) {
+      clearTimeout(this.envioTimeouts[msg.id]);
+      delete this.envioTimeouts[msg.id];
+    }
+
     msg.estadoTemporal = 'Eliminando';
     this.mostrarNotificacion('Eliminando mensaje...', 'info');
     this.cdr.detectChanges();
 
-    setTimeout(() => {
+    this.generalTimeouts.push(setTimeout(() => {
       msg.estadoTemporal = null;
       msg.estado = 'Eliminado';
       if (this.mensajeSeleccionado && this.mensajeSeleccionado.id === msg.id) {
@@ -788,7 +870,7 @@ export class App implements OnDestroy {
       }
       this.mostrarNotificacion('Mensaje eliminado.', 'exito');
       this.cdr.detectChanges();
-    }, 1500);
+    }, 1500));
   }
 
   responderMensaje(msg: Mensaje, event: Event): void {
@@ -799,7 +881,7 @@ export class App implements OnDestroy {
     this.mostrarNotificacion('Preparando respuesta...', 'info');
     this.cdr.detectChanges();
 
-    setTimeout(() => {
+    this.generalTimeouts.push(setTimeout(() => {
       msg.estadoTemporal = null;
       this.marcarComoVisto(msg);
       this.marcarComoRespondido(msg);
@@ -827,7 +909,7 @@ export class App implements OnDestroy {
       }
 
       this.cdr.detectChanges();
-    }, 1500);
+    }, 1500));
   }
 
   hacerLogin(event: Event): void {
@@ -841,22 +923,46 @@ export class App implements OnDestroy {
       return;
     }
 
-    this.isLoggedIn = true;
     const usuarioLimpio = this.loginUsuario.trim().toLowerCase();
-    if (usuarioLimpio === 'admin') {
+    const match = this.usuariosSistema.find(u =>
+      u.usuario.toLowerCase() === usuarioLimpio || u.correo.toLowerCase() === usuarioLimpio
+    );
+
+    if (match) {
+      if (match.password && match.password !== this.loginPassword) {
+        this.mostrarNotificacion('Contraseña incorrecta.', 'error');
+        return;
+      }
+      this.isLoggedIn = true;
       this.usuarioActual = {
-        nombre: 'Administrador del sistema',
-        rol: 'Administrador',
-        tipo: 'admin'
+        nombre: match.nombre,
+        rol: match.rol,
+        tipo: (match.rol === 'Administrador' ? 'admin' : 'normal') as 'admin' | 'normal'
       };
-      this.mostrarNotificacion('Sesión iniciada como Administrador.', 'exito');
+      if (match.requiereCambioPassword) {
+        this.mostrarCambioObligatorioModal = true;
+        this.usuarioPendienteCambio = match;
+        this.mostrarNotificacion('Debe cambiar su contraseña obligatoriamente.', 'advertencia');
+      } else {
+        this.mostrarNotificacion(`Sesión iniciada como ${match.nombre}.`, 'exito');
+      }
     } else {
-      this.usuarioActual = {
-        nombre: this.loginUsuario.trim(),
-        rol: 'Usuario',
-        tipo: 'normal'
-      };
-      this.mostrarNotificacion('Sesión iniciada correctamente.', 'exito');
+      this.isLoggedIn = true;
+      if (usuarioLimpio === 'admin') {
+        this.usuarioActual = {
+          nombre: 'Administrador del sistema',
+          rol: 'Administrador',
+          tipo: 'admin'
+        };
+        this.mostrarNotificacion('Sesión iniciada como Administrador.', 'exito');
+      } else {
+        this.usuarioActual = {
+          nombre: this.loginUsuario.trim(),
+          rol: 'Usuario',
+          tipo: 'normal'
+        };
+        this.mostrarNotificacion('Sesión iniciada correctamente.', 'exito');
+      }
     }
 
     sessionStorage.setItem('si_session_logged', 'true');
@@ -869,6 +975,10 @@ export class App implements OnDestroy {
   cerrarSesion(): void {
     this.isLoggedIn = false;
     this.mostrarPerfilModal = false;
+    this.mostrarCambioObligatorioModal = false;
+    this.usuarioPendienteCambio = null;
+    this.nuevaPassword = '';
+    this.confirmarNuevaPassword = '';
     this.loginUsuario = '';
     this.loginPassword = '';
     this.usuarioActual = {
@@ -886,13 +996,54 @@ export class App implements OnDestroy {
     this.resetearFormulario();
   }
 
+  cambiarPasswordObligatorio(event: Event): void {
+    event.preventDefault();
+    if (!this.usuarioPendienteCambio) return;
+
+    const pwd = this.nuevaPassword;
+    const confirmPwd = this.confirmarNuevaPassword;
+
+    if (!pwd) {
+      this.mostrarNotificacion('La contraseña no puede estar vacía.', 'error');
+      return;
+    }
+    if (pwd.length < 8) {
+      this.mostrarNotificacion('La contraseña debe tener al menos 8 caracteres.', 'error');
+      return;
+    }
+    if (pwd !== confirmPwd) {
+      this.mostrarNotificacion('Las contraseñas no coinciden.', 'error');
+      return;
+    }
+
+    const userInList = this.usuariosSistema.find(u => u.id === this.usuarioPendienteCambio!.id);
+    if (userInList) {
+      userInList.password = pwd;
+      userInList.requiereCambioPassword = false;
+    }
+
+    this.usuarioPendienteCambio.password = pwd;
+    this.usuarioPendienteCambio.requiereCambioPassword = false;
+
+    sessionStorage.setItem('si_session_logged', 'true');
+    sessionStorage.setItem('si_session_user', JSON.stringify(this.usuarioActual));
+
+    this.mostrarCambioObligatorioModal = false;
+    this.usuarioPendienteCambio = null;
+    this.nuevaPassword = '';
+    this.confirmarNuevaPassword = '';
+
+    this.mostrarNotificacion('Contraseña actualizada correctamente. Bienvenido al sistema.', 'exito');
+    this.cdr.detectChanges();
+  }
+
   verPerfilUsuario(): void {
     this.guardarFoco();
     this.mostrarPerfilModal = true;
-    setTimeout(() => {
+    this.generalTimeouts.push(setTimeout(() => {
       const closeBtn = document.querySelector('.profile-modal .btn-close') as HTMLElement;
       if (closeBtn) closeBtn.focus();
-    }, 50);
+    }, 50));
   }
 
   cerrarPerfilUsuario(): void {
@@ -922,15 +1073,17 @@ export class App implements OnDestroy {
     this.usuarioSeleccionadoAdmin = usuario;
     this.usuarioEditandoAdmin = null;
     this.modalVerUsuarioAbierto = true;
-    setTimeout(() => {
+    this.verPasswordVerUsuario = false;
+    this.generalTimeouts.push(setTimeout(() => {
       const closeBtn = document.querySelector('.modal-card .btn-close') as HTMLElement;
       if (closeBtn) closeBtn.focus();
-    }, 50);
+    }, 50));
   }
 
   cerrarModalVerUsuario(): void {
     this.modalVerUsuarioAbierto = false;
     this.usuarioSeleccionadoAdmin = null;
+    this.verPasswordVerUsuario = false;
     this.restaurarFoco();
   }
 
@@ -939,10 +1092,11 @@ export class App implements OnDestroy {
     this.usuarioEditandoAdmin = { ...usuario };
     this.modalEditarUsuarioAbierto = true;
     this.modalVerUsuarioAbierto = false;
-    setTimeout(() => {
+    this.verPasswordEditUsuario = false;
+    this.generalTimeouts.push(setTimeout(() => {
       const firstInput = document.querySelector('#editNombre') as HTMLElement;
       if (firstInput) firstInput.focus();
-    }, 50);
+    }, 50));
   }
 
   cerrarModalEditarUsuario(): void {
@@ -954,7 +1108,8 @@ export class App implements OnDestroy {
           this.usuarioEditandoAdmin.correo !== original.correo ||
           this.usuarioEditandoAdmin.area !== original.area ||
           this.usuarioEditandoAdmin.rol !== original.rol ||
-          this.usuarioEditandoAdmin.estado !== original.estado;
+          this.usuarioEditandoAdmin.estado !== original.estado ||
+          this.usuarioEditandoAdmin.password !== original.password;
         if (isDirty) {
           if (!confirm('Tiene cambios sin guardar en el usuario. ¿Desea descartar los cambios?')) {
             return;
@@ -964,6 +1119,7 @@ export class App implements OnDestroy {
     }
     this.modalEditarUsuarioAbierto = false;
     this.usuarioEditandoAdmin = null;
+    this.verPasswordEditUsuario = false;
     this.restaurarFoco();
   }
 
@@ -993,6 +1149,10 @@ export class App implements OnDestroy {
 
     const index = this.usuariosSistema.findIndex(u => u.id === this.usuarioEditandoAdmin!.id);
     if (index !== -1) {
+      const original = this.usuariosSistema[index];
+      if (this.usuarioEditandoAdmin.password !== original.password) {
+        this.usuarioEditandoAdmin.requiereCambioPassword = true;
+      }
       this.usuariosSistema[index] = { ...this.usuarioEditandoAdmin };
       this.usuarioSeleccionadoAdmin = this.usuariosSistema[index];
       this.usuarioEditandoAdmin = null;
@@ -1000,6 +1160,18 @@ export class App implements OnDestroy {
       this.actualizarUsuariosDisponibles();
       this.mostrarNotificacion('Usuario actualizado correctamente.', 'exito');
     }
+  }
+
+  generarPasswordEdicionAdmin(): void {
+    if (!this.usuarioEditandoAdmin) return;
+    const num = Math.floor(1000 + Math.random() * 9000);
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const letter1 = chars[Math.floor(Math.random() * chars.length)];
+    const letter2 = chars[Math.floor(Math.random() * chars.length)];
+    const password = `Temp-${num}-${letter1}${letter2}`;
+    this.usuarioEditandoAdmin.password = password;
+    this.verPasswordEditUsuario = true;
+    this.mostrarNotificacion('Nueva contraseña aleatoria generada.', 'exito');
   }
 
   cambiarEstadoUsuario(usuario: UsuarioSistema): void {
@@ -1248,12 +1420,12 @@ export class App implements OnDestroy {
       msg.estadoTemporal = 'Cancelando';
       this.mostrarNotificacion('Cancelando envío del documento...', 'info');
       this.cdr.detectChanges();
-      setTimeout(() => {
+      this.generalTimeouts.push(setTimeout(() => {
         msg.estadoTemporal = null;
         msg.estado = 'Cancelado';
         this.mostrarNotificacion('Envío cancelado correctamente.', 'exito');
         this.cdr.detectChanges();
-      }, 1500);
+      }, 1500));
     }
   }
 
@@ -1263,10 +1435,10 @@ export class App implements OnDestroy {
     this.filtroEventosCalendario = 'Todos';
     this.fechaBusquedaCalendario = this.fechaSeleccionadaCalendario;
     this.cdr.detectChanges();
-    setTimeout(() => {
+    this.generalTimeouts.push(setTimeout(() => {
       const closeBtn = document.querySelector('.calendar-modal .btn-close') as HTMLElement;
       if (closeBtn) closeBtn.focus();
-    }, 50);
+    }, 50));
   }
 
   cerrarCalendario(): void {
@@ -1278,6 +1450,185 @@ export class App implements OnDestroy {
     this.calendarioModalAbierto = false;
     this.cdr.detectChanges();
     this.restaurarFoco();
+  }
+
+  puedeEditarMensajeEnviado(msg: Mensaje | null): boolean {
+    if (!msg) return false;
+    if (msg.estadoTemporal) return false;
+    if (!this.esMensajeEnviado(msg)) return false;
+    const allowed = ['Enviado', 'Visto', 'Nuevo', 'Respondido'];
+    return allowed.includes(msg.estado);
+  }
+
+  activarEdicionDetalle(): void {
+    if (!this.mensajeSeleccionado) return;
+    const msg = this.mensajeSeleccionado;
+    this.mensajeEditando = msg;
+    
+    if (!msg.fecha) {
+      msg.fecha = this.formatearFechaLocal(new Date());
+    }
+    if (!msg.hora) {
+      const d = new Date();
+      const h = String(d.getHours()).padStart(2, '0');
+      const m = String(d.getMinutes()).padStart(2, '0');
+      msg.hora = `${h}:${m}`;
+    }
+    
+    this.editMsgTitulo = msg.titulo;
+    this.editMsgDescripcion = msg.descripcion;
+    this.editMsgFecha = msg.fecha;
+    this.editMsgHora = msg.hora;
+    
+    const actuales = this.normalizarListaDestinatarios(msg.destinatarios);
+    this.editMsgDestSeleccionados = [...actuales];
+    
+    const todosUsuarios = this.usuariosSistema.map(u => u.nombre);
+    const pool = Array.from(new Set([
+      ...todosUsuarios,
+      'Administrador del sistema',
+      'María Rodríguez López',
+      'Juan Pérez García',
+      'Dirección de Finanzas',
+      'Dirección de Informática',
+      'Dirección de Recursos Materiales'
+    ]));
+    
+    this.editMsgDestDisponibles = pool.filter(u => !actuales.includes(u)).sort();
+    
+    this.editMsgDocumentos = this.normalizarListaDocumentos(msg.documento);
+    this.editMsgNuevosArchivos = [];
+    
+    this.detalleEditandoMensaje = true;
+    this.cdr.detectChanges();
+  }
+
+  cancelarEdicionDetalle(): void {
+    this.detalleEditandoMensaje = false;
+    this.mensajeEditando = null;
+    this.cdr.detectChanges();
+  }
+
+  removerDocumentoExistenteEditor(index: number): void {
+    this.editMsgDocumentos.splice(index, 1);
+    this.cdr.detectChanges();
+  }
+
+  removerNuevoArchivoEditor(index: number): void {
+    this.editMsgNuevosArchivos.splice(index, 1);
+    this.cdr.detectChanges();
+  }
+
+  onNewFileSelectedEditor(event: any): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      for (let i = 0; i < input.files.length; i++) {
+        this.editMsgNuevosArchivos.push(input.files[i]);
+      }
+    }
+    this.cdr.detectChanges();
+  }
+
+  guardarCambiosMensajeEnviado(): void {
+    if (!this.mensajeEditando) return;
+
+    if (!this.editMsgTitulo.trim()) {
+      this.mostrarNotificacion('El título no puede estar vacío.', 'error');
+      return;
+    }
+
+    if (this.editMsgDestSeleccionados.length === 0) {
+      this.mostrarNotificacion('Debe haber al menos un destinatario.', 'error');
+      return;
+    }
+
+    const todosDocNames = [
+      ...this.editMsgDocumentos,
+      ...this.editMsgNuevosArchivos.map(f => f.name)
+    ];
+
+    const finalDocumento = todosDocNames.length > 0
+      ? todosDocNames.join(', ')
+      : 'Sin adjunto';
+
+    const index = this.mensajesBandeja.findIndex(m => m.id === this.mensajeEditando!.id);
+    if (index !== -1) {
+      this.mensajesBandeja[index] = {
+        ...this.mensajesBandeja[index],
+        titulo: this.editMsgTitulo.trim(),
+        descripcion: this.editMsgDescripcion.trim() || 'Sin descripción adicional.',
+        destinatarios: this.editMsgDestSeleccionados.join(', '),
+        documento: finalDocumento,
+        fecha: this.editMsgFecha,
+        hora: this.editMsgHora
+      };
+      
+      this.mensajeSeleccionado = this.mensajesBandeja[index];
+      this.mostrarNotificacion('Mensaje enviado actualizado con éxito.', 'exito');
+      this.detalleEditandoMensaje = false;
+      this.mensajeEditando = null;
+      this.cdr.detectChanges();
+    }
+  }
+
+  editMsgBuscarDestinatario = '';
+  editMsgDestDisponibles: string[] = [];
+  editMsgDestSeleccionados: string[] = [];
+  editMsgSelectedDisponibles: string[] = [];
+  editMsgSelectedSeleccionados: string[] = [];
+
+  get editMsgDestDisponiblesFiltrados(): string[] {
+    const q = (this.editMsgBuscarDestinatario || '').toLowerCase().trim();
+    if (!q) return this.editMsgDestDisponibles;
+    return this.editMsgDestDisponibles.filter(u => u.toLowerCase().includes(q));
+  }
+
+  pasarEdit(): void {
+    if (this.editMsgSelectedDisponibles.length === 0) return;
+    const aMover = [...this.editMsgSelectedDisponibles];
+    this.editMsgDestSeleccionados = [...this.editMsgDestSeleccionados, ...aMover];
+    this.editMsgDestDisponibles = this.editMsgDestDisponibles.filter(u => !aMover.includes(u));
+    this.editMsgSelectedDisponibles = [];
+    this.cdr.detectChanges();
+  }
+
+  quitarEdit(): void {
+    if (this.editMsgSelectedSeleccionados.length === 0) return;
+    const aMover = [...this.editMsgSelectedSeleccionados];
+    this.editMsgDestDisponibles = [...this.editMsgDestDisponibles, ...aMover].sort();
+    this.editMsgDestSeleccionados = this.editMsgDestSeleccionados.filter(u => !aMover.includes(u));
+    this.editMsgSelectedSeleccionados = [];
+    this.cdr.detectChanges();
+  }
+
+  pasarTodosEdit(): void {
+    this.editMsgDestSeleccionados = [...this.editMsgDestSeleccionados, ...this.editMsgDestDisponibles];
+    this.editMsgDestDisponibles = [];
+    this.editMsgSelectedDisponibles = [];
+    this.cdr.detectChanges();
+  }
+
+  quitarTodosEdit(): void {
+    this.editMsgDestDisponibles = [...this.editMsgDestDisponibles, ...this.editMsgDestSeleccionados].sort();
+    this.editMsgDestSeleccionados = [];
+    this.editMsgSelectedSeleccionados = [];
+    this.cdr.detectChanges();
+  }
+
+  pasarDirectoEdit(usuario: string): void {
+    if (this.editMsgDestDisponibles.includes(usuario)) {
+      this.editMsgDestSeleccionados = [...this.editMsgDestSeleccionados, usuario];
+      this.editMsgDestDisponibles = this.editMsgDestDisponibles.filter(u => u !== usuario);
+    }
+    this.editMsgSelectedDisponibles = this.editMsgSelectedDisponibles.filter(u => u !== usuario);
+  }
+
+  quitarDirectoEdit(usuario: string): void {
+    if (!this.editMsgDestDisponibles.includes(usuario)) {
+      this.editMsgDestDisponibles = [...this.editMsgDestDisponibles, usuario].sort();
+      this.editMsgDestSeleccionados = this.editMsgDestSeleccionados.filter(u => u !== usuario);
+    }
+    this.editMsgSelectedSeleccionados = this.editMsgSelectedSeleccionados.filter(u => u !== usuario);
   }
 
   irAFechaCalendario(): void {
@@ -1301,22 +1652,46 @@ export class App implements OnDestroy {
 
     const filtrados = todos.filter(ev => {
       if (this.filtroEventosCalendario === 'Todos') return true;
-      if (this.filtroEventosCalendario === 'Recibidos') return ev.tipo === 'recibido';
-      if (this.filtroEventosCalendario === 'Enviados') return ev.tipo === 'enviado';
+      if (this.filtroEventosCalendario === 'Mensajes') return ev.tipo === 'recibido' || ev.tipo === 'enviado';
       if (this.filtroEventosCalendario === 'Recordatorios') return ev.tipo === 'recordatorio';
       return true;
     });
 
-    return [...filtrados].sort((a, b) => {
-      const timeA = a.hora || '00:00';
-      const timeB = b.hora || '00:00';
-      const datetimeA = `${a.fecha}T${timeA}`;
-      const datetimeB = `${b.fecha}T${timeB}`;
-      return datetimeB.localeCompare(datetimeA);
-    });
+    return [...filtrados].sort((a, b) => this.compararEventos(a, b));
   }
 
   inicializarDatosPrueba(): void {
+    this.usuariosSistema = [];
+    this.mensajesBandeja = [];
+  }
+
+  compararMensajes(a: Mensaje, b: Mensaje): number {
+    const aEsNuevo = a.estado === 'Nuevo' || a.estadoLectura === 'Nuevo';
+    const bEsNuevo = b.estado === 'Nuevo' || b.estadoLectura === 'Nuevo';
+
+    if (aEsNuevo && !bEsNuevo) return -1;
+    if (!aEsNuevo && bEsNuevo) return 1;
+
+    const datetimeA = `${a.fecha || ''}T${a.hora || ''}`;
+    const datetimeB = `${b.fecha || ''}T${b.hora || ''}`;
+    return datetimeB.localeCompare(datetimeA);
+  }
+
+  compararEventos(a: EventoCalendario, b: EventoCalendario): number {
+    const aMsg = a.mensajeAsociado;
+    const bMsg = b.mensajeAsociado;
+
+    const aEsNuevo = aMsg ? (aMsg.estado === 'Nuevo' || aMsg.estadoLectura === 'Nuevo') : false;
+    const bEsNuevo = bMsg ? (bMsg.estado === 'Nuevo' || bMsg.estadoLectura === 'Nuevo') : false;
+
+    if (aEsNuevo && !bEsNuevo) return -1;
+    if (!aEsNuevo && bEsNuevo) return 1;
+
+    const timeA = a.hora || '00:00';
+    const timeB = b.hora || '00:00';
+    const datetimeA = `${a.fecha}T${timeA}`;
+    const datetimeB = `${b.fecha}T${timeB}`;
+    return datetimeB.localeCompare(datetimeA);
   }
 
   normalizarListaDestinatarios(destinatarios: string): string[] {
@@ -1527,9 +1902,14 @@ export class App implements OnDestroy {
 
   @HostListener('document:keydown.escape', ['$event'])
   manejarEscapeModales(event: Event): void {
+    if (this.mostrarCambioObligatorioModal) {
+      event.preventDefault();
+      return;
+    }
     if (this.mensajeSeleccionado) {
       event.preventDefault();
       this.cerrarDetalles();
+
     } else if (this.modalEditarUsuarioAbierto) {
       event.preventDefault();
       this.cerrarModalEditarUsuario();

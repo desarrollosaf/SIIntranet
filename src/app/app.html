@@ -139,18 +139,16 @@
 
           <div class="recent-messages-scroll">
             @for (msg of mensajesRecientes; track msg.id) {
-            <div class="recent-message clickable" (click)="abrirMensajeDesdeVista(msg, $event)" tabindex="0"
+            <div class="recent-message clickable" [class.unread]="esMensajeNuevo(msg)" (click)="abrirMensajeDesdeVista(msg, $event)" tabindex="0"
               role="button" (keydown)="manejarTecladoRecent($event)" aria-label="Ver detalles del mensaje">
               <div class="message-info">
                 <strong>{{ msg.titulo }}</strong>
-                <p class="msg-date-time"
-                  style="font-weight: 600; font-size: 11.5px; color: var(--texto-mutado); margin: 2px 0 0;"><i
-                    class="bi bi-calendar3"></i> {{ msg.fecha }} · <i class="bi bi-clock"></i> {{ msg.hora }}</p>
-                <p class="msg-participants" style="margin: 2px 0 0;">{{ obtenerResumenParticipantesMensaje(msg) }}</p>
+                <p class="msg-date-time"><i
+                    class="bi bi-calendar3"></i> {{ formatearFechaMensaje(msg.fecha) }} · <i class="bi bi-clock"></i> {{ formatearHoraMensaje(msg.hora) }}</p>
+                <p class="msg-participants">{{ obtenerResumenParticipantesMensaje(msg) }}</p>
               </div>
 
-              <div class="message-meta"
-                style="flex-direction: row; gap: 4px; flex-wrap: wrap; justify-content: flex-end;">
+              <div class="message-meta recent-message-meta">
                 @for (est of obtenerEstadosMensaje(msg); track est) {
                 <span class="status-badge status-{{ est.toLowerCase() }}">
                   @if (est === 'Nuevo') { <i class="bi bi-star-fill animate-pulse"></i> }
@@ -168,7 +166,7 @@
               </div>
             </div>
             } @empty {
-            <div class="file-empty" style="margin: 16px; border-radius: 10px;">
+            <div class="file-empty recent-empty">
               <i class="bi bi-inbox"></i>
               <p>No hay mensajes recientes por el momento</p>
             </div>
@@ -265,9 +263,9 @@
                       <span>{{ archivo.name }}</span>
                       <span class="file-size">({{ (archivo.size / 1024).toFixed(1) }} KB)</span>
                     </div>
-                    <button type="button" class="btn-clear-file" (click)="clearSelectedFile(i)" title="Remover archivo">
-                      <i class="bi bi-x-lg"></i>
-                    </button>
+                     <button type="button" class="btn-clear-file si-btn-icon-remove" (click)="clearSelectedFile(i)" title="Remover archivo" aria-label="Remover archivo">
+                       <i class="bi bi-x-lg"></i>
+                     </button>
                   </div>
                   }
                 </div>
@@ -359,11 +357,11 @@
         </div>
 
         <div class="form-actions">
-          <button type="submit">
+          <button type="submit" class="si-btn-primary">
             <i class="bi bi-send-fill"></i>
             <span>Enviar Mensaje</span>
           </button>
-          <button type="button" class="btn-secondary" (click)="cancelarFormulario()">
+          <button type="button" class="btn-secondary si-btn-secondary" (click)="cancelarFormulario()">
             <i class="bi bi-x-circle-fill"></i>
             <span>Limpiar</span>
           </button>
@@ -411,8 +409,7 @@
             <div class="sent-msg-info">
               <strong>{{ msg.titulo }}</strong>
               <div class="sent-msg-details" style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
-                <span class="sent-msg-meta"><i class="bi bi-calendar-event-fill"></i> {{ msg.fecha }} a las {{ msg.hora
-                  }}</span>
+                <span class="sent-msg-meta"><i class="bi bi-calendar-event-fill"></i> {{ formatearFechaMensaje(msg.fecha) }} a las {{ formatearHoraMensaje(msg.hora) }}</span>
                 <span class="sent-msg-meta">
                   <i class="bi bi-people-fill"></i> Para: {{ obtenerDestinatariosResumen(msg, 2) || 'Destinatarios' }}
                   @if (obtenerCantidadDestinatariosExtra(msg, 2) > 0) {
@@ -449,36 +446,22 @@
               </span>
               }
 
-              @if (msg.estado === 'Enviando' && !msg.estadoTemporal) {
-              <button type="button" class="btn-cancel-send" (click)="cancelarMensaje(msg); $event.stopPropagation()"
-                title="Cancelar envío">
-                <i class="bi bi-x-circle-fill"></i>
-                <span>Cancelar envío</span>
-              </button>
-              } @else if (msg.estado === 'Enviado' && !msg.estadoTemporal) {
-              <button type="button" class="btn-cancel-send btn-cancel-sent"
-                (click)="cancelarMensaje(msg); $event.stopPropagation()" title="Anular envío"
-                style="background: rgba(133, 0, 63, 0.05); color: #85003f; border: 1px solid rgba(133, 0, 63, 0.2); margin-left: 8px;">
-                <i class="bi bi-x-circle"></i>
-                <span>Anular envío</span>
-              </button>
-              }
+
 
               @if (msg.estado !== 'Eliminado' && !msg.estadoTemporal) {
               @if (!msg.confirmarEliminarSent) {
-              <button type="button" class="btn-delete-view" (click)="eliminarMensajeEnviado(msg, $event)"
+              <button type="button" class="btn-delete-view si-btn-danger-ghost si-btn-xs" (click)="eliminarMensajeEnviado(msg, $event)"
                 title="Eliminar">
                 <i class="bi bi-trash"></i>
                 <span>Eliminar</span>
               </button>
               } @else {
-              <div style="display: inline-flex; gap: 4px; margin-left: 8px; align-items: center;"
-                (click)="$event.stopPropagation()">
-                <button type="button" class="btn-confirm-delete" (click)="eliminarMensajeEnviado(msg, $event)"
+              <div class="sent-confirm-actions-wrap" (click)="$event.stopPropagation()">
+                <button type="button" class="btn-confirm-delete si-btn-danger si-btn-xs" (click)="eliminarMensajeEnviado(msg, $event)"
                   title="Confirmar eliminación">
                   Confirmar
                 </button>
-                <button type="button" class="btn-cancel-delete"
+                <button type="button" class="btn-cancel-delete si-btn-secondary si-btn-xs"
                   (click)="msg.confirmarEliminarSent = false; $event.stopPropagation()" title="Cancelar">
                   Cancelar
                 </button>
@@ -488,7 +471,7 @@
             </div>
           </div>
           } @empty {
-          <div class="file-empty" style="margin: 20px; border-radius: 10px;">
+          <div class="file-empty sent-empty">
             <i class="bi bi-send-x-fill"></i>
             @if (mensajesEnviados.length === 0) {
             <p>No hay mensajes enviados por el momento</p>
@@ -550,13 +533,13 @@
           <div class="inbox-list">
             @for (msg of mensajesFiltrados; track msg.id) {
             <article class="inbox-item clickable"
-              [class.unread]="esMensajeRecibido(msg) && msg.estadoLectura === 'Nuevo'"
+              [class.unread]="esMensajeNuevo(msg)"
               [class.item-sending]="msg.estado === 'Enviando'" [class.item-cancelled]="msg.estado === 'Cancelado'"
               (click)="abrirMensajeDesdeVista(msg, $event)" tabindex="0" role="button"
               (keydown)="manejarTecladoInbox($event)" aria-label="Ver detalles del mensaje">
               <div class="sender-block">
-                <span class="date-tag" style="margin-bottom: 6px;"><i class="bi bi-calendar3"></i> {{ msg.fecha }} · <i
-                    class="bi bi-clock"></i> {{ msg.hora }}</span>
+                <span class="date-tag" style="margin-bottom: 6px;"><i class="bi bi-calendar3"></i> {{ formatearFechaMensaje(msg.fecha) }} · <i
+                    class="bi bi-clock"></i> {{ formatearHoraMensaje(msg.hora) }}</span>
                 @if (esMensajeRecibido(msg)) {
                 <span>De:</span>
                 <strong style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 100%;">{{
@@ -621,21 +604,21 @@
               </div>
 
               <div class="inbox-actions">
-                <button type="button" class="action-link btn-view-message" (click)="abrirMensajeDesdeVista(msg, $event)"
+                <button type="button" class="action-link btn-view-message si-btn-ghost si-btn-sm" (click)="abrirMensajeDesdeVista(msg, $event)"
                   [disabled]="msg.estadoTemporal">
                   <i class="bi bi-chat-square-text-fill"></i>
                   <span>Ver detalles</span>
                 </button>
 
                 @if (puedeResponderMensaje(msg)) {
-                <button type="button" class="action-link" (click)="responderMensaje(msg, $event)">
+                <button type="button" class="action-link si-btn-primary si-btn-sm" (click)="responderMensaje(msg, $event)">
                   <i class="bi bi-reply-fill"></i>
                   <span>Responder</span>
                 </button>
                 }
 
                 @if (msg.estado !== 'Eliminado' && !msg.estadoTemporal) {
-                <button type="button" class="delete-button" (click)="eliminarMensaje(msg, $event)">
+                <button type="button" class="delete-button si-btn-danger-ghost si-btn-sm" (click)="eliminarMensaje(msg, $event)">
                   <i class="bi bi-trash3-fill"></i>
                   <span>Eliminar</span>
                 </button>
@@ -669,15 +652,14 @@
                 style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; border-bottom: 1px solid rgba(226, 232, 240, 0.8); font-size: 13.5px;">
                 <span style="font-weight: 600; color: var(--texto);"><i class="bi bi-file-earmark-pdf-fill"
                     style="color: var(--vino); margin-right: 8px; font-size: 16px;"></i>{{ doc.nombre }}</span>
-                <button type="button" class="btn-admin-action"
-                  (click)="mostrarNotificacion('Descargando documento de prueba...', 'info')"
-                  style="padding: 4px 10px; font-size: 11px; margin: 0;">
+                <button type="button" class="btn-admin-action si-btn-ghost si-btn-xs"
+                  (click)="mostrarNotificacion('Descargando documento de prueba...', 'info')">
                   <i class="bi bi-download"></i>
                   <span>Descargar</span>
                 </button>
               </div>
               } @empty {
-              <div class="file-empty" style="margin: 16px;">
+              <div class="file-empty formats-empty">
                 <i class="bi bi-folder-symlink"></i>
                 <p>No hay formatos cargados por el momento</p>
               </div>
@@ -754,25 +736,25 @@
                   <td class="font-bold">{{ u.nombre }}</td>
                   <td><code>{{ u.usuario }}</code></td>
                   <td>
-                    <span class="status-badge" [class.status-new]="u.rol === 'Administrador'"
-                      [class.status-answered]="u.rol === 'Usuario'">
+                    <span class="status-badge" [class.status-admin]="u.rol === 'Administrador'"
+                      [class.status-user]="u.rol === 'Usuario'">
                       {{ u.rol }}
                     </span>
                   </td>
                   <td>
-                    <span class="status-badge" [class.status-seen-inbox]="u.estado === 'Activo'"
-                      [class.status-cancelled]="u.estado === 'Inactivo'">
+                    <span class="status-badge" [class.status-active]="u.estado === 'Activo'"
+                      [class.status-inactive]="u.estado === 'Inactivo'">
                       {{ u.estado }}
                     </span>
                   </td>
                   <td class="actions-cell">
-                    <div style="display: flex; gap: 6px; justify-content: flex-end;">
-                      <button type="button" class="btn-admin-action" (click)="seleccionarUsuarioAdmin(u)"
+                    <div class="actions-cell-wrap">
+                      <button type="button" class="btn-admin-action si-btn-ghost si-btn-xs" (click)="seleccionarUsuarioAdmin(u)"
                         title="Ver detalles">
                         <i class="bi bi-eye-fill"></i>
                         <span>Ver</span>
                       </button>
-                      <button type="button" class="btn-admin-action" (click)="abrirModalEditarUsuario(u)"
+                      <button type="button" class="btn-admin-action si-btn-primary si-btn-xs" (click)="abrirModalEditarUsuario(u)"
                         title="Editar usuario">
                         <i class="bi bi-pencil-fill"></i>
                         <span>Editar</span>
@@ -783,7 +765,7 @@
                 } @empty {
                 <tr>
                   <td colspan="5">
-                    <div class="file-empty" style="margin: 20px;">
+                    <div class="file-empty admin-empty">
                       <i class="bi bi-people"></i>
                       @if (usuariosSistema.length === 0) {
                       <p>No hay usuarios registrados por el momento</p>
@@ -815,10 +797,7 @@
     © PODER LEGISLATIVO DEL ESTADO DE MÉXICO | SECRETARÍA DE ADMINISTRACIÓN Y FINANZAS.
   </footer>
 
-  <div class="floating-visits-counter" aria-label="Contador de visitas">
-    <i class="bi bi-eye-fill"></i>
-    <span>{{ totalVisitas }} visitas</span>
-  </div>
+
 
 
 
@@ -827,7 +806,7 @@
     <div class="modal-card profile-modal animate-slide-up" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3><i class="bi bi-person-badge-fill"></i> Perfil de Usuario</h3>
-        <button type="button" class="btn-close" (click)="cerrarPerfilUsuario()" title="Cerrar">
+        <button type="button" class="btn-close si-btn-icon" (click)="cerrarPerfilUsuario()" title="Cerrar" aria-label="Cerrar perfil de usuario">
           <i class="bi bi-x-lg"></i>
         </button>
       </div>
@@ -894,7 +873,7 @@
     <div class="modal-card calendar-modal animate-slide-up" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3><i class="bi bi-calendar-event-fill"></i> Calendario Completo</h3>
-        <button type="button" class="btn-close" (click)="cerrarCalendario()" title="Cerrar">
+        <button type="button" class="btn-close si-btn-icon" (click)="cerrarCalendario()" title="Cerrar" aria-label="Cerrar calendario">
           <i class="bi bi-x-lg"></i>
         </button>
       </div>
@@ -910,13 +889,13 @@
             </div>
 
             <div class="calendar-controls-row">
-              <button type="button" class="btn-calendar-nav" (click)="mesAnteriorCalendario()" title="Mes anterior">
+              <button type="button" class="btn-calendar-nav" (click)="mesAnteriorCalendario()" title="Mes anterior" aria-label="Mes anterior">
                 <i class="bi bi-chevron-left"></i>
               </button>
               <div class="calendar-month-title">
                 {{ nombreMesCalendario }}
               </div>
-              <button type="button" class="btn-calendar-nav" (click)="mesSiguienteCalendario()" title="Mes siguiente">
+              <button type="button" class="btn-calendar-nav" (click)="mesSiguienteCalendario()" title="Mes siguiente" aria-label="Mes siguiente">
                 <i class="bi bi-chevron-right"></i>
               </button>
             </div>
@@ -942,8 +921,9 @@
                 @if (dia.eventos.length > 0) {
                 <div class="calendar-dots">
                   @for (evento of dia.eventos; track $index) {
-                  @if ($index < 3) { <span class="calendar-dot" [class.dot-recibido]="evento.tipo === 'recibido'"
-                    [class.dot-enviado]="evento.tipo === 'enviado'"
+                  @if ($index < 3) { <span class="calendar-dot"
+                    [class.dot-nuevo]="evento.mensajeAsociado ? esMensajeNuevo(evento.mensajeAsociado) : false"
+                    [class.dot-visto-enviado]="evento.mensajeAsociado ? !esMensajeNuevo(evento.mensajeAsociado) : false"
                     [class.dot-recordatorio]="evento.tipo === 'recordatorio'">
                     </span>
                     }
@@ -959,8 +939,8 @@
             </div>
 
             <div class="calendar-legend">
-              <span><i class="dot-recibido"></i> Recibido</span>
-              <span><i class="dot-enviado"></i> Enviado</span>
+              <span><i class="dot-nuevo"></i> Nuevo</span>
+              <span><i class="dot-visto-enviado"></i> Visto / Enviado</span>
               <span><i class="dot-recordatorio"></i> Recordatorio</span>
             </div>
           </div>
@@ -975,13 +955,9 @@
                 (click)="filtroEventosCalendario = 'Todos'">
                 Todos
               </button>
-              <button type="button" class="btn-filter" [class.active]="filtroEventosCalendario === 'Recibidos'"
-                (click)="filtroEventosCalendario = 'Recibidos'">
-                Recibidos
-              </button>
-              <button type="button" class="btn-filter" [class.active]="filtroEventosCalendario === 'Enviados'"
-                (click)="filtroEventosCalendario = 'Enviados'">
-                Enviados
+              <button type="button" class="btn-filter" [class.active]="filtroEventosCalendario === 'Mensajes'"
+                (click)="filtroEventosCalendario = 'Mensajes'">
+                Mensajes
               </button>
               <button type="button" class="btn-filter" [class.active]="filtroEventosCalendario === 'Recordatorios'"
                 (click)="filtroEventosCalendario = 'Recordatorios'">
@@ -991,31 +967,25 @@
 
             <div class="calendar-activities-scroll">
               @for (evento of eventosFechaSeleccionadaFiltrados; track $index) {
-              <div class="calendar-event-item" [class.clickable]="evento.tipo !== 'recordatorio'"
+              <div class="calendar-event-item" [class.unread]="evento.mensajeAsociado ? esMensajeNuevo(evento.mensajeAsociado) : false" [class.clickable]="evento.tipo !== 'recordatorio'"
                 (click)="evento.tipo !== 'recordatorio' && evento.mensajeAsociado ? abrirMensajeDesdeVista(evento.mensajeAsociado, $event) : null"
                 [attr.tabindex]="evento.tipo !== 'recordatorio' ? 0 : null"
                 [attr.role]="evento.tipo !== 'recordatorio' ? 'button' : null"
                 (keydown)="evento.tipo !== 'recordatorio' ? manejarTecladoCalendarEvent($event) : null"
                 [title]="evento.tipo !== 'recordatorio' ? 'Ver detalles del mensaje' : ''">
-                <div class="calendar-event-body" style="width: 100%; display: flex; flex-direction: column; gap: 3px;">
-                  <span class="calendar-event-title"
-                    style="font-weight: 700; font-size: 14px; color: var(--texto); display: block;">{{ evento.titulo
-                    }}</span>
+                <div class="calendar-event-body">
+                  <span class="calendar-event-title">{{ evento.titulo }}</span>
 
-                  <div class="calendar-event-time-row"
-                    style="font-size: 11px; color: var(--texto-mutado); display: flex; align-items: center; gap: 4px;">
+                  <div class="calendar-event-time-row">
                     <i class="bi bi-calendar3"></i>
-                    <span>{{ evento.fecha }}</span>
-                    @if (evento.hora) {
+                    <span>{{ formatearFechaMensaje(evento.fecha) }}</span>
                     <span>·</span>
                     <i class="bi bi-clock"></i>
-                    <span>{{ evento.hora }}</span>
-                    }
+                    <span>{{ formatearHoraMensaje(evento.hora) }}</span>
                   </div>
 
                   @if (evento.tipo !== 'recordatorio' && evento.mensajeAsociado) {
-                  <div class="calendar-event-participants"
-                    style="font-size: 12px; color: var(--texto-suave); margin-top: 1px; display: flex; align-items: center; gap: 4px;">
+                  <div class="calendar-event-participants">
                     @if (evento.esEnviado) {
                     <i class="bi bi-people-fill"></i>
                     <span>Para: {{ obtenerDestinatariosResumen(evento.mensajeAsociado, 2) }}
@@ -1032,11 +1002,11 @@
 
                   <div class="calendar-event-meta-row"
                     style="margin-top: 6px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                    <span class="calendar-event-type" [class.event-recibido]="evento.tipo === 'recibido'"
-                      [class.event-enviado]="evento.tipo === 'enviado'"
-                      [class.event-recordatorio]="evento.tipo === 'recordatorio'">
-                      {{ evento.tipo }}
+                    @if (evento.tipo === 'recordatorio') {
+                    <span class="calendar-event-type event-recordatorio">
+                      Recordatorio
                     </span>
+                    }
 
                     @if (evento.estados) {
                     @for (est of evento.estados; track est) {
@@ -1061,8 +1031,8 @@
                 </div>
 
                 @if (evento.tipo === 'recordatorio') {
-                <button type="button" class="btn-delete-reminder"
-                  (click)="eliminarRecordatorioCalendario(evento.id, $event)" title="Eliminar recordatorio">
+                <button type="button" class="btn-delete-reminder si-btn-danger-ghost"
+                  (click)="eliminarRecordatorioCalendario(evento.id, $event)" title="Eliminar recordatorio" aria-label="Eliminar recordatorio">
                   <i class="bi bi-x-lg"></i>
                 </button>
                 }
@@ -1105,128 +1075,283 @@
 
   @if (mensajeSeleccionado) {
   <div class="modal-backdrop details-modal-backdrop" (click)="cerrarDetalles()">
-    <div class="modal-card animate-slide-up" (click)="$event.stopPropagation()">
+    <div class="modal-card animate-slide-up" [class.unread]="esMensajeNuevo(mensajeSeleccionado)" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3><i class="bi bi-chat-square-text-fill"></i> Detalle del Mensaje</h3>
-        <button type="button" class="btn-close" (click)="cerrarDetalles()" title="Cerrar">
+        <button type="button" class="btn-close si-btn-icon" (click)="cerrarDetalles()" title="Cerrar" aria-label="Cerrar detalle del mensaje">
           <i class="bi bi-x-lg"></i>
         </button>
       </div>
-      <div class="modal-body">
-        <div class="detail-row">
-          <span class="detail-label">Estado</span>
-          <div class="detail-value" style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
-            @for (est of obtenerEstadosMensaje(mensajeSeleccionado); track est) {
-            <span class="status-badge status-{{ est.toLowerCase() }}">
-              @if (est === 'Nuevo') { <i class="bi bi-star-fill animate-pulse"></i> }
-              @else if (est === 'Visto') { <i class="bi bi-eye-fill"></i> }
-              @else if (est === 'Respondido') { <i class="bi bi-reply-fill"></i> }
-              @else if (est === 'Enviado') { <i class="bi bi-send-fill"></i> }
-              @else if (est === 'Cancelado') { <i class="bi bi-x-circle-fill"></i> }
-              @else if (est === 'Eliminado') { <i class="bi bi-trash3-fill"></i> }
-              @else if (est === 'Enviando') { <i class="bi bi-arrow-repeat animate-spin"></i> }
-              @else if (est === 'Respondiendo') { <i class="bi bi-arrow-repeat animate-spin"></i> }
-              @else if (est === 'Eliminando') { <i class="bi bi-trash3-fill"></i> }
-              @else if (est === 'Cancelando') { <i class="bi bi-x-circle-fill"></i> }
-              <span>{{ est }}</span>
-            </span>
-            }
+      <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+        @if (!detalleEditandoMensaje) {
+          <div class="detail-row">
+            <span class="detail-label">Estado</span>
+            <div class="detail-value" style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+              @for (est of obtenerEstadosMensaje(mensajeSeleccionado); track est) {
+              <span class="status-badge status-{{ est.toLowerCase() }}">
+                @if (est === 'Nuevo') { <i class="bi bi-star-fill animate-pulse"></i> }
+                @else if (est === 'Visto') { <i class="bi bi-eye-fill"></i> }
+                @else if (est === 'Respondido') { <i class="bi bi-reply-fill"></i> }
+                @else if (est === 'Enviado') { <i class="bi bi-send-fill"></i> }
+                @else if (est === 'Cancelado') { <i class="bi bi-x-circle-fill"></i> }
+                @else if (est === 'Eliminado') { <i class="bi bi-trash3-fill"></i> }
+                @else if (est === 'Enviando') { <i class="bi bi-arrow-repeat animate-spin"></i> }
+                @else if (est === 'Respondiendo') { <i class="bi bi-arrow-repeat animate-spin"></i> }
+                @else if (est === 'Eliminando') { <i class="bi bi-trash3-fill"></i> }
+                @else if (est === 'Cancelando') { <i class="bi bi-x-circle-fill"></i> }
+                <span>{{ est }}</span>
+              </span>
+              }
+            </div>
           </div>
-        </div>
-        @if (esMensajeRecibido(mensajeSeleccionado)) {
-        <div class="detail-row">
-          <span class="detail-label">Remitente</span>
-          <div class="detail-value text-accent">
-            <i class="bi bi-person-fill"></i>
-            <strong>{{ mensajeSeleccionado.remitente }}</strong>
+          @if (esMensajeRecibido(mensajeSeleccionado)) {
+          <div class="detail-row">
+            <span class="detail-label">Remitente</span>
+            <div class="detail-value text-accent">
+              <i class="bi bi-person-fill"></i>
+              <strong>{{ mensajeSeleccionado.remitente }}</strong>
+            </div>
           </div>
-        </div>
+          } @else {
+          <div class="detail-row">
+            <span class="detail-label">Origen</span>
+            <div class="detail-value text-accent">
+              <i class="bi bi-person-check-fill"></i>
+              <strong>Enviado por ti</strong>
+            </div>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Destinatarios</span>
+            <div class="detail-value text-accent">
+              <i class="bi bi-people-fill"></i>
+              <strong>{{ mensajeSeleccionado.destinatarios }}</strong>
+            </div>
+          </div>
+          }
+          <div class="detail-grid">
+            <div class="detail-row">
+              <span class="detail-label">Fecha</span>
+              <div class="detail-value">
+                <i class="bi bi-calendar3"></i>
+                <span>{{ formatearFechaMensaje(mensajeSeleccionado.fecha) }}</span>
+              </div>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Hora</span>
+              <div class="detail-value">
+                <i class="bi bi-clock-history"></i>
+                <span>{{ formatearHoraMensaje(mensajeSeleccionado.hora) }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Asunto / Título</span>
+            <div class="detail-value text-highlight">
+              <span>{{ mensajeSeleccionado.titulo }}</span>
+            </div>
+          </div>
+          <div class="detail-row text-block-row">
+            <span class="detail-label">Contenido / Descripción</span>
+            <div class="detail-text-content"
+              style="word-break: break-word; overflow-wrap: anywhere; white-space: pre-wrap;">{{
+              mensajeSeleccionado.descripcion }}</div>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Documentos Adjuntos</span>
+            <div class="detail-doc-link" style="display: flex; flex-direction: column; gap: 8px;">
+              @if (normalizarListaDocumentos(mensajeSeleccionado.documento).length === 0) {
+              <span>Sin adjunto</span>
+              } @else {
+              @for (doc of normalizarListaDocumentos(mensajeSeleccionado.documento); track doc) {
+              <a href="#"
+                (click)="marcarComoVisto(mensajeSeleccionado); $event.preventDefault(); $event.stopPropagation(); mostrarNotificacion('Abriendo vista previa del documento: ' + doc, 'info')">
+                <i class="bi" [class.bi-file-earmark-pdf-fill]="doc.endsWith('.pdf')"
+                  [class.bi-file-earmark-word-fill]="doc.endsWith('.docx')"
+                  [class.bi-files]="!doc.endsWith('.pdf') && !doc.endsWith('.docx')">
+                </i>
+                <span>{{ doc }}</span>
+              </a>
+              }
+              }
+            </div>
+          </div>
         } @else {
-        <div class="detail-row">
-          <span class="detail-label">Origen</span>
-          <div class="detail-value text-accent">
-            <i class="bi bi-person-check-fill"></i>
-            <strong>Enviado por ti</strong>
+          <div class="detail-grid grid-1col">
+            <div class="detail-row">
+              <span class="detail-label">Estado</span>
+              <div class="detail-value" style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                @for (est of obtenerEstadosMensaje(mensajeSeleccionado); track est) {
+                <span class="status-badge status-{{ est.toLowerCase() }}">
+                  <span>{{ est }}</span>
+                </span>
+                }
+              </div>
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-label">Origen</span>
+              <div class="detail-value text-accent">
+                <i class="bi bi-person-check-fill"></i>
+                <strong>Enviado por ti</strong>
+              </div>
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-label">Destinatarios</span>
+              <div class="recipients-chips-container">
+                @for (usuario of editMsgDestSeleccionados; track usuario) {
+                <span class="recipient-chip">
+                  <span>{{ usuario }}</span>
+                  <button type="button" class="btn-chip-remove si-btn-chip" (click)="quitarDirectoEdit(usuario)" title="Quitar destinatario" aria-label="Quitar destinatario">
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                </span>
+                } @empty {
+                <span class="chips-empty-hint">No hay destinatarios seleccionados. Debe agregar al menos uno.</span>
+                }
+              </div>
+              <div class="recipients-select-wrap">
+                <select #selectDisponibles class="si-form-control" (change)="pasarDirectoEdit(selectDisponibles.value); selectDisponibles.value = ''">
+                  <option value="" disabled selected>Agregar destinatario...</option>
+                  @for (usuario of editMsgDestDisponibles; track usuario) {
+                  <option [value]="usuario">{{ usuario }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+
+            <div class="detail-grid">
+              <div class="detail-row">
+                <span class="detail-label">Fecha</span>
+                <div class="detail-value">
+                  <i class="bi bi-calendar3"></i>
+                  <span>{{ formatearFechaMensaje(editMsgFecha) }}</span>
+                </div>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Hora</span>
+                <div class="detail-value">
+                  <i class="bi bi-clock-history"></i>
+                  <span>{{ formatearHoraMensaje(editMsgHora) }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-label">Asunto / Título</span>
+              <input name="editMsgTitulo" type="text" [(ngModel)]="editMsgTitulo" required placeholder="Ingrese el título" class="si-form-control" />
+            </div>
+
+            <div class="detail-row text-block-row edit-text-block-row">
+              <span class="detail-label">Contenido / Descripción</span>
+              <textarea name="editMsgDescripcion" [(ngModel)]="editMsgDescripcion" placeholder="Escriba una descripción" class="si-form-control edit-textarea"></textarea>
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-label">Documentos Adjuntos</span>
+              <div class="files-section files-section--edit">
+                @if (editMsgDocumentos.length > 0) {
+                <div class="edit-files-group">
+                  <span class="edit-files-label">Documentos existentes:</span>
+                  <div class="edit-files-list">
+                    @for (doc of editMsgDocumentos; track doc; let i = $index) {
+                    <div class="file-selected-badge">
+                      <div class="file-name-info">
+                        <i class="bi bi-file-earmark-check-fill"></i>
+                        <span>{{ doc }}</span>
+                      </div>
+                      <button type="button" class="btn-clear-file si-btn-icon-remove" (click)="removerDocumentoExistenteEditor(i)" title="Remover archivo" aria-label="Remover archivo">
+                        <i class="bi bi-x-lg"></i>
+                      </button>
+                    </div>
+                    }
+                  </div>
+                </div>
+                }
+
+                @if (editMsgNuevosArchivos.length > 0) {
+                <div class="edit-files-group">
+                  <span class="edit-files-label">Nuevos documentos:</span>
+                  <div class="edit-files-list">
+                    @for (archivo of editMsgNuevosArchivos; track archivo.name; let i = $index) {
+                    <div class="file-selected-badge file-selected-badge--new">
+                      <div class="file-name-info file-name-info--new">
+                        <i class="bi bi-file-earmark-arrow-up-fill"></i>
+                        <span>{{ archivo.name }}</span>
+                        <span class="file-size file-size--new">({{ (archivo.size / 1024).toFixed(1) }} KB)</span>
+                      </div>
+                      <button type="button" class="btn-clear-file si-btn-icon-remove" (click)="removerNuevoArchivoEditor(i)" title="Remover archivo" aria-label="Remover archivo">
+                        <i class="bi bi-x-lg"></i>
+                      </button>
+                    </div>
+                    }
+                  </div>
+                </div>
+                }
+
+                <label class="file-input-container" for="editMsgFile" tabindex="0" role="button" aria-label="Adjuntar nuevos archivos" style="margin-top: 8px;">
+                  <i class="bi bi-file-earmark-arrow-up"></i>
+                  <span class="file-selector-btn">Buscar archivo</span>
+                  <span class="file-selector-text" [class.has-file]="editMsgNuevosArchivos.length > 0">
+                    {{ editMsgNuevosArchivos.length > 0 ? (editMsgNuevosArchivos.length + ' archivo(s) seleccionado(s)') : 'Ningún archivo seleccionado' }}
+                  </span>
+                  <input id="editMsgFile" name="editMsgFile" type="file" multiple (change)="onNewFileSelectedEditor($event)" style="display: none;" />
+                </label>
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Destinatarios</span>
-          <div class="detail-value text-accent">
-            <i class="bi bi-people-fill"></i>
-            <strong>{{ mensajeSeleccionado.destinatarios }}</strong>
-          </div>
-        </div>
         }
-        <div class="detail-grid">
-          <div class="detail-row">
-            <span class="detail-label">Fecha</span>
-            <div class="detail-value">
-              <i class="bi bi-calendar3"></i>
-              <span>{{ mensajeSeleccionado.fecha }}</span>
-            </div>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Hora</span>
-            <div class="detail-value">
-              <i class="bi bi-clock-history"></i>
-              <span>{{ mensajeSeleccionado.hora }}</span>
-            </div>
-          </div>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Asunto / Título</span>
-          <div class="detail-value text-highlight">
-            <span>{{ mensajeSeleccionado.titulo }}</span>
-          </div>
-        </div>
-        <div class="detail-row text-block-row">
-          <span class="detail-label">Contenido / Descripción</span>
-          <div class="detail-text-content"
-            style="word-break: break-word; overflow-wrap: anywhere; white-space: pre-wrap;">{{
-            mensajeSeleccionado.descripcion }}</div>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Documentos Adjuntos</span>
-          <div class="detail-doc-link" style="display: flex; flex-direction: column; gap: 8px;">
-            @if (normalizarListaDocumentos(mensajeSeleccionado.documento).length === 0) {
-            <span>Sin adjunto</span>
-            } @else {
-            @for (doc of normalizarListaDocumentos(mensajeSeleccionado.documento); track doc) {
-            <a href="#"
-              (click)="marcarComoVisto(mensajeSeleccionado); $event.preventDefault(); $event.stopPropagation(); mostrarNotificacion('Abriendo vista previa del documento: ' + doc, 'info')">
-              <i class="bi" [class.bi-file-earmark-pdf-fill]="doc.endsWith('.pdf')"
-                [class.bi-file-earmark-word-fill]="doc.endsWith('.docx')"
-                [class.bi-files]="!doc.endsWith('.pdf') && !doc.endsWith('.docx')">
-              </i>
-              <span>{{ doc }}</span>
-            </a>
-            }
-            }
-          </div>
-        </div>
       </div>
       <div class="modal-footer">
-        @if (puedeResponderMensaje(mensajeSeleccionado)) {
-        <button type="button" class="btn-modal-reply"
-          (click)="responderMensaje(mensajeSeleccionado, $event); cerrarDetalles()">
-          <i class="bi bi-reply-fill"></i>
-          <span>Redactar Respuesta</span>
-        </button>
+        @if (!detalleEditandoMensaje) {
+          @if (puedeEditarMensajeEnviado(mensajeSeleccionado)) {
+          <button type="button" class="btn-modal-reply" (click)="activarEdicionDetalle()">
+            <i class="bi bi-pencil-fill"></i>
+            <span>Editar</span>
+          </button>
+          <button type="button" class="btn-modal-delete" (click)="eliminarMensajeEnviado(mensajeSeleccionado, $event)">
+            <i class="bi bi-trash"></i>
+            <span>Eliminar</span>
+          </button>
+          } @else if (esMensajeRecibido(mensajeSeleccionado)) {
+            @if (puedeResponderMensaje(mensajeSeleccionado)) {
+            <button type="button" class="btn-modal-reply"
+              (click)="responderMensaje(mensajeSeleccionado, $event); cerrarDetalles()">
+              <i class="bi bi-reply-fill"></i>
+              <span>Redactar Respuesta</span>
+            </button>
+            }
+            @if (mensajeSeleccionado.estado !== 'Eliminado') {
+            <button type="button" class="btn-modal-delete" (click)="eliminarMensaje(mensajeSeleccionado, $event)">
+              <i class="bi bi-trash"></i>
+              <span>Eliminar</span>
+            </button>
+            }
+          }
+          <button type="button" class="btn-modal-close" (click)="cerrarDetalles()">
+            <span>Cerrar</span>
+          </button>
+        } @else {
+          <button type="button" class="btn-modal-save" (click)="guardarCambiosMensajeEnviado()">
+            <i class="bi bi-save-fill"></i>
+            <span>Guardar cambios</span>
+          </button>
+          <button type="button" class="btn-modal-close" (click)="cancelarEdicionDetalle()">
+            <span>Cancelar</span>
+          </button>
         }
-        <button type="button" class="btn-modal-close" (click)="cerrarDetalles()">
-          <span>Cerrar</span>
-        </button>
       </div>
     </div>
   </div>
   }
+
 
   @if (modalVerUsuarioAbierto && usuarioSeleccionadoAdmin) {
   <div class="modal-backdrop" (click)="cerrarModalVerUsuario()">
     <div class="modal-card animate-slide-up" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3><i class="bi bi-person-badge-fill"></i> Detalles del Usuario</h3>
-        <button type="button" class="btn-close" (click)="cerrarModalVerUsuario()" title="Cerrar">
+        <button type="button" class="btn-close si-btn-icon" (click)="cerrarModalVerUsuario()" title="Cerrar" aria-label="Cerrar vista de usuario">
           <i class="bi bi-x-lg"></i>
         </button>
       </div>
@@ -1252,8 +1377,8 @@
           <div class="detail-row">
             <span class="detail-label">Rol</span>
             <div class="detail-value">
-              <span class="status-badge" [class.status-new]="usuarioSeleccionadoAdmin.rol === 'Administrador'"
-                [class.status-answered]="usuarioSeleccionadoAdmin.rol === 'Usuario'">
+              <span class="status-badge" [class.status-admin]="usuarioSeleccionadoAdmin.rol === 'Administrador'"
+                [class.status-user]="usuarioSeleccionadoAdmin.rol === 'Usuario'">
                 {{ usuarioSeleccionadoAdmin.rol }}
               </span>
             </div>
@@ -1261,55 +1386,36 @@
           <div class="detail-row">
             <span class="detail-label">Estado</span>
             <div class="detail-value">
-              <span class="status-badge" [class.status-seen-inbox]="usuarioSeleccionadoAdmin.estado === 'Activo'"
-                [class.status-cancelled]="usuarioSeleccionadoAdmin.estado === 'Inactivo'">
+              <span class="status-badge" [class.status-active]="usuarioSeleccionadoAdmin.estado === 'Activo'"
+                [class.status-inactive]="usuarioSeleccionadoAdmin.estado === 'Inactivo'">
                 {{ usuarioSeleccionadoAdmin.estado }}
               </span>
             </div>
           </div>
           <div class="detail-row" style="grid-column: span 2;">
-            <span class="detail-label">Contraseña Temporal</span>
-            <div class="detail-value">
-              @if (usuarioSeleccionadoAdmin.passwordTemporal) {
-              <code class="temp-pwd-code"
-                style="font-size: 13.5px; font-weight: 700;">{{ usuarioSeleccionadoAdmin.passwordTemporal }}</code>
-              } @else {
-              <span class="text-muted-italic">Ninguna generada</span>
-              }
+            <span class="detail-label">Contraseña Actual</span>
+            <div class="detail-value" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+              <span style="font-family: monospace; font-size: 14px; font-weight: 600;">
+                {{ verPasswordVerUsuario ? (usuarioSeleccionadoAdmin.password || 'Sin contraseña') : '••••••••' }}
+              </span>
+              <button type="button" class="btn-toggle-pwd si-btn-icon" (click)="verPasswordVerUsuario = !verPasswordVerUsuario" title="Mostrar/Ocultar contraseña" aria-label="Mostrar u ocultar contraseña">
+                <i class="bi" [class.bi-eye-fill]="!verPasswordVerUsuario" [class.bi-eye-slash-fill]="verPasswordVerUsuario"></i>
+              </button>
             </div>
           </div>
         </div>
       </div>
-      <div class="modal-footer" style="flex-wrap: wrap; gap: 8px;">
-        <button type="button" class="btn-admin-action-btn" (click)="abrirModalEditarUsuario(usuarioSeleccionadoAdmin)">
+      <div class="modal-footer modal-footer-wrap">
+        <button type="button" class="btn-admin-action-btn si-btn-primary" (click)="abrirModalEditarUsuario(usuarioSeleccionadoAdmin)">
           <i class="bi bi-pencil-fill"></i>
           <span>Editar</span>
         </button>
-        <button type="button" class="btn-admin-action-btn btn-secondary"
-          (click)="generarPasswordTemporal(usuarioSeleccionadoAdmin)">
-          <i class="bi bi-key-fill"></i>
-          <span>Contraseña Temp.</span>
-        </button>
-        <button type="button" class="btn-admin-action-btn btn-secondary"
+        <button type="button" class="btn-admin-action-btn si-btn-ghost"
           (click)="descargarPdfUsuario(usuarioSeleccionadoAdmin)">
           <i class="bi bi-file-earmark-pdf-fill"></i>
           <span>Descargar PDF</span>
         </button>
-        @if (usuarioSeleccionadoAdmin.estado === 'Inactivo') {
-        <button type="button" class="btn-admin-action-btn btn-success"
-          (click)="cambiarEstadoUsuario(usuarioSeleccionadoAdmin)">
-          <i class="bi bi-check-circle-fill"></i>
-          <span>Activar</span>
-        </button>
-        } @else {
-        <button type="button" class="btn-admin-action-btn btn-danger"
-          (click)="cambiarEstadoUsuario(usuarioSeleccionadoAdmin)">
-          <i class="bi bi-x-circle-fill"></i>
-          <span>Desactivar</span>
-        </button>
-        }
-        <button type="button" class="btn-admin-action-btn" (click)="cerrarModalVerUsuario()"
-          style="background: #e2e8f0; color: #475569; border-color: #cbd5e1;">
+        <button type="button" class="btn-admin-action-btn si-btn-secondary" (click)="cerrarModalVerUsuario()">
           <span>Cerrar</span>
         </button>
       </div>
@@ -1322,7 +1428,7 @@
     <div class="modal-card animate-slide-up" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3><i class="bi bi-person-badge-fill"></i> Editar Usuario</h3>
-        <button type="button" class="btn-close" (click)="cerrarModalEditarUsuario()" title="Cerrar">
+        <button type="button" class="btn-close si-btn-icon" (click)="cerrarModalEditarUsuario()" title="Cerrar" aria-label="Cerrar edición de usuario">
           <i class="bi bi-x-lg"></i>
         </button>
       </div>
@@ -1384,6 +1490,22 @@
                 </select>
               </div>
             </div>
+
+            <div class="form-row form-row-vertical">
+              <label for="editPassword">Contraseña:</label>
+              <div style="display: flex; gap: 8px; width: 100%;">
+                <div class="input-with-icon" style="flex: 1;">
+                  <i class="bi bi-key-fill"></i>
+                  <input id="editPassword" name="editPassword" [type]="verPasswordEditUsuario ? 'text' : 'password'" [(ngModel)]="usuarioEditandoAdmin.password" placeholder="Contraseña del usuario" />
+                </div>
+                <button type="button" class="btn-toggle-pwd-border" (click)="verPasswordEditUsuario = !verPasswordEditUsuario" title="Mostrar/Ocultar contraseña" aria-label="Mostrar u ocultar contraseña">
+                  <i class="bi" [class.bi-eye-fill]="!verPasswordEditUsuario" [class.bi-eye-slash-fill]="verPasswordEditUsuario"></i>
+                </button>
+                <button type="button" class="btn-admin-action btn-admin-generate" (click)="generarPasswordEdicionAdmin()" title="Generar contraseña aleatoria">
+                  Generar
+                </button>
+              </div>
+            </div>
           </div>
         </div>
         <div class="modal-footer">
@@ -1391,10 +1513,64 @@
             <i class="bi bi-save-fill"></i>
             <span>Guardar cambios</span>
           </button>
-          <button type="button" class="btn-admin-action-btn" (click)="cerrarModalEditarUsuario()"
-            style="background: #e2e8f0; color: #475569; border-color: #cbd5e1;">
+          <button type="button" class="btn-admin-action-btn btn-secondary" (click)="cerrarModalEditarUsuario()">
             <i class="bi bi-x-circle-fill"></i>
             <span>Cancelar</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  }
+
+  @if (mostrarCambioObligatorioModal) {
+  <div class="modal-backdrop force-password-modal-backdrop">
+    <div class="modal-card force-password-modal animate-slide-up">
+      <div class="modal-header force-password-header">
+        <h3 class="force-password-title"><i class="bi bi-shield-lock-fill"></i> Cambio de Contraseña Obligatorio</h3>
+      </div>
+      <form (submit)="cambiarPasswordObligatorio($event)">
+        <div class="modal-body force-password-body">
+          <p class="force-password-intro">
+            Su cuenta ha sido marcada para cambio obligatorio de contraseña en el próximo inicio de sesión. Por favor, introduzca su nueva contraseña para continuar.
+          </p>
+
+          <div class="detail-grid grid-1col">
+            <div class="form-row form-row-vertical">
+              <label for="newPassword">Nueva Contraseña (mínimo 8 caracteres):</label>
+              <div style="display: flex; gap: 8px; width: 100%;">
+                <div class="input-with-icon" style="flex: 1;">
+                  <i class="bi bi-lock-fill"></i>
+                  <input id="newPassword" name="nuevaPassword" [type]="verNuevaPassword ? 'text' : 'password'" [(ngModel)]="nuevaPassword" placeholder="Ingrese nueva contraseña" required minlength="8" />
+                </div>
+                <button type="button" class="btn-toggle-pwd-border" (click)="verNuevaPassword = !verNuevaPassword" title="Mostrar/Ocultar contraseña" aria-label="Mostrar u ocultar nueva contraseña">
+                  <i class="bi" [class.bi-eye-fill]="!verNuevaPassword" [class.bi-eye-slash-fill]="verNuevaPassword"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-row form-row-vertical">
+              <label for="confirmNewPassword">Confirmar Nueva Contraseña:</label>
+              <div style="display: flex; gap: 8px; width: 100%;">
+                <div class="input-with-icon" style="flex: 1;">
+                  <i class="bi bi-lock-fill"></i>
+                  <input id="confirmNewPassword" name="confirmarNuevaPassword" [type]="verConfirmarPassword ? 'text' : 'password'" [(ngModel)]="confirmarNuevaPassword" placeholder="Confirme nueva contraseña" required />
+                </div>
+                <button type="button" class="btn-toggle-pwd-border" (click)="verConfirmarPassword = !verConfirmarPassword" title="Mostrar/Ocultar contraseña" aria-label="Mostrar u ocultar confirmación de contraseña">
+                  <i class="bi" [class.bi-eye-fill]="!verConfirmarPassword" [class.bi-eye-slash-fill]="verConfirmarPassword"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer modal-footer-between">
+          <button type="submit" class="btn-admin-action-btn btn-success">
+            <i class="bi bi-save-fill"></i>
+            <span>Actualizar y Entrar</span>
+          </button>
+          <button type="button" class="btn-logout" (click)="cerrarSesion()">
+            <i class="bi bi-box-arrow-left"></i>
+            <span>Cancelar y Salir</span>
           </button>
         </div>
       </form>
