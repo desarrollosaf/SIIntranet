@@ -8,6 +8,19 @@ export class UsuariosService {
   private usuarios: Usuario[] = [];
   private nextId = 1;
 
+  private sanitizeUsuario(usuario: Usuario): Omit<Usuario, 'password'> {
+    const { password, ...sanitized } = usuario;
+    return sanitized;
+  }
+
+  private findRawOne(id: number): Usuario {
+    const usuario = this.usuarios.find(u => u.id === id);
+    if (!usuario) {
+      throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
+    }
+    return usuario;
+  }
+
   getStatus() {
     return {
       module: 'usuarios',
@@ -16,19 +29,15 @@ export class UsuariosService {
     };
   }
 
-  findAll(): Usuario[] {
-    return this.usuarios;
+  findAll(): Omit<Usuario, 'password'>[] {
+    return this.usuarios.map(u => this.sanitizeUsuario(u));
   }
 
-  findOne(id: number): Usuario {
-    const usuario = this.usuarios.find(u => u.id === id);
-    if (!usuario) {
-      throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
-    }
-    return usuario;
+  findOne(id: number): Omit<Usuario, 'password'> {
+    return this.sanitizeUsuario(this.findRawOne(id));
   }
 
-  create(createUsuarioDto: CreateUsuarioDto): Usuario {
+  create(createUsuarioDto: CreateUsuarioDto): Omit<Usuario, 'password'> {
     const nuevoUsuario: Usuario = {
       id: this.nextId++,
       nombre: createUsuarioDto.nombre,
@@ -41,11 +50,11 @@ export class UsuariosService {
       requiereCambioPassword: createUsuarioDto.requiereCambioPassword ?? false,
     };
     this.usuarios.push(nuevoUsuario);
-    return nuevoUsuario;
+    return this.sanitizeUsuario(nuevoUsuario);
   }
 
-  update(id: number, updateUsuarioDto: UpdateUsuarioDto): Usuario {
-    const usuario = this.findOne(id);
+  update(id: number, updateUsuarioDto: UpdateUsuarioDto): Omit<Usuario, 'password'> {
+    const usuario = this.findRawOne(id);
     
     if (updateUsuarioDto.nombre !== undefined) usuario.nombre = updateUsuarioDto.nombre;
     if (updateUsuarioDto.usuario !== undefined) usuario.usuario = updateUsuarioDto.usuario;
@@ -57,20 +66,20 @@ export class UsuariosService {
       usuario.requiereCambioPassword = updateUsuarioDto.requiereCambioPassword;
     }
 
-    return usuario;
+    return this.sanitizeUsuario(usuario);
   }
 
   changePassword(id: number, passwordNueva: string): { success: boolean } {
-    const usuario = this.findOne(id);
+    const usuario = this.findRawOne(id);
     usuario.password = passwordNueva;
     usuario.requiereCambioPassword = false;
     return { success: true };
   }
 
-  remove(id: number): Usuario {
-    const usuario = this.findOne(id);
+  remove(id: number): Omit<Usuario, 'password'> {
+    const usuario = this.findRawOne(id);
     usuario.estado = 'Inactivo';
-    return usuario;
+    return this.sanitizeUsuario(usuario);
   }
 
   findByUsername(username: string): Usuario | undefined {
