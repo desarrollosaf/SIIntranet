@@ -176,6 +176,7 @@ export class App implements OnDestroy {
         if (this.usuarioActual.tipo === 'admin') {
           this.cargarUsuarios();
         }
+        this.cargarMensajes();
       } catch (e) {
         this.isLoggedIn = false;
       }
@@ -190,12 +191,11 @@ export class App implements OnDestroy {
         window.location.hash = 'inicio';
       } else {
         this.moduloActual = hash;
-        if (hash === 'administracion' && this.usuarioActual.tipo === 'admin') {
-          this.cargarUsuarios();
-        }
+        this.cargarDatosModulo(hash);
       }
     } else {
       this.moduloActual = 'inicio';
+      this.cargarDatosModulo('inicio');
     }
   }
 
@@ -225,9 +225,7 @@ export class App implements OnDestroy {
     if (modulo === 'mensaje') {
       this.actualizarFechaHora();
     }
-    if (modulo === 'administracion' && this.usuarioActual.tipo === 'admin') {
-      this.cargarUsuarios();
-    }
+    this.cargarDatosModulo(modulo);
     this.cdr.detectChanges();
   }
 
@@ -533,9 +531,7 @@ export class App implements OnDestroy {
     if (modulo === 'mensaje') {
       this.actualizarFechaHora();
     }
-    if (modulo === 'administracion' && this.usuarioActual.tipo === 'admin') {
-      this.cargarUsuarios();
-    }
+    this.cargarDatosModulo(modulo);
 
     const hash = '#' + modulo;
     if (window.location.hash !== hash) {
@@ -644,7 +640,6 @@ export class App implements OnDestroy {
       return;
     }
 
-    const nuevoId = this.nextId++;
     const documentosAdjuntos = this.formArchivos.length > 0
       ? this.formArchivos.map(f => f.name).join(', ')
       : 'Sin adjunto';
@@ -653,34 +648,30 @@ export class App implements OnDestroy {
     const hoyStr = this.formatearFechaLocal(actual);
     const horaStr = `${String(actual.getHours()).padStart(2, '0')}:${String(actual.getMinutes()).padStart(2, '0')}`;
 
-    const nuevoMsg: Mensaje = {
-      id: nuevoId,
+    const body = {
+      titulo: this.formTitulo.trim(),
+      descripcion: this.formDescripcion?.trim() || 'Sin descripción adicional.',
       remitente: this.usuarioActual.nombre,
-      titulo: this.formTitulo,
-      descripcion: this.formDescripcion || 'Sin descripción adicional.',
+      destinatarios: this.usuariosSeleccionados.join(', '),
+      documento: documentosAdjuntos,
       fecha: this.formFecha || hoyStr,
       hora: this.formHora || horaStr,
-      documento: documentosAdjuntos,
-      destinatarios: this.usuariosSeleccionados.join(', '),
-      estado: 'Enviando',
-      tipoMensaje: 'enviado'
+      estado: 'Enviado' as const,
+      tipoMensaje: 'enviado' as const
     };
 
-    this.mensajesBandeja = [nuevoMsg, ...this.mensajesBandeja];
-    this.mostrarNotificacion('Enviando documento...', 'info');
-
-    this.envioTimeouts[nuevoId] = setTimeout(() => {
-      const msg = this.mensajesBandeja.find(m => m.id === nuevoId);
-      if (msg && msg.estado === 'Enviando') {
-        msg.estado = 'Enviado';
+    this.http.post<Mensaje>(`${this.apiUrl}/mensajes`, body).subscribe({
+      next: (response) => {
         this.mostrarNotificacion('Mensaje enviado correctamente.', 'exito');
-        this.cdr.detectChanges();
+        this.resetearFormulario();
+        this.actualizarFechaHora();
+        this.cargarMensajesEnviados();
+      },
+      error: (err) => {
+        console.error(err);
+        this.mostrarNotificacion('No se pudo enviar el mensaje. Verifica que el backend esté activo.', 'error');
       }
-      delete this.envioTimeouts[nuevoId];
-    }, 7000);
-
-    this.resetearFormulario();
-    this.actualizarFechaHora();
+    });
   }
 
   cancelarEnvio(id: number): void {
@@ -812,14 +803,17 @@ export class App implements OnDestroy {
   marcarComoVisto(msg: Mensaje, mostrarNotif = false): void {
     if (this.esMensajeRecibido(msg)) {
       if (msg.estadoLectura !== 'Visto') {
-        msg.estadoLectura = 'Visto';
-        if (msg.estado === 'Nuevo') {
-          msg.estado = 'Visto';
-        }
-        if (mostrarNotif) {
-          this.mostrarNotificacion(`Documento "${msg.titulo}" marcado como visto.`, 'info');
-        }
-        this.cdr.detectChanges();
+        this.http.patch<Mensaje>(`${this.apiUrl}/mensajes/${msg.id}`, { estado: 'Visto' }).subscribe({
+          next: (updatedMsg) => {
+            msg.estadoLectura = 'Visto';
+            msg.estado = 'Visto';
+            if (mostrarNotif) {
+              this.mostrarNotificacion(`Documento "${msg.titulo}" marcado como visto.`, 'info');
+            }
+            this.cdr.detectChanges();
+          },
+          error: (err) => console.error('Error al marcar como visto:', err)
+        });
       }
     }
   }
@@ -828,24 +822,19 @@ export class App implements OnDestroy {
     event.preventDefault();
     event.stopPropagation();
 
-    if (msg.estado === 'Enviando' && this.envioTimeouts[msg.id]) {
-      clearTimeout(this.envioTimeouts[msg.id]);
-      delete this.envioTimeouts[msg.id];
-    }
-
-    msg.estadoTemporal = 'Eliminando';
-    this.mostrarNotificacion('Eliminando documento...', 'info');
-    this.cdr.detectChanges();
-
-    this.generalTimeouts.push(setTimeout(() => {
-      msg.estadoTemporal = null;
-      msg.estado = 'Eliminado';
-      if (this.mensajeSeleccionado && this.mensajeSeleccionado.id === msg.id) {
-        this.mensajeSeleccionado = null;
+    this.http.delete<Mensaje>(`${this.apiUrl}/mensajes/${msg.id}`).subscribe({
+      next: (response) => {
+        if (this.mensajeSeleccionado && this.mensajeSeleccionado.id === msg.id) {
+          this.mensajeSeleccionado = null;
+        }
+        this.mostrarNotificacion(`El documento "${msg.titulo}" ha sido movido a la Papelera.`, 'exito');
+        this.cargarMensajesRecibidos();
+      },
+      error: (err) => {
+        console.error(err);
+        this.mostrarNotificacion('No se pudo eliminar el mensaje.', 'error');
       }
-      this.mostrarNotificacion(`El documento "${msg.titulo}" ha sido movido a la Papelera.`, 'exito');
-      this.cdr.detectChanges();
-    }, 1500));
+    });
   }
 
   eliminarMensajeEnviado(msg: Mensaje, event: Event): void {
@@ -868,24 +857,19 @@ export class App implements OnDestroy {
 
     msg.confirmarEliminarSent = false;
 
-    if (msg.estado === 'Enviando' && this.envioTimeouts[msg.id]) {
-      clearTimeout(this.envioTimeouts[msg.id]);
-      delete this.envioTimeouts[msg.id];
-    }
-
-    msg.estadoTemporal = 'Eliminando';
-    this.mostrarNotificacion('Eliminando mensaje...', 'info');
-    this.cdr.detectChanges();
-
-    this.generalTimeouts.push(setTimeout(() => {
-      msg.estadoTemporal = null;
-      msg.estado = 'Eliminado';
-      if (this.mensajeSeleccionado && this.mensajeSeleccionado.id === msg.id) {
-        this.mensajeSeleccionado = null;
+    this.http.delete<Mensaje>(`${this.apiUrl}/mensajes/${msg.id}`).subscribe({
+      next: (response) => {
+        if (this.mensajeSeleccionado && this.mensajeSeleccionado.id === msg.id) {
+          this.mensajeSeleccionado = null;
+        }
+        this.mostrarNotificacion('Mensaje eliminado.', 'exito');
+        this.cargarMensajesEnviados();
+      },
+      error: (err) => {
+        console.error(err);
+        this.mostrarNotificacion('No se pudo eliminar el mensaje.', 'error');
       }
-      this.mostrarNotificacion('Mensaje eliminado.', 'exito');
-      this.cdr.detectChanges();
-    }, 1500));
+    });
   }
 
   responderMensaje(msg: Mensaje, event: Event): void {
@@ -977,6 +961,7 @@ export class App implements OnDestroy {
         if (this.usuarioActual.tipo === 'admin') {
           this.cargarUsuarios();
         }
+        this.cargarMensajes();
 
         window.location.hash = this.moduloActual;
         window.history.replaceState({ modulo: this.moduloActual }, '', '#' + this.moduloActual);
@@ -1329,6 +1314,66 @@ export class App implements OnDestroy {
     });
   }
 
+  cargarMensajes(): void {
+    this.http.get<Mensaje[]>(`${this.apiUrl}/mensajes`).subscribe({
+      next: (mensajes) => {
+        this.mensajesBandeja = mensajes;
+        this.asegurarFechaHoraMensajes();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error(err);
+        this.mostrarNotificacion('No se pudieron cargar los mensajes.', 'error');
+      }
+    });
+  }
+
+  cargarMensajesRecibidos(): void {
+    this.http.get<Mensaje[]>(`${this.apiUrl}/mensajes/recibidos`).subscribe({
+      next: (recibidos) => {
+        const enviados = this.mensajesBandeja.filter(m => this.esMensajeEnviado(m));
+        const idsRecibidos = new Set(recibidos.map(m => m.id));
+        const filtradosEnviados = enviados.filter(m => !idsRecibidos.has(m.id));
+        this.mensajesBandeja = [...recibidos, ...filtradosEnviados];
+        this.asegurarFechaHoraMensajes();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error(err);
+        this.mostrarNotificacion('No se pudieron cargar los mensajes.', 'error');
+      }
+    });
+  }
+
+  cargarMensajesEnviados(): void {
+    this.http.get<Mensaje[]>(`${this.apiUrl}/mensajes/enviados`).subscribe({
+      next: (enviados) => {
+        const recibidos = this.mensajesBandeja.filter(m => this.esMensajeRecibido(m));
+        const idsEnviados = new Set(enviados.map(m => m.id));
+        const filtradosRecibidos = recibidos.filter(m => !idsEnviados.has(m.id));
+        this.mensajesBandeja = [...filtradosRecibidos, ...enviados];
+        this.asegurarFechaHoraMensajes();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error(err);
+        this.mostrarNotificacion('No se pudieron cargar los mensajes.', 'error');
+      }
+    });
+  }
+
+  cargarDatosModulo(modulo: string): void {
+    if (modulo === 'administracion' && this.usuarioActual.tipo === 'admin') {
+      this.cargarUsuarios();
+    } else if (modulo === 'bandeja') {
+      this.cargarMensajesRecibidos();
+    } else if (modulo === 'mensaje') {
+      this.cargarMensajesEnviados();
+    } else if (modulo === 'inicio') {
+      this.cargarMensajes();
+    }
+  }
+
   generarPasswordTemporal(usuario: UsuarioSistema): void {
     const num = Math.floor(1000 + Math.random() * 9000);
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -1543,10 +1588,15 @@ export class App implements OnDestroy {
 
   marcarComoRespondido(msg: Mensaje): void {
     if (this.esMensajeRecibido(msg)) {
-      msg.estadoLectura = 'Visto';
-      msg.estadoRespuesta = 'Respondido';
-      msg.estado = 'Respondido';
-      this.cdr.detectChanges();
+      this.http.patch<Mensaje>(`${this.apiUrl}/mensajes/${msg.id}`, { estado: 'Respondido' }).subscribe({
+        next: (updatedMsg) => {
+          msg.estadoLectura = 'Visto';
+          msg.estadoRespuesta = 'Respondido';
+          msg.estado = 'Respondido';
+          this.cdr.detectChanges();
+        },
+        error: (err) => console.error('Error al marcar como respondido:', err)
+      });
     }
   }
 
@@ -1569,6 +1619,7 @@ export class App implements OnDestroy {
   }
 
   abrirCalendario(): void {
+    this.cargarMensajes();
     this.guardarFoco();
     this.calendarioModalAbierto = true;
     this.filtroEventosCalendario = 'Todos';
@@ -1690,24 +1741,27 @@ export class App implements OnDestroy {
       ? todosDocNames.join(', ')
       : 'Sin adjunto';
 
-    const index = this.mensajesBandeja.findIndex(m => m.id === this.mensajeEditando!.id);
-    if (index !== -1) {
-      this.mensajesBandeja[index] = {
-        ...this.mensajesBandeja[index],
-        titulo: this.editMsgTitulo.trim(),
-        descripcion: this.editMsgDescripcion.trim() || 'Sin descripción adicional.',
-        destinatarios: this.editMsgDestSeleccionados.join(', '),
-        documento: finalDocumento,
-        fecha: this.editMsgFecha,
-        hora: this.editMsgHora
-      };
-      
-      this.mensajeSeleccionado = this.mensajesBandeja[index];
-      this.mostrarNotificacion('Mensaje enviado actualizado con éxito.', 'exito');
-      this.detalleEditandoMensaje = false;
-      this.mensajeEditando = null;
-      this.cdr.detectChanges();
-    }
+    const body = {
+      titulo: this.editMsgTitulo.trim(),
+      descripcion: this.editMsgDescripcion.trim() || 'Sin descripción adicional.',
+      destinatarios: this.editMsgDestSeleccionados.join(', '),
+      documento: finalDocumento,
+      estado: this.mensajeEditando.estado
+    };
+
+    this.http.patch<Mensaje>(`${this.apiUrl}/mensajes/${this.mensajeEditando.id}`, body).subscribe({
+      next: (response) => {
+        this.mostrarNotificacion('Mensaje enviado actualizado con éxito.', 'exito');
+        this.detalleEditandoMensaje = false;
+        this.mensajeEditando = null;
+        this.mensajeSeleccionado = response;
+        this.cargarMensajesEnviados();
+      },
+      error: (err) => {
+        console.error(err);
+        this.mostrarNotificacion('No se pudieron guardar los cambios del mensaje.', 'error');
+      }
+    });
   }
 
   editMsgBuscarDestinatario = '';
