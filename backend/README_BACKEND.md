@@ -52,10 +52,28 @@ Todas las rutas de la API utilizan el prefijo global `/api` configurado en `src/
 * `DELETE /api/mensajes/:id` — Marca un mensaje como `"Eliminado"` (sin borrarlo físicamente).
 * `GET /api/mensajes/status` — Endpoint de verificación de estado.
 
-### 📁 Otros Módulos (En espera de Fase 3)
+### 📁 Formatos Oficiales (Módulo `formatos` - CRUD en Memoria)
+* `GET /api/formatos` — Lista todos los formatos activos en memoria.
+* `GET /api/formatos/categoria/:categoria` — Obtiene los formatos de una categoría específica.
+* `GET /api/formatos/:id` — Obtiene el detalle de un formato específico.
+* `POST /api/formatos` — Registra un nuevo formato.
+  * **Cuerpo (CreateFormatoDto):** `{ "nombre": "...", "descripcion": "...", "categoria": "...", "archivo": "...", "tipoArchivo": "...", "estado": "..." }`
+* `PATCH /api/formatos/:id` — Actualiza información de un formato.
+* `DELETE /api/formatos/:id` — Marca un formato como `"Inactivo"` (sin borrarlo físicamente).
+* `GET /api/formatos/status` — Endpoint de verificación de estado.
+
+### 📅 Recordatorios (Módulo `recordatorios` - CRUD en Memoria)
+* `GET /api/recordatorios` — Lista todos los recordatorios activos (no eliminados).
+* `GET /api/recordatorios/fecha/:fecha` — Obtiene los recordatorios para una fecha específica (formato YYYY-MM-DD).
+* `GET /api/recordatorios/:id` — Obtiene el detalle de un recordatorio específico.
+* `POST /api/recordatorios` — Registra un nuevo recordatorio.
+  * **Cuerpo (CreateRecordatorioDto):** `{ "titulo": "...", "descripcion": "...", "fecha": "...", "hora": "...", "tipo": "recordatorio", "creadoPor": "..." }`
+* `PATCH /api/recordatorios/:id` — Actualiza información de un recordatorio.
+* `DELETE /api/recordatorios/:id` — Marca un recordatorio como `"Eliminado"` (sin borrarlo físicamente).
+* `GET /api/recordatorios/status` — Endpoint de verificación de estado.
+
+### 📁 Otros Módulos
 * `GET /api/health` — Verificación de salud.
-* `GET /api/formatos/status` — Módulo Formatos.
-* `GET /api/recordatorios/status` — Módulo Recordatorios.
 * `GET /api/archivos/status` — Módulo Archivos.
 
 ---
@@ -98,5 +116,6 @@ npm run test
 
 ## Estado Actual de la Integración
 * ⚠️ **Base de Datos (MySQL):** No está conectada todavía. Las bases de datos se simulan con arreglos en memoria en los servicios de NestJS.
+* ⚠️ **Archivos / Storage:** No se guardan ni procesan archivos físicos (los nombres de archivos son solo campos de texto).
 * ⚠️ **Seguridad (JWT/Auth):** La autenticación real mediante tokens JWT no está activa todavía (los tokens retornados en login son `null`).
-* 🔗 **Conexión Frontend-Backend:** Esta fase define los contratos de API y endpoints para comenzar a conectar Angular con NestJS consumiendo datos dinámicos simulados.
+* 🔗 **Conexión Frontend-Backend:** Login, Usuarios y Mensajes ya están completamente conectados y operativos en el frontend de Angular. Los módulos de Formatos y Recordatorios tienen endpoints preparados en memoria en el backend, listos para su posterior integración en el frontend.

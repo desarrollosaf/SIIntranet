@@ -46,3 +46,25 @@ export interface LoginResponse {
   token: string | null;
   mode: 'mock';
 }
+
+export interface Formato {
+  id: number;
+  nombre: string;
+  descripcion: string;
+  categoria: string;
+  archivo: string;
+  tipoArchivo: string;
+  fechaCreacion: string;
+  estado: 'Activo' | 'Inactivo';
+}
+
+export interface Recordatorio {
+  id: number;
+  titulo: string;
+  descripcion: string;
+  fecha: string;
+  hora: string;
+  tipo: 'recordatorio';
+  estado: 'Activo' | 'Inactivo' | 'Eliminado';
+  creadoPor: string;
+}
