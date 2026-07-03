@@ -1,5 +1,6 @@
 import { Component, ChangeDetectorRef, HostListener, OnDestroy, NgZone } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 
 export interface Mensaje {
   id: number;
@@ -56,6 +57,8 @@ export interface DocumentoFormato {
   styleUrl: './app.scss'
 })
 export class App implements OnDestroy {
+
+  private readonly apiUrl = 'http://localhost:3000/api';
 
   ultimoElementoEnfocado: HTMLElement | null = null;
 
@@ -125,7 +128,7 @@ export class App implements OnDestroy {
     });
   }
 
-  constructor(private cdr: ChangeDetectorRef, private zone: NgZone) {
+  constructor(private cdr: ChangeDetectorRef, private zone: NgZone, private http: HttpClient) {
     this.inicializarDatosPrueba();
     this.detectarSesionGuardada();
     this.asegurarFechaHoraMensajes();
@@ -170,6 +173,9 @@ export class App implements OnDestroy {
       try {
         this.usuarioActual = JSON.parse(userStr);
         this.isLoggedIn = true;
+        if (this.usuarioActual.tipo === 'admin') {
+          this.cargarUsuarios();
+        }
       } catch (e) {
         this.isLoggedIn = false;
       }
@@ -184,6 +190,9 @@ export class App implements OnDestroy {
         window.location.hash = 'inicio';
       } else {
         this.moduloActual = hash;
+        if (hash === 'administracion' && this.usuarioActual.tipo === 'admin') {
+          this.cargarUsuarios();
+        }
       }
     } else {
       this.moduloActual = 'inicio';
@@ -215,6 +224,9 @@ export class App implements OnDestroy {
     this.moduloActual = modulo;
     if (modulo === 'mensaje') {
       this.actualizarFechaHora();
+    }
+    if (modulo === 'administracion' && this.usuarioActual.tipo === 'admin') {
+      this.cargarUsuarios();
     }
     this.cdr.detectChanges();
   }
@@ -520,6 +532,9 @@ export class App implements OnDestroy {
     this.moduloActual = modulo;
     if (modulo === 'mensaje') {
       this.actualizarFechaHora();
+    }
+    if (modulo === 'administracion' && this.usuarioActual.tipo === 'admin') {
+      this.cargarUsuarios();
     }
 
     const hash = '#' + modulo;
@@ -923,53 +938,59 @@ export class App implements OnDestroy {
       return;
     }
 
-    const usuarioLimpio = this.loginUsuario.trim().toLowerCase();
-    const match = this.usuariosSistema.find(u =>
-      u.usuario.toLowerCase() === usuarioLimpio || u.correo.toLowerCase() === usuarioLimpio
-    );
+    const payload = {
+      usuario: this.loginUsuario.trim(),
+      password: this.loginPassword.trim()
+    };
 
-    if (match) {
-      if (match.password && match.password !== this.loginPassword) {
-        this.mostrarNotificacion('Contraseña incorrecta.', 'error');
-        return;
-      }
-      this.isLoggedIn = true;
-      this.usuarioActual = {
-        nombre: match.nombre,
-        rol: match.rol,
-        tipo: (match.rol === 'Administrador' ? 'admin' : 'normal') as 'admin' | 'normal'
-      };
-      if (match.requiereCambioPassword) {
-        this.mostrarCambioObligatorioModal = true;
-        this.usuarioPendienteCambio = match;
-        this.mostrarNotificacion('Debe cambiar su contraseña obligatoriamente.', 'advertencia');
-      } else {
-        this.mostrarNotificacion(`Sesión iniciada como ${match.nombre}.`, 'exito');
-      }
-    } else {
-      this.isLoggedIn = true;
-      if (usuarioLimpio === 'admin') {
+    this.http.post<any>(`${this.apiUrl}/auth/login`, payload).subscribe({
+      next: (response) => {
+        this.isLoggedIn = true;
         this.usuarioActual = {
-          nombre: 'Administrador del sistema',
-          rol: 'Administrador',
-          tipo: 'admin'
+          nombre: response.user.nombre,
+          rol: response.user.rol,
+          tipo: (response.user.rol === 'Administrador' ? 'admin' : 'normal') as 'admin' | 'normal'
         };
-        this.mostrarNotificacion('Sesión iniciada como Administrador.', 'exito');
-      } else {
-        this.usuarioActual = {
-          nombre: this.loginUsuario.trim(),
-          rol: 'Usuario',
-          tipo: 'normal'
-        };
-        this.mostrarNotificacion('Sesión iniciada correctamente.', 'exito');
+
+        sessionStorage.setItem('si_session_logged', 'true');
+        sessionStorage.setItem('si_session_user', JSON.stringify(this.usuarioActual));
+
+        if (response.requiresPasswordChange) {
+          this.mostrarCambioObligatorioModal = true;
+          this.usuarioPendienteCambio = {
+            id: response.user.id,
+            nombre: response.user.nombre,
+            usuario: response.user.usuario,
+            correo: response.user.correo || '',
+            area: response.user.area || '',
+            rol: response.user.rol,
+            estado: 'Activo'
+          };
+          this.mostrarNotificacion('Debe cambiar su contraseña obligatoriamente.', 'advertencia');
+        } else {
+          this.mostrarNotificacion(`Sesión iniciada como ${response.user.nombre}.`, 'exito');
+        }
+
+        this.loginUsuario = '';
+        this.loginPassword = '';
+
+        if (this.usuarioActual.tipo === 'admin') {
+          this.cargarUsuarios();
+        }
+
+        window.location.hash = this.moduloActual;
+        window.history.replaceState({ modulo: this.moduloActual }, '', '#' + this.moduloActual);
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error(err);
+        if (err.status === 401 || err.status === 404) {
+          this.mostrarNotificacion('Usuario o contraseña incorrectos.', 'error');
+        } else {
+          this.mostrarNotificacion('No se pudo conectar con el servidor. Verifica que el backend esté activo.', 'error');
+        }
       }
-    }
-
-    sessionStorage.setItem('si_session_logged', 'true');
-    sessionStorage.setItem('si_session_user', JSON.stringify(this.usuarioActual));
-
-    window.location.hash = this.moduloActual;
-    window.history.replaceState({ modulo: this.moduloActual }, '', '#' + this.moduloActual);
+    });
   }
 
   cerrarSesion(): void {
@@ -1016,25 +1037,28 @@ export class App implements OnDestroy {
       return;
     }
 
-    const userInList = this.usuariosSistema.find(u => u.id === this.usuarioPendienteCambio!.id);
-    if (userInList) {
-      userInList.password = pwd;
-      userInList.requiereCambioPassword = false;
-    }
+    this.http.patch<any>(`${this.apiUrl}/usuarios/${this.usuarioPendienteCambio.id}/password`, { passwordNueva: pwd }).subscribe({
+      next: () => {
+        sessionStorage.setItem('si_session_logged', 'true');
+        sessionStorage.setItem('si_session_user', JSON.stringify(this.usuarioActual));
 
-    this.usuarioPendienteCambio.password = pwd;
-    this.usuarioPendienteCambio.requiereCambioPassword = false;
+        this.mostrarCambioObligatorioModal = false;
+        this.usuarioPendienteCambio = null;
+        this.nuevaPassword = '';
+        this.confirmarNuevaPassword = '';
 
-    sessionStorage.setItem('si_session_logged', 'true');
-    sessionStorage.setItem('si_session_user', JSON.stringify(this.usuarioActual));
-
-    this.mostrarCambioObligatorioModal = false;
-    this.usuarioPendienteCambio = null;
-    this.nuevaPassword = '';
-    this.confirmarNuevaPassword = '';
-
-    this.mostrarNotificacion('Contraseña actualizada correctamente. Bienvenido al sistema.', 'exito');
-    this.cdr.detectChanges();
+        this.mostrarNotificacion('Contraseña actualizada correctamente. Bienvenido al sistema.', 'exito');
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error(err);
+        if (err.status === 404) {
+          this.mostrarNotificacion('Usuario no encontrado en el servidor. No se pudo cambiar la contraseña.', 'error');
+        } else {
+          this.mostrarNotificacion('Error al actualizar la contraseña en el servidor.', 'error');
+        }
+      }
+    });
   }
 
   verPerfilUsuario(): void {
@@ -1099,6 +1123,28 @@ export class App implements OnDestroy {
     }, 50));
   }
 
+  abrirCrearUsuarioAdmin(): void {
+    this.guardarFoco();
+    this.usuarioEditandoAdmin = {
+      id: 0,
+      nombre: '',
+      usuario: '',
+      correo: '',
+      area: '',
+      rol: 'Usuario',
+      estado: 'Activo',
+      password: '',
+      requiereCambioPassword: false
+    };
+    this.modalEditarUsuarioAbierto = true;
+    this.modalVerUsuarioAbierto = false;
+    this.verPasswordEditUsuario = false;
+    this.generalTimeouts.push(setTimeout(() => {
+      const firstInput = document.querySelector('#editNombre') as HTMLElement;
+      if (firstInput) firstInput.focus();
+    }, 50));
+  }
+
   cerrarModalEditarUsuario(): void {
     if (this.usuarioEditandoAdmin) {
       const original = this.usuariosSistema.find(u => u.id === this.usuarioEditandoAdmin!.id);
@@ -1147,18 +1193,77 @@ export class App implements OnDestroy {
       return;
     }
 
-    const index = this.usuariosSistema.findIndex(u => u.id === this.usuarioEditandoAdmin!.id);
-    if (index !== -1) {
-      const original = this.usuariosSistema[index];
-      if (this.usuarioEditandoAdmin.password !== original.password) {
-        this.usuarioEditandoAdmin.requiereCambioPassword = true;
-      }
-      this.usuariosSistema[index] = { ...this.usuarioEditandoAdmin };
-      this.usuarioSeleccionadoAdmin = this.usuariosSistema[index];
-      this.usuarioEditandoAdmin = null;
-      this.modalEditarUsuarioAbierto = false;
-      this.actualizarUsuariosDisponibles();
-      this.mostrarNotificacion('Usuario actualizado correctamente.', 'exito');
+    if (this.usuarioEditandoAdmin.id === 0) {
+      // Create mode
+      const payload = {
+        nombre: this.usuarioEditandoAdmin.nombre.trim(),
+        usuario: this.usuarioEditandoAdmin.usuario.trim(),
+        correo: this.usuarioEditandoAdmin.correo?.trim() || '',
+        area: this.usuarioEditandoAdmin.area?.trim() || '',
+        rol: this.usuarioEditandoAdmin.rol,
+        estado: this.usuarioEditandoAdmin.estado,
+        password: this.usuarioEditandoAdmin.password || undefined,
+        requiereCambioPassword: this.usuarioEditandoAdmin.requiereCambioPassword ?? false
+      };
+
+      this.http.post<UsuarioSistema>(`${this.apiUrl}/usuarios`, payload).subscribe({
+        next: (response) => {
+          this.mostrarNotificacion('Usuario creado correctamente.', 'exito');
+          this.modalEditarUsuarioAbierto = false;
+          this.usuarioEditandoAdmin = null;
+          this.cargarUsuarios();
+        },
+        error: (err) => {
+          console.error(err);
+          this.mostrarNotificacion('Error al crear el usuario en el servidor.', 'error');
+        }
+      });
+    } else {
+      // Edit mode
+      const payload = {
+        nombre: this.usuarioEditandoAdmin.nombre.trim(),
+        usuario: this.usuarioEditandoAdmin.usuario.trim(),
+        correo: this.usuarioEditandoAdmin.correo?.trim() || '',
+        area: this.usuarioEditandoAdmin.area?.trim() || '',
+        rol: this.usuarioEditandoAdmin.rol,
+        estado: this.usuarioEditandoAdmin.estado,
+        requiereCambioPassword: this.usuarioEditandoAdmin.requiereCambioPassword ?? false
+      };
+
+      const userId = this.usuarioEditandoAdmin.id;
+      const newPwd = this.usuarioEditandoAdmin.password?.trim();
+
+      this.http.patch<UsuarioSistema>(`${this.apiUrl}/usuarios/${userId}`, payload).subscribe({
+        next: (response) => {
+          if (newPwd) {
+            // Update password
+            this.http.patch<any>(`${this.apiUrl}/usuarios/${userId}/password`, { passwordNueva: newPwd }).subscribe({
+              next: () => {
+                this.mostrarNotificacion('Usuario y contraseña actualizados correctamente.', 'exito');
+                this.modalEditarUsuarioAbierto = false;
+                this.usuarioEditandoAdmin = null;
+                this.cargarUsuarios();
+              },
+              error: (err) => {
+                console.error(err);
+                this.mostrarNotificacion('Usuario actualizado, pero falló el cambio de contraseña.', 'advertencia');
+                this.modalEditarUsuarioAbierto = false;
+                this.usuarioEditandoAdmin = null;
+                this.cargarUsuarios();
+              }
+            });
+          } else {
+            this.mostrarNotificacion('Usuario actualizado correctamente.', 'exito');
+            this.modalEditarUsuarioAbierto = false;
+            this.usuarioEditandoAdmin = null;
+            this.cargarUsuarios();
+          }
+        },
+        error: (err) => {
+          console.error(err);
+          this.mostrarNotificacion('Error al actualizar el usuario en el servidor.', 'error');
+        }
+      });
     }
   }
 
@@ -1188,6 +1293,40 @@ export class App implements OnDestroy {
     } else {
       this.mostrarNotificacion('Usuario desactivado correctamente.', 'exito');
     }
+  }
+
+  eliminarUsuarioAdmin(usuario: UsuarioSistema, event?: Event): void {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    if (!confirm(`¿Está seguro de que desea desactivar al usuario "${usuario.nombre}"?`)) {
+      return;
+    }
+    this.http.delete<any>(`${this.apiUrl}/usuarios/${usuario.id}`).subscribe({
+      next: (response) => {
+        this.mostrarNotificacion('Usuario desactivado correctamente.', 'exito');
+        this.cargarUsuarios();
+      },
+      error: (err) => {
+        console.error(err);
+        this.mostrarNotificacion('Error al desactivar el usuario.', 'error');
+      }
+    });
+  }
+
+  cargarUsuarios(): void {
+    this.http.get<UsuarioSistema[]>(`${this.apiUrl}/usuarios`).subscribe({
+      next: (users) => {
+        this.usuariosSistema = users;
+        this.actualizarUsuariosDisponibles();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error(err);
+        this.mostrarNotificacion('No se pudo conectar con el servidor. Verifica que el backend esté activo.', 'error');
+      }
+    });
   }
 
   generarPasswordTemporal(usuario: UsuarioSistema): void {

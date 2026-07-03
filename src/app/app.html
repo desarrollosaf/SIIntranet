@@ -712,10 +712,16 @@
         <div class="inbox-card" style="margin-bottom: 24px;">
           <div class="inbox-header">
             <h3><i class="bi bi-people-fill"></i> Gestión de Usuarios</h3>
-            <span class="badge-count">
-              <i class="bi bi-person-fill"></i>
-              {{ usuariosFiltrados.length }} usuarios
-            </span>
+            <div style="display: flex; gap: 12px; align-items: center;">
+              <button type="button" class="btn-admin-action si-btn-primary si-btn-sm" (click)="abrirCrearUsuarioAdmin()" title="Crear usuario" style="padding: 6px 12px; height: auto;">
+                <i class="bi bi-person-plus-fill"></i>
+                <span>Nuevo Usuario</span>
+              </button>
+              <span class="badge-count">
+                <i class="bi bi-person-fill"></i>
+                {{ usuariosFiltrados.length }} usuarios
+              </span>
+            </div>
           </div>
 
           <div class="admin-table-container">
@@ -758,6 +764,11 @@
                         title="Editar usuario">
                         <i class="bi bi-pencil-fill"></i>
                         <span>Editar</span>
+                      </button>
+                      <button type="button" class="btn-admin-action si-btn-danger-ghost si-btn-xs" (click)="eliminarUsuarioAdmin(u, $event)"
+                        title="Desactivar usuario" [disabled]="u.estado === 'Inactivo'">
+                        <i class="bi bi-trash-fill"></i>
+                        <span>Desactivar</span>
                       </button>
                     </div>
                   </td>
@@ -1393,14 +1404,9 @@
             </div>
           </div>
           <div class="detail-row" style="grid-column: span 2;">
-            <span class="detail-label">Contraseña Actual</span>
-            <div class="detail-value" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
-              <span style="font-family: monospace; font-size: 14px; font-weight: 600;">
-                {{ verPasswordVerUsuario ? (usuarioSeleccionadoAdmin.password || 'Sin contraseña') : '••••••••' }}
-              </span>
-              <button type="button" class="btn-toggle-pwd si-btn-icon" (click)="verPasswordVerUsuario = !verPasswordVerUsuario" title="Mostrar/Ocultar contraseña" aria-label="Mostrar u ocultar contraseña">
-                <i class="bi" [class.bi-eye-fill]="!verPasswordVerUsuario" [class.bi-eye-slash-fill]="verPasswordVerUsuario"></i>
-              </button>
+            <span class="detail-label">Contraseña</span>
+            <div class="detail-value" style="font-style: italic; color: var(--texto-mutado); font-size: 13.5px;">
+              La contraseña no se muestra por seguridad.
             </div>
           </div>
         </div>
@@ -1427,7 +1433,7 @@
   <div class="modal-backdrop" (click)="cerrarModalEditarUsuario()">
     <div class="modal-card animate-slide-up" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h3><i class="bi bi-person-badge-fill"></i> Editar Usuario</h3>
+        <h3><i class="bi bi-person-badge-fill"></i> {{ usuarioEditandoAdmin.id === 0 ? 'Crear Usuario' : 'Editar Usuario' }}</h3>
         <button type="button" class="btn-close si-btn-icon" (click)="cerrarModalEditarUsuario()" title="Cerrar" aria-label="Cerrar edición de usuario">
           <i class="bi bi-x-lg"></i>
         </button>
@@ -1506,12 +1512,17 @@
                 </button>
               </div>
             </div>
+
+            <div class="form-row form-row-vertical" style="flex-direction: row; align-items: center; gap: 8px; margin-top: 10px;">
+              <input id="editRequiereCambioPassword" name="editRequiereCambioPassword" type="checkbox" [(ngModel)]="usuarioEditandoAdmin.requiereCambioPassword" style="width: auto; margin: 0; cursor: pointer;" />
+              <label for="editRequiereCambioPassword" style="margin: 0; cursor: pointer; font-size: 13.5px; font-weight: 500;">Exigir cambio de contraseña en el próximo inicio de sesión</label>
+            </div>
           </div>
         </div>
         <div class="modal-footer">
           <button type="submit" class="btn-admin-action-btn btn-success">
             <i class="bi bi-save-fill"></i>
-            <span>Guardar cambios</span>
+            <span>{{ usuarioEditandoAdmin.id === 0 ? 'Crear usuario' : 'Guardar cambios' }}</span>
           </button>
           <button type="button" class="btn-admin-action-btn btn-secondary" (click)="cerrarModalEditarUsuario()">
             <i class="bi bi-x-circle-fill"></i>
