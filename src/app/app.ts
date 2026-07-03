@@ -45,8 +45,14 @@ export interface UsuarioSistema {
 }
 
 export interface DocumentoFormato {
+  id?: number;
   nombre: string;
+  descripcion?: string;
+  categoria?: string;
   archivo: string;
+  tipoArchivo?: string;
+  fechaCreacion?: string;
+  estado?: 'Activo' | 'Inactivo';
 }
 
 
@@ -177,6 +183,7 @@ export class App implements OnDestroy {
           this.cargarUsuarios();
         }
         this.cargarMensajes();
+        this.cargarRecordatorios();
       } catch (e) {
         this.isLoggedIn = false;
       }
@@ -472,29 +479,45 @@ export class App implements OnDestroy {
       return;
     }
 
-    this.recordatoriosCalendario = [
-      ...this.recordatoriosCalendario,
-      {
-        id: this.nextRecordatorioId++,
-        fecha: this.fechaSeleccionadaCalendario,
-        tipo: 'recordatorio',
-        titulo: 'Recordatorio',
-        descripcion,
-        hora: this.nuevoRecordatorioHoraCalendario || undefined
-      }
-    ];
+    const body = {
+      titulo: 'Recordatorio',
+      descripcion: descripcion,
+      fecha: this.fechaSeleccionadaCalendario,
+      hora: this.nuevoRecordatorioHoraCalendario || '00:00',
+      tipo: 'recordatorio' as const,
+      estado: 'Activo' as const,
+      creadoPor: this.usuarioActual.nombre
+    };
 
-    this.nuevoRecordatorioCalendario = '';
-    this.nuevoRecordatorioHoraCalendario = '';
-    this.mostrarNotificacion('Recordatorio agregado correctamente.', 'exito');
+    this.http.post<EventoCalendario>(`${this.apiUrl}/recordatorios`, body).subscribe({
+      next: (response) => {
+        this.mostrarNotificacion('Recordatorio agregado correctamente.', 'exito');
+        this.nuevoRecordatorioCalendario = '';
+        this.nuevoRecordatorioHoraCalendario = '';
+        this.cargarRecordatorios();
+      },
+      error: (err) => {
+        console.error(err);
+        this.mostrarNotificacion('No se pudo crear el recordatorio.', 'error');
+      }
+    });
   }
 
   eliminarRecordatorioCalendario(id: number | undefined, event: Event): void {
     event.preventDefault();
     event.stopPropagation();
     if (id === undefined) return;
-    this.recordatoriosCalendario = this.recordatoriosCalendario.filter(recordatorio => recordatorio.id !== id);
-    this.mostrarNotificacion('Recordatorio eliminado.', 'info');
+
+    this.http.delete<EventoCalendario>(`${this.apiUrl}/recordatorios/${id}`).subscribe({
+      next: (response) => {
+        this.mostrarNotificacion('Recordatorio eliminado.', 'exito');
+        this.cargarRecordatorios();
+      },
+      error: (err) => {
+        console.error(err);
+        this.mostrarNotificacion('No se pudo eliminar el recordatorio.', 'error');
+      }
+    });
   }
 
   private formatearFechaLocal(fecha: Date): string {
@@ -962,6 +985,7 @@ export class App implements OnDestroy {
           this.cargarUsuarios();
         }
         this.cargarMensajes();
+        this.cargarRecordatorios();
 
         window.location.hash = this.moduloActual;
         window.history.replaceState({ modulo: this.moduloActual }, '', '#' + this.moduloActual);
@@ -1328,6 +1352,55 @@ export class App implements OnDestroy {
     });
   }
 
+  normalizarTexto(txt: string): string {
+    return txt
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]/g, '');
+  }
+
+  cargarFormatos(): void {
+    this.http.get<DocumentoFormato[]>(`${this.apiUrl}/formatos`).subscribe({
+      next: (formatos) => {
+        this.categoriasFormatos.forEach(cat => {
+          this.documentosFormatos[cat] = [];
+        });
+
+        formatos.forEach(f => {
+          const catNormalizada = this.normalizarTexto(f.categoria || '');
+          const catEncontrada = this.categoriasFormatos.find(
+            cat => this.normalizarTexto(cat) === catNormalizada
+          );
+
+          if (catEncontrada) {
+            this.documentosFormatos[catEncontrada].push(f);
+          } else if (this.documentosFormatos[f.categoria || 'Formatos']) {
+            this.documentosFormatos[f.categoria || 'Formatos'].push(f);
+          }
+        });
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error(err);
+        this.mostrarNotificacion('No se pudieron cargar los formatos.', 'error');
+      }
+    });
+  }
+
+  cargarRecordatorios(): void {
+    this.http.get<EventoCalendario[]>(`${this.apiUrl}/recordatorios`).subscribe({
+      next: (recordatorios) => {
+        this.recordatoriosCalendario = recordatorios;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error(err);
+        this.mostrarNotificacion('No se pudieron cargar los recordatorios.', 'error');
+      }
+    });
+  }
+
   cargarMensajesRecibidos(): void {
     this.http.get<Mensaje[]>(`${this.apiUrl}/mensajes/recibidos`).subscribe({
       next: (recibidos) => {
@@ -1371,6 +1444,9 @@ export class App implements OnDestroy {
       this.cargarMensajesEnviados();
     } else if (modulo === 'inicio') {
       this.cargarMensajes();
+      this.cargarRecordatorios();
+    } else if (modulo === 'formatos') {
+      this.cargarFormatos();
     }
   }
 
@@ -1620,6 +1696,7 @@ export class App implements OnDestroy {
 
   abrirCalendario(): void {
     this.cargarMensajes();
+    this.cargarRecordatorios();
     this.guardarFoco();
     this.calendarioModalAbierto = true;
     this.filtroEventosCalendario = 'Todos';
