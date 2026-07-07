@@ -4937,3 +4937,30 @@ select:focus-visible {
 .dot-recordatorio {
   background: $vino !important;
 }
+
+.password-change-required-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 16px 24px 0;
+  text-align: left;
+
+  input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin: 2px 0 0 0;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  label {
+    margin: 0;
+    cursor: pointer;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: $texto;
+    line-height: 1.4;
+    text-transform: none !important;
+  }
+}
