@@ -479,11 +479,23 @@ export class App implements OnDestroy {
       return;
     }
 
+    const fecha = this.fechaSeleccionadaCalendario;
+    if (!fecha) {
+      this.mostrarNotificacion('Por favor seleccione una fecha para el recordatorio.', 'error');
+      return;
+    }
+
+    const hora = (this.nuevoRecordatorioHoraCalendario || '').trim();
+    if (!hora) {
+      this.mostrarNotificacion('Por favor especifique la hora para el recordatorio.', 'error');
+      return;
+    }
+
     const body = {
       titulo: 'Recordatorio',
       descripcion: descripcion,
-      fecha: this.fechaSeleccionadaCalendario,
-      hora: this.nuevoRecordatorioHoraCalendario || '00:00',
+      fecha: fecha,
+      hora: hora,
       tipo: 'recordatorio' as const,
       estado: 'Activo' as const,
       creadoPor: this.usuarioActual.nombre
@@ -658,6 +670,10 @@ export class App implements OnDestroy {
       this.mostrarNotificacion('Por favor ingrese un título para el documento.', 'error');
       return;
     }
+    if (!this.formDescripcion || !this.formDescripcion.trim()) {
+      this.mostrarNotificacion('Por favor ingrese una descripción para el mensaje.', 'error');
+      return;
+    }
     if (this.usuariosSeleccionados.length === 0) {
       this.mostrarNotificacion('Por favor seleccione al menos un destinatario.', 'error');
       return;
@@ -673,7 +689,7 @@ export class App implements OnDestroy {
 
     const body = {
       titulo: this.formTitulo.trim(),
-      descripcion: this.formDescripcion?.trim() || 'Sin descripción adicional.',
+      descripcion: this.formDescripcion.trim(),
       remitente: this.usuarioActual.nombre,
       destinatarios: this.usuariosSeleccionados.join(', '),
       documento: documentosAdjuntos,
@@ -1193,6 +1209,23 @@ export class App implements OnDestroy {
       this.mostrarNotificacion('El usuario no puede estar vacío.', 'error');
       return;
     }
+    
+    const correo = (this.usuarioEditandoAdmin.correo || '').trim();
+    if (!correo) {
+      this.mostrarNotificacion('El correo electrónico es obligatorio.', 'error');
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(correo)) {
+      this.mostrarNotificacion('El formato del correo electrónico no es válido.', 'error');
+      return;
+    }
+
+    if (!this.usuarioEditandoAdmin.area || !this.usuarioEditandoAdmin.area.trim()) {
+      this.mostrarNotificacion('El área de adscripción es obligatoria.', 'error');
+      return;
+    }
+
     if (!this.usuarioEditandoAdmin.rol.trim()) {
       this.mostrarNotificacion('El rol no puede estar vacío.', 'error');
       return;
@@ -1204,11 +1237,19 @@ export class App implements OnDestroy {
 
     if (this.usuarioEditandoAdmin.id === 0) {
       // Create mode
+      if (this.usuarioEditandoAdmin.password) {
+        const pwd = this.usuarioEditandoAdmin.password.trim();
+        if (pwd.length > 0 && pwd.length < 8) {
+          this.mostrarNotificacion('La contraseña debe tener al menos 8 caracteres.', 'error');
+          return;
+        }
+      }
+
       const payload = {
         nombre: this.usuarioEditandoAdmin.nombre.trim(),
         usuario: this.usuarioEditandoAdmin.usuario.trim(),
-        correo: this.usuarioEditandoAdmin.correo?.trim() || '',
-        area: this.usuarioEditandoAdmin.area?.trim() || '',
+        correo: correo,
+        area: this.usuarioEditandoAdmin.area.trim(),
         rol: this.usuarioEditandoAdmin.rol,
         estado: this.usuarioEditandoAdmin.estado,
         password: this.usuarioEditandoAdmin.password || undefined,
@@ -1229,18 +1270,23 @@ export class App implements OnDestroy {
       });
     } else {
       // Edit mode
+      const newPwd = this.usuarioEditandoAdmin.password?.trim();
+      if (newPwd && newPwd.length < 8) {
+        this.mostrarNotificacion('La contraseña debe tener al menos 8 caracteres.', 'error');
+        return;
+      }
+
       const payload = {
         nombre: this.usuarioEditandoAdmin.nombre.trim(),
         usuario: this.usuarioEditandoAdmin.usuario.trim(),
-        correo: this.usuarioEditandoAdmin.correo?.trim() || '',
-        area: this.usuarioEditandoAdmin.area?.trim() || '',
+        correo: correo,
+        area: this.usuarioEditandoAdmin.area.trim(),
         rol: this.usuarioEditandoAdmin.rol,
         estado: this.usuarioEditandoAdmin.estado,
         requiereCambioPassword: this.usuarioEditandoAdmin.requiereCambioPassword ?? false
       };
 
       const userId = this.usuarioEditandoAdmin.id;
-      const newPwd = this.usuarioEditandoAdmin.password?.trim();
 
       this.http.patch<UsuarioSistema>(`${this.apiUrl}/usuarios/${userId}`, payload).subscribe({
         next: (response) => {
@@ -1804,6 +1850,11 @@ export class App implements OnDestroy {
       return;
     }
 
+    if (!this.editMsgDescripcion || !this.editMsgDescripcion.trim()) {
+      this.mostrarNotificacion('La descripción no puede estar vacía.', 'error');
+      return;
+    }
+
     if (this.editMsgDestSeleccionados.length === 0) {
       this.mostrarNotificacion('Debe haber al menos un destinatario.', 'error');
       return;
@@ -1820,7 +1871,7 @@ export class App implements OnDestroy {
 
     const body = {
       titulo: this.editMsgTitulo.trim(),
-      descripcion: this.editMsgDescripcion.trim() || 'Sin descripción adicional.',
+      descripcion: this.editMsgDescripcion.trim(),
       destinatarios: this.editMsgDestSeleccionados.join(', '),
       documento: finalDocumento,
       estado: this.mensajeEditando.estado
