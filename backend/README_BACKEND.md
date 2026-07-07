@@ -114,6 +114,14 @@ npm run test
 
 ---
 
+## 🛡️ Validación de DTOs
+Se ha implementado validación automática y de tipos en los DTOs del backend utilizando el middleware nativo de NestJS:
+* **ValidationPipe global:** Configurado en `src/main.ts` con las opciones `whitelist: true` (remueve automáticamente campos que no estén explícitamente declarados en el DTO) y `transform: true` (autotransforma tipos de datos de red a tipos nativos).
+* **Decoradores de class-validator:** Se validan campos obligatorios (`@IsNotEmpty()`), tipos de datos (`@IsString()`, `@IsEmail()`, `@IsBoolean()`) y valores permitidos (`@IsIn()`).
+* **Seguridad y MySQL:** Estas validaciones actúan como una capa de protección en memoria; todavía no hay integraciones con base de datos MySQL ni autenticación JWT activa.
+
+---
+
 ## Estado Actual de la Integración
 * ⚠️ **Base de Datos (MySQL):** No está conectada todavía. Las bases de datos se simulan con arreglos en memoria en los servicios de NestJS.
 * ⚠️ **Archivos / Storage:** No se guardan ni procesan archivos físicos (los nombres de archivos son solo campos de texto).
