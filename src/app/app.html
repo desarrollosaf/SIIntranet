@@ -22,10 +22,15 @@
 
       <div class="login-row">
         <label for="login_pass">Contraseña:</label>
-        <div class="input-with-icon">
-          <i class="bi bi-lock-fill"></i>
-          <input id="login_pass" name="loginPassword" type="password" [(ngModel)]="loginPassword"
-            placeholder="Ingrese su contraseña" required />
+        <div style="display: flex; gap: 8px; width: 100%;">
+          <div class="input-with-icon" style="flex: 1;">
+            <i class="bi bi-lock-fill"></i>
+            <input id="login_pass" name="loginPassword" [type]="mostrarPasswordLogin ? 'text' : 'password'" [(ngModel)]="loginPassword"
+              placeholder="Ingrese su contraseña" required />
+          </div>
+          <button type="button" class="btn-toggle-pwd-border" (click)="mostrarPasswordLogin = !mostrarPasswordLogin" title="Mostrar/Ocultar contraseña" aria-label="Mostrar u ocultar contraseña">
+            <i class="bi" [class.bi-eye-fill]="!mostrarPasswordLogin" [class.bi-eye-slash-fill]="mostrarPasswordLogin"></i>
+          </button>
         </div>
       </div>
 
@@ -765,11 +770,19 @@
                         <i class="bi bi-pencil-fill"></i>
                         <span>Editar</span>
                       </button>
-                      <button type="button" class="btn-admin-action si-btn-danger-ghost si-btn-xs" (click)="eliminarUsuarioAdmin(u, $event)"
-                        title="Desactivar usuario" [disabled]="u.estado === 'Inactivo'">
-                        <i class="bi bi-trash-fill"></i>
-                        <span>Desactivar</span>
-                      </button>
+                      @if (u.estado === 'Activo') {
+                        <button type="button" class="btn-admin-action si-btn-danger-ghost si-btn-xs" (click)="toggleEstadoUsuario(u, $event)"
+                          title="Desactivar usuario">
+                          <i class="bi bi-person-x-fill"></i>
+                          <span>Desactivar</span>
+                        </button>
+                      } @else {
+                        <button type="button" class="btn-admin-action si-btn-primary si-btn-xs" (click)="toggleEstadoUsuario(u, $event)"
+                          title="Activar usuario">
+                          <i class="bi bi-person-check-fill"></i>
+                          <span>Activar</span>
+                        </button>
+                      }
                     </div>
                   </td>
                 </tr>
@@ -1511,6 +1524,7 @@
                   Generar
                 </button>
               </div>
+              <span class="password-security-hint">La contraseña no se muestra por seguridad.</span>
             </div>
 
             <div class="password-change-required-row">

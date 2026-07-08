@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ForbiddenException } from '@nestjs/common';
 import { UsuariosService } from '../usuarios/usuarios.service';
 import { LoginDto } from './dto/login.dto';
 import { LoginResponse } from '../../common/interfaces/common.interfaces';
@@ -17,10 +17,17 @@ export class AuthService {
 
   login(loginDto: LoginDto): LoginResponse {
     const username = (loginDto.usuario || '').trim().toLowerCase();
+    const password = loginDto.password || '';
     
     const match = this.usuariosService.findByUsername(username);
 
     if (match) {
+      if (match.estado === 'Inactivo') {
+        throw new ForbiddenException('El usuario se encuentra inactivo. Contacte al administrador.');
+      }
+      if (match.password !== password) {
+        throw new UnauthorizedException('Usuario o contraseña incorrectos.');
+      }
       return {
         user: {
           id: match.id,
@@ -35,6 +42,9 @@ export class AuthService {
     }
 
     if (username === 'admin') {
+      if (password !== '123') {
+        throw new UnauthorizedException('Usuario o contraseña incorrectos.');
+      }
       return {
         user: {
           id: 999,
@@ -46,18 +56,8 @@ export class AuthService {
         token: null,
         mode: 'mock',
       };
-    } else {
-      return {
-        user: {
-          id: 888,
-          nombre: loginDto.usuario,
-          usuario: username,
-          rol: 'Usuario',
-        },
-        requiresPasswordChange: false,
-        token: null,
-        mode: 'mock',
-      };
     }
+
+    throw new UnauthorizedException('Usuario o contraseña incorrectos.');
   }
 }

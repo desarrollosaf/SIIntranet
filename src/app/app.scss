@@ -4964,3 +4964,10 @@ select:focus-visible {
     text-transform: none !important;
   }
 }
+
+.password-security-hint {
+  font-size: 12px;
+  color: $texto-mutado;
+  margin-top: 4px;
+  display: block;
+}

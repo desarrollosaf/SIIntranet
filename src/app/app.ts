@@ -72,6 +72,7 @@ export class App implements OnDestroy {
 
   verPasswordEditUsuario = false;
   verPasswordVerUsuario = false;
+  mostrarPasswordLogin = false;
   mostrarCambioObligatorioModal = false;
   usuarioPendienteCambio: UsuarioSistema | null = null;
   nuevaPassword = '';
@@ -1009,7 +1010,10 @@ export class App implements OnDestroy {
       },
       error: (err) => {
         console.error(err);
-        if (err.status === 401 || err.status === 404) {
+        if (err.status === 403 || (err.error && err.error.message && err.error.message.includes('inactivo'))) {
+          const msg = err.error?.message || 'El usuario se encuentra inactivo. Contacte al administrador.';
+          this.mostrarNotificacion(msg, 'error');
+        } else if (err.status === 401 || err.status === 404) {
           this.mostrarNotificacion('Usuario o contraseña incorrectos.', 'error');
         } else {
           this.mostrarNotificacion('No se pudo conectar con el servidor. Verifica que el backend esté activo.', 'error');
@@ -1350,22 +1354,26 @@ export class App implements OnDestroy {
     }
   }
 
-  eliminarUsuarioAdmin(usuario: UsuarioSistema, event?: Event): void {
+  toggleEstadoUsuario(usuario: UsuarioSistema, event?: Event): void {
     if (event) {
       event.preventDefault();
       event.stopPropagation();
     }
-    if (!confirm(`¿Está seguro de que desea desactivar al usuario "${usuario.nombre}"?`)) {
+    const nuevoEstado = usuario.estado === 'Activo' ? 'Inactivo' : 'Activo';
+    const accion = nuevoEstado === 'Activo' ? 'activar' : 'desactivar';
+    if (!confirm(`¿Está seguro de que desea ${accion} al usuario "${usuario.nombre}"?`)) {
       return;
     }
-    this.http.delete<any>(`${this.apiUrl}/usuarios/${usuario.id}`).subscribe({
+    this.http.patch<any>(`${this.apiUrl}/usuarios/${usuario.id}`, { estado: nuevoEstado }).subscribe({
       next: (response) => {
-        this.mostrarNotificacion('Usuario desactivado correctamente.', 'exito');
+        const msg = nuevoEstado === 'Activo' ? 'Usuario activado correctamente.' : 'Usuario desactivado correctamente.';
+        this.mostrarNotificacion(msg, 'exito');
         this.cargarUsuarios();
       },
       error: (err) => {
         console.error(err);
-        this.mostrarNotificacion('Error al desactivar el usuario.', 'error');
+        const errMsg = nuevoEstado === 'Activo' ? 'Error al activar el usuario.' : 'Error al desactivar el usuario.';
+        this.mostrarNotificacion(errMsg, 'error');
       }
     });
   }
