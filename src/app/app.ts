@@ -1763,10 +1763,12 @@ export class App implements OnDestroy {
   }
 
   cerrarCalendario(): void {
-    if ((this.nuevoRecordatorioCalendario || '').trim() || (this.nuevoRecordatorioHoraCalendario || '').trim()) {
-      if (!confirm('Tiene un recordatorio sin guardar. ¿Desea cerrar el calendario de todos modos?')) {
-        return;
-      }
+    const desc = (this.nuevoRecordatorioCalendario || '').trim();
+    const hora = (this.nuevoRecordatorioHoraCalendario || '').trim();
+    if (desc || hora) {
+      this.nuevoRecordatorioCalendario = '';
+      this.nuevoRecordatorioHoraCalendario = '';
+      this.mostrarNotificacion('Se descartó el recordatorio no guardado.', 'info');
     }
     this.calendarioModalAbierto = false;
     this.cdr.detectChanges();
