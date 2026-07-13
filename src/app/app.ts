@@ -64,15 +64,14 @@ export interface DocumentoFormato {
 })
 export class App implements OnDestroy {
 
-  private readonly apiUrl = 'http://localhost:3000/api';
+  private readonly urlApi = 'http://localhost:3000/api';
 
   ultimoElementoEnfocado: HTMLElement | null = null;
 
   documentosFormatos: { [categoria: string]: DocumentoFormato[] } = {};
 
   verPasswordEditUsuario = false;
-  verPasswordVerUsuario = false;
-  mostrarPasswordLogin = false;
+  mostrarContrasenaLogin = false;
   mostrarCambioObligatorioModal = false;
   usuarioPendienteCambio: UsuarioSistema | null = null;
   nuevaPassword = '';
@@ -82,12 +81,12 @@ export class App implements OnDestroy {
 
   mensajeEditando: Mensaje | null = null;
   detalleEditandoMensaje = false;
-  editMsgTitulo = '';
-  editMsgDescripcion = '';
-  editMsgFecha = '';
-  editMsgHora = '';
-  editMsgDocumentos: string[] = [];
-  editMsgNuevosArchivos: File[] = [];
+  editarMensajeTitulo = '';
+  editarMensajeDescripcion = '';
+  editarMensajeFecha = '';
+  editarMensajeHora = '';
+  editarMensajeDocumentos: string[] = [];
+  editarMensajeNuevosArchivos: File[] = [];
 
   esMensajeNuevo(msg: Mensaje | null | undefined): boolean {
     if (!msg) return false;
@@ -179,14 +178,14 @@ export class App implements OnDestroy {
     if (logged === 'true' && userStr) {
       try {
         this.usuarioActual = JSON.parse(userStr);
-        this.isLoggedIn = true;
+        this.sesionIniciada = true;
         if (this.usuarioActual.tipo === 'admin') {
           this.cargarUsuarios();
         }
         this.cargarMensajes();
         this.cargarRecordatorios();
       } catch (e) {
-        this.isLoggedIn = false;
+        this.sesionIniciada = false;
       }
     }
   }
@@ -239,10 +238,6 @@ export class App implements OnDestroy {
 
   moduloActual = 'inicio';
 
-  private nextId = 1;
-
-  private nextRecordatorioId = 1;
-
   diasSemanaCalendario = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 
   mesCalendario = new Date().getMonth();
@@ -289,9 +284,9 @@ export class App implements OnDestroy {
     });
   }
 
-  isLoggedIn = false;
-  loginUsuario = '';
-  loginPassword = '';
+  sesionIniciada = false;
+  usuarioLogin = '';
+  contrasenaLogin = '';
 
   mostrarPerfilModal = false;
 
@@ -324,14 +319,14 @@ export class App implements OnDestroy {
   usuariosDisponibles: string[] = [];
   usuariosSeleccionados: string[] = [];
 
-  selectedDisponibles: string[] = [];
-  selectedSeleccionados: string[] = [];
+  usuariosDisponiblesMarcados: string[] = [];
+  destinatariosMarcados: string[] = [];
 
-  formTitulo = '';
-  formDescripcion = '';
-  formFecha = '';
-  formHora = '';
-  formArchivos: File[] = [];
+  formularioTitulo = '';
+  formularioDescripcion = '';
+  formularioFecha = '';
+  formularioHora = '';
+  formularioArchivos: File[] = [];
 
   envioTimeouts: { [key: number]: ReturnType<typeof setTimeout> } = {};
   private generalTimeouts: ReturnType<typeof setTimeout>[] = [];
@@ -502,7 +497,7 @@ export class App implements OnDestroy {
       creadoPor: this.usuarioActual.nombre
     };
 
-    this.http.post<EventoCalendario>(`${this.apiUrl}/recordatorios`, body).subscribe({
+    this.http.post<EventoCalendario>(`${this.urlApi}/recordatorios`, body).subscribe({
       next: (response) => {
         this.mostrarNotificacion('Recordatorio agregado correctamente.', 'exito');
         this.nuevoRecordatorioCalendario = '';
@@ -521,7 +516,7 @@ export class App implements OnDestroy {
     event.stopPropagation();
     if (id === undefined) return;
 
-    this.http.delete<EventoCalendario>(`${this.apiUrl}/recordatorios/${id}`).subscribe({
+    this.http.delete<EventoCalendario>(`${this.urlApi}/recordatorios/${id}`).subscribe({
       next: (response) => {
         this.mostrarNotificacion('Recordatorio eliminado.', 'exito');
         this.cargarRecordatorios();
@@ -595,58 +590,58 @@ export class App implements OnDestroy {
     const año = actual.getFullYear();
     const mes = String(actual.getMonth() + 1).padStart(2, '0');
     const dia = String(actual.getDate()).padStart(2, '0');
-    this.formFecha = `${año}-${mes}-${dia}`;
+    this.formularioFecha = `${año}-${mes}-${dia}`;
 
     const horas = String(actual.getHours()).padStart(2, '0');
     const minutos = String(actual.getMinutes()).padStart(2, '0');
-    this.formHora = `${horas}:${minutos}`;
+    this.formularioHora = `${horas}:${minutos}`;
   }
 
-  onFileSelected(event: Event): void {
+  alSeleccionarArchivo(event: Event): void {
     const target = event.target as HTMLInputElement;
     const files = target.files;
     if (files && files.length > 0) {
       for (let i = 0; i < files.length; i++) {
-        if (!this.formArchivos.some(f => f.name === files[i].name)) {
-          this.formArchivos.push(files[i]);
+        if (!this.formularioArchivos.some(f => f.name === files[i].name)) {
+          this.formularioArchivos.push(files[i]);
         }
       }
     }
     target.value = '';
   }
 
-  clearSelectedFile(index: number): void {
-    this.formArchivos.splice(index, 1);
+  limpiarArchivoSeleccionado(index: number): void {
+    this.formularioArchivos.splice(index, 1);
   }
 
   pasar(): void {
-    if (this.selectedDisponibles.length === 0) return;
-    const aPasar = this.selectedDisponibles.filter(u => !this.usuariosSeleccionados.includes(u));
+    if (this.usuariosDisponiblesMarcados.length === 0) return;
+    const aPasar = this.usuariosDisponiblesMarcados.filter(u => !this.usuariosSeleccionados.includes(u));
     this.usuariosSeleccionados = [...this.usuariosSeleccionados, ...aPasar];
-    this.usuariosDisponibles = this.usuariosDisponibles.filter(u => !this.selectedDisponibles.includes(u));
-    this.selectedDisponibles = [];
+    this.usuariosDisponibles = this.usuariosDisponibles.filter(u => !this.usuariosDisponiblesMarcados.includes(u));
+    this.usuariosDisponiblesMarcados = [];
   }
 
   quitar(): void {
-    if (this.selectedSeleccionados.length === 0) return;
-    const aQuitar = this.selectedSeleccionados.filter(u => !this.usuariosDisponibles.includes(u));
+    if (this.destinatariosMarcados.length === 0) return;
+    const aQuitar = this.destinatariosMarcados.filter(u => !this.usuariosDisponibles.includes(u));
     this.usuariosDisponibles = [...this.usuariosDisponibles, ...aQuitar];
-    this.usuariosSeleccionados = this.usuariosSeleccionados.filter(u => !this.selectedSeleccionados.includes(u));
-    this.selectedSeleccionados = [];
+    this.usuariosSeleccionados = this.usuariosSeleccionados.filter(u => !this.destinatariosMarcados.includes(u));
+    this.destinatariosMarcados = [];
   }
 
   pasarTodos(): void {
     const aPasar = this.usuariosDisponibles.filter(u => !this.usuariosSeleccionados.includes(u));
     this.usuariosSeleccionados = [...this.usuariosSeleccionados, ...aPasar];
     this.usuariosDisponibles = [];
-    this.selectedDisponibles = [];
+    this.usuariosDisponiblesMarcados = [];
   }
 
   quitarTodos(): void {
     const aQuitar = this.usuariosSeleccionados.filter(u => !this.usuariosDisponibles.includes(u));
     this.usuariosDisponibles = [...this.usuariosDisponibles, ...aQuitar];
     this.usuariosSeleccionados = [];
-    this.selectedSeleccionados = [];
+    this.destinatariosMarcados = [];
   }
 
   pasarDirecto(usuario: string): void {
@@ -654,7 +649,7 @@ export class App implements OnDestroy {
       this.usuariosSeleccionados = [...this.usuariosSeleccionados, usuario];
       this.usuariosDisponibles = this.usuariosDisponibles.filter(u => u !== usuario);
     }
-    this.selectedDisponibles = this.selectedDisponibles.filter(u => u !== usuario);
+    this.usuariosDisponiblesMarcados = this.usuariosDisponiblesMarcados.filter(u => u !== usuario);
   }
 
   quitarDirecto(usuario: string): void {
@@ -662,16 +657,16 @@ export class App implements OnDestroy {
       this.usuariosDisponibles = [...this.usuariosDisponibles, usuario];
       this.usuariosSeleccionados = this.usuariosSeleccionados.filter(u => u !== usuario);
     }
-    this.selectedSeleccionados = this.selectedSeleccionados.filter(u => u !== usuario);
+    this.destinatariosMarcados = this.destinatariosMarcados.filter(u => u !== usuario);
   }
 
   enviarMensaje(event: Event): void {
     event.preventDefault();
-    if (!this.formTitulo.trim()) {
+    if (!this.formularioTitulo.trim()) {
       this.mostrarNotificacion('Por favor ingrese un título para el documento.', 'error');
       return;
     }
-    if (!this.formDescripcion || !this.formDescripcion.trim()) {
+    if (!this.formularioDescripcion || !this.formularioDescripcion.trim()) {
       this.mostrarNotificacion('Por favor ingrese una descripción para el mensaje.', 'error');
       return;
     }
@@ -680,8 +675,8 @@ export class App implements OnDestroy {
       return;
     }
 
-    const documentosAdjuntos = this.formArchivos.length > 0
-      ? this.formArchivos.map(f => f.name).join(', ')
+    const documentosAdjuntos = this.formularioArchivos.length > 0
+      ? this.formularioArchivos.map(f => f.name).join(', ')
       : 'Sin adjunto';
 
     const actual = new Date();
@@ -689,18 +684,18 @@ export class App implements OnDestroy {
     const horaStr = `${String(actual.getHours()).padStart(2, '0')}:${String(actual.getMinutes()).padStart(2, '0')}`;
 
     const body = {
-      titulo: this.formTitulo.trim(),
-      descripcion: this.formDescripcion.trim(),
+      titulo: this.formularioTitulo.trim(),
+      descripcion: this.formularioDescripcion.trim(),
       remitente: this.usuarioActual.nombre,
       destinatarios: this.usuariosSeleccionados.join(', '),
       documento: documentosAdjuntos,
-      fecha: this.formFecha || hoyStr,
-      hora: this.formHora || horaStr,
+      fecha: this.formularioFecha || hoyStr,
+      hora: this.formularioHora || horaStr,
       estado: 'Enviado' as const,
       tipoMensaje: 'enviado' as const
     };
 
-    this.http.post<Mensaje>(`${this.apiUrl}/mensajes`, body).subscribe({
+    this.http.post<Mensaje>(`${this.urlApi}/mensajes`, body).subscribe({
       next: (response) => {
         this.mostrarNotificacion('Mensaje enviado correctamente.', 'exito');
         this.resetearFormulario();
@@ -764,12 +759,12 @@ export class App implements OnDestroy {
   }
 
   resetearFormulario(): void {
-    this.formTitulo = '';
-    this.formDescripcion = '';
-    this.formArchivos = [];
+    this.formularioTitulo = '';
+    this.formularioDescripcion = '';
+    this.formularioArchivos = [];
     this.usuariosSeleccionados = [];
-    this.selectedDisponibles = [];
-    this.selectedSeleccionados = [];
+    this.usuariosDisponiblesMarcados = [];
+    this.destinatariosMarcados = [];
     this.buscarDestinatario = '';
     this.actualizarUsuariosDisponibles();
   }
@@ -843,7 +838,7 @@ export class App implements OnDestroy {
   marcarComoVisto(msg: Mensaje, mostrarNotif = false): void {
     if (this.esMensajeRecibido(msg)) {
       if (msg.estadoLectura !== 'Visto') {
-        this.http.patch<Mensaje>(`${this.apiUrl}/mensajes/${msg.id}`, { estado: 'Visto' }).subscribe({
+        this.http.patch<Mensaje>(`${this.urlApi}/mensajes/${msg.id}`, { estado: 'Visto' }).subscribe({
           next: (updatedMsg) => {
             msg.estadoLectura = 'Visto';
             msg.estado = 'Visto';
@@ -862,7 +857,7 @@ export class App implements OnDestroy {
     event.preventDefault();
     event.stopPropagation();
 
-    this.http.delete<Mensaje>(`${this.apiUrl}/mensajes/${msg.id}`).subscribe({
+    this.http.delete<Mensaje>(`${this.urlApi}/mensajes/${msg.id}`).subscribe({
       next: (response) => {
         if (this.mensajeSeleccionado && this.mensajeSeleccionado.id === msg.id) {
           this.mensajeSeleccionado = null;
@@ -897,7 +892,7 @@ export class App implements OnDestroy {
 
     msg.confirmarEliminarSent = false;
 
-    this.http.delete<Mensaje>(`${this.apiUrl}/mensajes/${msg.id}`).subscribe({
+    this.http.delete<Mensaje>(`${this.urlApi}/mensajes/${msg.id}`).subscribe({
       next: (response) => {
         if (this.mensajeSeleccionado && this.mensajeSeleccionado.id === msg.id) {
           this.mensajeSeleccionado = null;
@@ -953,23 +948,23 @@ export class App implements OnDestroy {
 
   hacerLogin(event: Event): void {
     event.preventDefault();
-    if (!this.loginUsuario.trim()) {
+    if (!this.usuarioLogin.trim()) {
       this.mostrarNotificacion('Por favor ingrese su usuario o correo.', 'error');
       return;
     }
-    if (!this.loginPassword.trim()) {
+    if (!this.contrasenaLogin.trim()) {
       this.mostrarNotificacion('Por favor ingrese su contraseña.', 'error');
       return;
     }
 
     const payload = {
-      usuario: this.loginUsuario.trim(),
-      password: this.loginPassword.trim()
+      usuario: this.usuarioLogin.trim(),
+      password: this.contrasenaLogin.trim()
     };
 
-    this.http.post<any>(`${this.apiUrl}/auth/login`, payload).subscribe({
+    this.http.post<any>(`${this.urlApi}/auth/login`, payload).subscribe({
       next: (response) => {
-        this.isLoggedIn = true;
+        this.sesionIniciada = true;
         this.usuarioActual = {
           nombre: response.user.nombre,
           rol: response.user.rol,
@@ -995,8 +990,8 @@ export class App implements OnDestroy {
           this.mostrarNotificacion(`Sesión iniciada como ${response.user.nombre}.`, 'exito');
         }
 
-        this.loginUsuario = '';
-        this.loginPassword = '';
+        this.usuarioLogin = '';
+        this.contrasenaLogin = '';
 
         if (this.usuarioActual.tipo === 'admin') {
           this.cargarUsuarios();
@@ -1023,14 +1018,14 @@ export class App implements OnDestroy {
   }
 
   cerrarSesion(): void {
-    this.isLoggedIn = false;
+    this.sesionIniciada = false;
     this.mostrarPerfilModal = false;
     this.mostrarCambioObligatorioModal = false;
     this.usuarioPendienteCambio = null;
     this.nuevaPassword = '';
     this.confirmarNuevaPassword = '';
-    this.loginUsuario = '';
-    this.loginPassword = '';
+    this.usuarioLogin = '';
+    this.contrasenaLogin = '';
     this.usuarioActual = {
       nombre: 'Usuario del sistema',
       rol: 'Usuario',
@@ -1046,7 +1041,7 @@ export class App implements OnDestroy {
     this.resetearFormulario();
   }
 
-  cambiarPasswordObligatorio(event: Event): void {
+  cambiarContrasenaObligatoria(event: Event): void {
     event.preventDefault();
     if (!this.usuarioPendienteCambio) return;
 
@@ -1066,7 +1061,7 @@ export class App implements OnDestroy {
       return;
     }
 
-    this.http.patch<any>(`${this.apiUrl}/usuarios/${this.usuarioPendienteCambio.id}/password`, { passwordNueva: pwd }).subscribe({
+    this.http.patch<any>(`${this.urlApi}/usuarios/${this.usuarioPendienteCambio.id}/password`, { passwordNueva: pwd }).subscribe({
       next: () => {
         sessionStorage.setItem('si_session_logged', 'true');
         sessionStorage.setItem('si_session_user', JSON.stringify(this.usuarioActual));
@@ -1126,7 +1121,6 @@ export class App implements OnDestroy {
     this.usuarioSeleccionadoAdmin = usuario;
     this.usuarioEditandoAdmin = null;
     this.modalVerUsuarioAbierto = true;
-    this.verPasswordVerUsuario = false;
     this.generalTimeouts.push(setTimeout(() => {
       const closeBtn = document.querySelector('.modal-card .btn-close') as HTMLElement;
       if (closeBtn) closeBtn.focus();
@@ -1136,7 +1130,6 @@ export class App implements OnDestroy {
   cerrarModalVerUsuario(): void {
     this.modalVerUsuarioAbierto = false;
     this.usuarioSeleccionadoAdmin = null;
-    this.verPasswordVerUsuario = false;
     this.restaurarFoco();
   }
 
@@ -1260,7 +1253,7 @@ export class App implements OnDestroy {
         requiereCambioPassword: this.usuarioEditandoAdmin.requiereCambioPassword ?? false
       };
 
-      this.http.post<UsuarioSistema>(`${this.apiUrl}/usuarios`, payload).subscribe({
+      this.http.post<UsuarioSistema>(`${this.urlApi}/usuarios`, payload).subscribe({
         next: (response) => {
           this.mostrarNotificacion('Usuario creado correctamente.', 'exito');
           this.modalEditarUsuarioAbierto = false;
@@ -1292,11 +1285,11 @@ export class App implements OnDestroy {
 
       const userId = this.usuarioEditandoAdmin.id;
 
-      this.http.patch<UsuarioSistema>(`${this.apiUrl}/usuarios/${userId}`, payload).subscribe({
+      this.http.patch<UsuarioSistema>(`${this.urlApi}/usuarios/${userId}`, payload).subscribe({
         next: (response) => {
           if (newPwd) {
             // Update password
-            this.http.patch<any>(`${this.apiUrl}/usuarios/${userId}/password`, { passwordNueva: newPwd }).subscribe({
+            this.http.patch<any>(`${this.urlApi}/usuarios/${userId}/password`, { passwordNueva: newPwd }).subscribe({
               next: () => {
                 this.mostrarNotificacion('Usuario y contraseña actualizados correctamente.', 'exito');
                 this.modalEditarUsuarioAbierto = false;
@@ -1326,7 +1319,7 @@ export class App implements OnDestroy {
     }
   }
 
-  generarPasswordEdicionAdmin(): void {
+  generarContrasenaEdicionAdmin(): void {
     if (!this.usuarioEditandoAdmin) return;
     const num = Math.floor(1000 + Math.random() * 9000);
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -1354,7 +1347,7 @@ export class App implements OnDestroy {
     }
   }
 
-  toggleEstadoUsuario(usuario: UsuarioSistema, event?: Event): void {
+  alternarEstadoUsuario(usuario: UsuarioSistema, event?: Event): void {
     if (event) {
       event.preventDefault();
       event.stopPropagation();
@@ -1364,7 +1357,7 @@ export class App implements OnDestroy {
     if (!confirm(`¿Está seguro de que desea ${accion} al usuario "${usuario.nombre}"?`)) {
       return;
     }
-    this.http.patch<any>(`${this.apiUrl}/usuarios/${usuario.id}`, { estado: nuevoEstado }).subscribe({
+    this.http.patch<any>(`${this.urlApi}/usuarios/${usuario.id}`, { estado: nuevoEstado }).subscribe({
       next: (response) => {
         const msg = nuevoEstado === 'Activo' ? 'Usuario activado correctamente.' : 'Usuario desactivado correctamente.';
         this.mostrarNotificacion(msg, 'exito');
@@ -1379,7 +1372,7 @@ export class App implements OnDestroy {
   }
 
   cargarUsuarios(): void {
-    this.http.get<UsuarioSistema[]>(`${this.apiUrl}/usuarios`).subscribe({
+    this.http.get<UsuarioSistema[]>(`${this.urlApi}/usuarios`).subscribe({
       next: (users) => {
         this.usuariosSistema = users;
         this.actualizarUsuariosDisponibles();
@@ -1393,7 +1386,7 @@ export class App implements OnDestroy {
   }
 
   cargarMensajes(): void {
-    this.http.get<Mensaje[]>(`${this.apiUrl}/mensajes`).subscribe({
+    this.http.get<Mensaje[]>(`${this.urlApi}/mensajes`).subscribe({
       next: (mensajes) => {
         this.mensajesBandeja = mensajes;
         this.asegurarFechaHoraMensajes();
@@ -1415,7 +1408,7 @@ export class App implements OnDestroy {
   }
 
   cargarFormatos(): void {
-    this.http.get<DocumentoFormato[]>(`${this.apiUrl}/formatos`).subscribe({
+    this.http.get<DocumentoFormato[]>(`${this.urlApi}/formatos`).subscribe({
       next: (formatos) => {
         this.categoriasFormatos.forEach(cat => {
           this.documentosFormatos[cat] = [];
@@ -1443,7 +1436,7 @@ export class App implements OnDestroy {
   }
 
   cargarRecordatorios(): void {
-    this.http.get<EventoCalendario[]>(`${this.apiUrl}/recordatorios`).subscribe({
+    this.http.get<EventoCalendario[]>(`${this.urlApi}/recordatorios`).subscribe({
       next: (recordatorios) => {
         this.recordatoriosCalendario = recordatorios;
         this.cdr.detectChanges();
@@ -1456,7 +1449,7 @@ export class App implements OnDestroy {
   }
 
   cargarMensajesRecibidos(): void {
-    this.http.get<Mensaje[]>(`${this.apiUrl}/mensajes/recibidos`).subscribe({
+    this.http.get<Mensaje[]>(`${this.urlApi}/mensajes/recibidos`).subscribe({
       next: (recibidos) => {
         const enviados = this.mensajesBandeja.filter(m => this.esMensajeEnviado(m));
         const idsRecibidos = new Set(recibidos.map(m => m.id));
@@ -1473,7 +1466,7 @@ export class App implements OnDestroy {
   }
 
   cargarMensajesEnviados(): void {
-    this.http.get<Mensaje[]>(`${this.apiUrl}/mensajes/enviados`).subscribe({
+    this.http.get<Mensaje[]>(`${this.urlApi}/mensajes/enviados`).subscribe({
       next: (enviados) => {
         const recibidos = this.mensajesBandeja.filter(m => this.esMensajeRecibido(m));
         const idsEnviados = new Set(enviados.map(m => m.id));
@@ -1718,7 +1711,7 @@ export class App implements OnDestroy {
 
   marcarComoRespondido(msg: Mensaje): void {
     if (this.esMensajeRecibido(msg)) {
-      this.http.patch<Mensaje>(`${this.apiUrl}/mensajes/${msg.id}`, { estado: 'Respondido' }).subscribe({
+      this.http.patch<Mensaje>(`${this.urlApi}/mensajes/${msg.id}`, { estado: 'Respondido' }).subscribe({
         next: (updatedMsg) => {
           msg.estadoLectura = 'Visto';
           msg.estadoRespuesta = 'Respondido';
@@ -1798,13 +1791,13 @@ export class App implements OnDestroy {
       msg.hora = `${h}:${m}`;
     }
     
-    this.editMsgTitulo = msg.titulo;
-    this.editMsgDescripcion = msg.descripcion;
-    this.editMsgFecha = msg.fecha;
-    this.editMsgHora = msg.hora;
+    this.editarMensajeTitulo = msg.titulo;
+    this.editarMensajeDescripcion = msg.descripcion;
+    this.editarMensajeFecha = msg.fecha;
+    this.editarMensajeHora = msg.hora;
     
     const actuales = this.normalizarListaDestinatarios(msg.destinatarios);
-    this.editMsgDestSeleccionados = [...actuales];
+    this.editarMensajeDestinatariosSeleccionados = [...actuales];
     
     const todosUsuarios = this.usuariosSistema.map(u => u.nombre);
     const pool = Array.from(new Set([
@@ -1817,10 +1810,10 @@ export class App implements OnDestroy {
       'Dirección de Recursos Materiales'
     ]));
     
-    this.editMsgDestDisponibles = pool.filter(u => !actuales.includes(u)).sort();
+    this.editarMensajeDestinatariosDisponibles = pool.filter(u => !actuales.includes(u)).sort();
     
-    this.editMsgDocumentos = this.normalizarListaDocumentos(msg.documento);
-    this.editMsgNuevosArchivos = [];
+    this.editarMensajeDocumentos = this.normalizarListaDocumentos(msg.documento);
+    this.editarMensajeNuevosArchivos = [];
     
     this.detalleEditandoMensaje = true;
     this.cdr.detectChanges();
@@ -1832,21 +1825,21 @@ export class App implements OnDestroy {
     this.cdr.detectChanges();
   }
 
-  removerDocumentoExistenteEditor(index: number): void {
-    this.editMsgDocumentos.splice(index, 1);
+  eliminarDocumentoExistenteEditor(index: number): void {
+    this.editarMensajeDocumentos.splice(index, 1);
     this.cdr.detectChanges();
   }
 
-  removerNuevoArchivoEditor(index: number): void {
-    this.editMsgNuevosArchivos.splice(index, 1);
+  eliminarNuevoArchivoEditor(index: number): void {
+    this.editarMensajeNuevosArchivos.splice(index, 1);
     this.cdr.detectChanges();
   }
 
-  onNewFileSelectedEditor(event: any): void {
+  alSeleccionarNuevoArchivoEditor(event: any): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       for (let i = 0; i < input.files.length; i++) {
-        this.editMsgNuevosArchivos.push(input.files[i]);
+        this.editarMensajeNuevosArchivos.push(input.files[i]);
       }
     }
     this.cdr.detectChanges();
@@ -1855,24 +1848,24 @@ export class App implements OnDestroy {
   guardarCambiosMensajeEnviado(): void {
     if (!this.mensajeEditando) return;
 
-    if (!this.editMsgTitulo.trim()) {
+    if (!this.editarMensajeTitulo.trim()) {
       this.mostrarNotificacion('El título no puede estar vacío.', 'error');
       return;
     }
 
-    if (!this.editMsgDescripcion || !this.editMsgDescripcion.trim()) {
+    if (!this.editarMensajeDescripcion || !this.editarMensajeDescripcion.trim()) {
       this.mostrarNotificacion('La descripción no puede estar vacía.', 'error');
       return;
     }
 
-    if (this.editMsgDestSeleccionados.length === 0) {
+    if (this.editarMensajeDestinatariosSeleccionados.length === 0) {
       this.mostrarNotificacion('Debe haber al menos un destinatario.', 'error');
       return;
     }
 
     const todosDocNames = [
-      ...this.editMsgDocumentos,
-      ...this.editMsgNuevosArchivos.map(f => f.name)
+      ...this.editarMensajeDocumentos,
+      ...this.editarMensajeNuevosArchivos.map(f => f.name)
     ];
 
     const finalDocumento = todosDocNames.length > 0
@@ -1880,14 +1873,14 @@ export class App implements OnDestroy {
       : 'Sin adjunto';
 
     const body = {
-      titulo: this.editMsgTitulo.trim(),
-      descripcion: this.editMsgDescripcion.trim(),
-      destinatarios: this.editMsgDestSeleccionados.join(', '),
+      titulo: this.editarMensajeTitulo.trim(),
+      descripcion: this.editarMensajeDescripcion.trim(),
+      destinatarios: this.editarMensajeDestinatariosSeleccionados.join(', '),
       documento: finalDocumento,
       estado: this.mensajeEditando.estado
     };
 
-    this.http.patch<Mensaje>(`${this.apiUrl}/mensajes/${this.mensajeEditando.id}`, body).subscribe({
+    this.http.patch<Mensaje>(`${this.urlApi}/mensajes/${this.mensajeEditando.id}`, body).subscribe({
       next: (response) => {
         this.mostrarNotificacion('Mensaje enviado actualizado con éxito.', 'exito');
         this.detalleEditandoMensaje = false;
@@ -1902,64 +1895,64 @@ export class App implements OnDestroy {
     });
   }
 
-  editMsgBuscarDestinatario = '';
-  editMsgDestDisponibles: string[] = [];
-  editMsgDestSeleccionados: string[] = [];
-  editMsgSelectedDisponibles: string[] = [];
-  editMsgSelectedSeleccionados: string[] = [];
+  editarMensajeBuscarDestinatario = '';
+  editarMensajeDestinatariosDisponibles: string[] = [];
+  editarMensajeDestinatariosSeleccionados: string[] = [];
+  usuariosDisponiblesMarcadosEdicion: string[] = [];
+  destinatariosMarcadosEdicion: string[] = [];
 
-  get editMsgDestDisponiblesFiltrados(): string[] {
-    const q = (this.editMsgBuscarDestinatario || '').toLowerCase().trim();
-    if (!q) return this.editMsgDestDisponibles;
-    return this.editMsgDestDisponibles.filter(u => u.toLowerCase().includes(q));
+  get editarMensajeDestinatariosDisponiblesFiltrados(): string[] {
+    const q = (this.editarMensajeBuscarDestinatario || '').toLowerCase().trim();
+    if (!q) return this.editarMensajeDestinatariosDisponibles;
+    return this.editarMensajeDestinatariosDisponibles.filter(u => u.toLowerCase().includes(q));
   }
 
   pasarEdit(): void {
-    if (this.editMsgSelectedDisponibles.length === 0) return;
-    const aMover = [...this.editMsgSelectedDisponibles];
-    this.editMsgDestSeleccionados = [...this.editMsgDestSeleccionados, ...aMover];
-    this.editMsgDestDisponibles = this.editMsgDestDisponibles.filter(u => !aMover.includes(u));
-    this.editMsgSelectedDisponibles = [];
+    if (this.usuariosDisponiblesMarcadosEdicion.length === 0) return;
+    const aMover = [...this.usuariosDisponiblesMarcadosEdicion];
+    this.editarMensajeDestinatariosSeleccionados = [...this.editarMensajeDestinatariosSeleccionados, ...aMover];
+    this.editarMensajeDestinatariosDisponibles = this.editarMensajeDestinatariosDisponibles.filter(u => !aMover.includes(u));
+    this.usuariosDisponiblesMarcadosEdicion = [];
     this.cdr.detectChanges();
   }
 
   quitarEdit(): void {
-    if (this.editMsgSelectedSeleccionados.length === 0) return;
-    const aMover = [...this.editMsgSelectedSeleccionados];
-    this.editMsgDestDisponibles = [...this.editMsgDestDisponibles, ...aMover].sort();
-    this.editMsgDestSeleccionados = this.editMsgDestSeleccionados.filter(u => !aMover.includes(u));
-    this.editMsgSelectedSeleccionados = [];
+    if (this.destinatariosMarcadosEdicion.length === 0) return;
+    const aMover = [...this.destinatariosMarcadosEdicion];
+    this.editarMensajeDestinatariosDisponibles = [...this.editarMensajeDestinatariosDisponibles, ...aMover].sort();
+    this.editarMensajeDestinatariosSeleccionados = this.editarMensajeDestinatariosSeleccionados.filter(u => !aMover.includes(u));
+    this.destinatariosMarcadosEdicion = [];
     this.cdr.detectChanges();
   }
 
   pasarTodosEdit(): void {
-    this.editMsgDestSeleccionados = [...this.editMsgDestSeleccionados, ...this.editMsgDestDisponibles];
-    this.editMsgDestDisponibles = [];
-    this.editMsgSelectedDisponibles = [];
+    this.editarMensajeDestinatariosSeleccionados = [...this.editarMensajeDestinatariosSeleccionados, ...this.editarMensajeDestinatariosDisponibles];
+    this.editarMensajeDestinatariosDisponibles = [];
+    this.usuariosDisponiblesMarcadosEdicion = [];
     this.cdr.detectChanges();
   }
 
   quitarTodosEdit(): void {
-    this.editMsgDestDisponibles = [...this.editMsgDestDisponibles, ...this.editMsgDestSeleccionados].sort();
-    this.editMsgDestSeleccionados = [];
-    this.editMsgSelectedSeleccionados = [];
+    this.editarMensajeDestinatariosDisponibles = [...this.editarMensajeDestinatariosDisponibles, ...this.editarMensajeDestinatariosSeleccionados].sort();
+    this.editarMensajeDestinatariosSeleccionados = [];
+    this.destinatariosMarcadosEdicion = [];
     this.cdr.detectChanges();
   }
 
   pasarDirectoEdit(usuario: string): void {
-    if (this.editMsgDestDisponibles.includes(usuario)) {
-      this.editMsgDestSeleccionados = [...this.editMsgDestSeleccionados, usuario];
-      this.editMsgDestDisponibles = this.editMsgDestDisponibles.filter(u => u !== usuario);
+    if (this.editarMensajeDestinatariosDisponibles.includes(usuario)) {
+      this.editarMensajeDestinatariosSeleccionados = [...this.editarMensajeDestinatariosSeleccionados, usuario];
+      this.editarMensajeDestinatariosDisponibles = this.editarMensajeDestinatariosDisponibles.filter(u => u !== usuario);
     }
-    this.editMsgSelectedDisponibles = this.editMsgSelectedDisponibles.filter(u => u !== usuario);
+    this.usuariosDisponiblesMarcadosEdicion = this.usuariosDisponiblesMarcadosEdicion.filter(u => u !== usuario);
   }
 
   quitarDirectoEdit(usuario: string): void {
-    if (!this.editMsgDestDisponibles.includes(usuario)) {
-      this.editMsgDestDisponibles = [...this.editMsgDestDisponibles, usuario].sort();
-      this.editMsgDestSeleccionados = this.editMsgDestSeleccionados.filter(u => u !== usuario);
+    if (!this.editarMensajeDestinatariosDisponibles.includes(usuario)) {
+      this.editarMensajeDestinatariosDisponibles = [...this.editarMensajeDestinatariosDisponibles, usuario].sort();
+      this.editarMensajeDestinatariosSeleccionados = this.editarMensajeDestinatariosSeleccionados.filter(u => u !== usuario);
     }
-    this.editMsgSelectedSeleccionados = this.editMsgSelectedSeleccionados.filter(u => u !== usuario);
+    this.destinatariosMarcadosEdicion = this.destinatariosMarcadosEdicion.filter(u => u !== usuario);
   }
 
   irAFechaCalendario(): void {

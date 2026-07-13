@@ -1,4 +1,4 @@
-@if (!isLoggedIn) {
+@if (!sesionIniciada) {
 <div class="login-wrapper">
   <div class="login-card animate-slide-up">
     <div class="login-header">
@@ -15,7 +15,7 @@
         <label for="login_user">Usuario o Correo:</label>
         <div class="input-with-icon">
           <i class="bi bi-person-fill"></i>
-          <input id="login_user" name="loginUsuario" type="text" [(ngModel)]="loginUsuario"
+          <input id="login_user" name="usuarioLogin" type="text" [(ngModel)]="usuarioLogin"
             placeholder="Ingrese su usuario" required />
         </div>
       </div>
@@ -25,11 +25,11 @@
         <div style="display: flex; gap: 8px; width: 100%;">
           <div class="input-with-icon" style="flex: 1;">
             <i class="bi bi-lock-fill"></i>
-            <input id="login_pass" name="loginPassword" [type]="mostrarPasswordLogin ? 'text' : 'password'" [(ngModel)]="loginPassword"
+            <input id="login_pass" name="contrasenaLogin" [type]="mostrarContrasenaLogin ? 'text' : 'password'" [(ngModel)]="contrasenaLogin"
               placeholder="Ingrese su contraseña" required />
           </div>
-          <button type="button" class="btn-toggle-pwd-border" (click)="mostrarPasswordLogin = !mostrarPasswordLogin" title="Mostrar/Ocultar contraseña" aria-label="Mostrar u ocultar contraseña">
-            <i class="bi" [class.bi-eye-fill]="!mostrarPasswordLogin" [class.bi-eye-slash-fill]="mostrarPasswordLogin"></i>
+          <button type="button" class="btn-toggle-pwd-border" (click)="mostrarContrasenaLogin = !mostrarContrasenaLogin" title="Mostrar/Ocultar contraseña" aria-label="Mostrar u ocultar contraseña">
+            <i class="bi" [class.bi-eye-fill]="!mostrarContrasenaLogin" [class.bi-eye-slash-fill]="mostrarContrasenaLogin"></i>
           </button>
         </div>
       </div>
@@ -224,7 +224,7 @@
               <label for="titulo">Título del documento:</label>
               <div class="input-with-icon">
                 <i class="bi bi-card-text"></i>
-                <input id="titulo" name="titulo" type="text" [(ngModel)]="formTitulo"
+                <input id="titulo" name="titulo" type="text" [(ngModel)]="formularioTitulo"
                   placeholder="Ingrese el título del documento" />
               </div>
             </div>
@@ -233,7 +233,7 @@
               <label for="fecha">Fecha y hora de creación:</label>
               <div class="input-with-icon">
                 <i class="bi bi-calendar3"></i>
-                <input id="fecha" name="fecha" type="date" [(ngModel)]="formFecha" readonly class="readonly-input"
+                <input id="fecha" name="fecha" type="date" [(ngModel)]="formularioFecha" readonly class="readonly-input"
                   title="Fecha automática de envío" />
               </div>
             </div>
@@ -242,7 +242,7 @@
               <label for="hora">Hora:</label>
               <div class="input-with-icon">
                 <i class="bi bi-clock"></i>
-                <input id="hora" name="hora" type="time" [(ngModel)]="formHora" readonly class="readonly-input"
+                <input id="hora" name="hora" type="time" [(ngModel)]="formularioHora" readonly class="readonly-input"
                   title="Hora automática de envío" />
               </div>
             </div>
@@ -251,7 +251,7 @@
               <label for="descripcion">Descripción:</label>
               <div class="input-with-icon align-start">
                 <i class="bi bi-text-paragraph"></i>
-                <textarea id="descripcion" name="descripcion" [(ngModel)]="formDescripcion"
+                <textarea id="descripcion" name="descripcion" [(ngModel)]="formularioDescripcion"
                   placeholder="Escriba aquí una breve reseña del documento"></textarea>
               </div>
             </div>
@@ -259,16 +259,16 @@
             <div class="form-group form-group-full">
               <label>Documentos adjuntos:</label>
               <div class="files-section">
-                @if (formArchivos.length > 0) {
+                @if (formularioArchivos.length > 0) {
                 <div class="files-list">
-                  @for (archivo of formArchivos; track archivo.name; let i = $index) {
+                  @for (archivo of formularioArchivos; track archivo.name; let i = $index) {
                   <div class="file-selected-badge">
                     <div class="file-name-info">
                       <i class="bi bi-file-earmark-check-fill"></i>
                       <span>{{ archivo.name }}</span>
                       <span class="file-size">({{ (archivo.size / 1024).toFixed(1) }} KB)</span>
                     </div>
-                     <button type="button" class="btn-clear-file si-btn-icon-remove" (click)="clearSelectedFile(i)" title="Remover archivo" aria-label="Remover archivo">
+                     <button type="button" class="btn-clear-file si-btn-icon-remove" (click)="limpiarArchivoSeleccionado(i)" title="Remover archivo" aria-label="Remover archivo">
                        <i class="bi bi-x-lg"></i>
                      </button>
                   </div>
@@ -279,21 +279,21 @@
                   aria-label="Buscar y adjuntar archivos" (keydown)="manejarTecladoArchivo($event)">
                   <i class="bi bi-file-earmark-arrow-up"></i>
                   <span class="file-selector-btn">Buscar archivo</span>
-                  <span class="file-selector-text" [class.has-file]="formArchivos.length > 0">
-                    @if (formArchivos.length === 0) {
+                  <span class="file-selector-text" [class.has-file]="formularioArchivos.length > 0">
+                    @if (formularioArchivos.length === 0) {
                     No se ha seleccionado ningún archivo
                     } @else {
-                    {{ formArchivos.length === 1 ? '1 archivo seleccionado' : formArchivos.length + ' archivos
+                    {{ formularioArchivos.length === 1 ? '1 archivo seleccionado' : formularioArchivos.length + ' archivos
                     seleccionados' }}
                     }
                   </span>
-                  <input id="documento" name="documento" type="file" multiple (change)="onFileSelected($event)"
+                  <input id="documento" name="documento" type="file" multiple (change)="alSeleccionarArchivo($event)"
                     style="display: none;" />
                 </label>
-                @if (formArchivos.length > 0) {
+                @if (formularioArchivos.length > 0) {
                 <p class="files-count-hint">
                   <i class="bi bi-paperclip"></i>
-                  {{ formArchivos.length }} {{ formArchivos.length === 1 ? 'archivo adjunto' : 'archivos adjuntos' }}
+                  {{ formularioArchivos.length }} {{ formularioArchivos.length === 1 ? 'archivo adjunto' : 'archivos adjuntos' }}
                 </p>
                 }
               </div>
@@ -317,7 +317,7 @@
           <div class="recipients-container">
             <div class="select-box">
               <span class="select-title">Usuarios disponibles ({{ usuariosDisponiblesFiltrados.length }})</span>
-              <select multiple aria-label="Usuarios disponibles" [(ngModel)]="selectedDisponibles" name="selDisponibles"
+              <select multiple aria-label="Usuarios disponibles" [(ngModel)]="usuariosDisponiblesMarcados" name="selDisponibles"
                 (keydown.enter)="$event.preventDefault(); pasar()">
                 @for (usuario of usuariosDisponiblesFiltrados; track usuario) {
                 <option [value]="usuario" (dblclick)="pasarDirecto(usuario)">{{ usuario }}</option>
@@ -348,7 +348,7 @@
 
             <div class="select-box">
               <span class="select-title">Usuarios seleccionados ({{ usuariosSeleccionados.length }})</span>
-              <select multiple aria-label="Usuarios seleccionados" [(ngModel)]="selectedSeleccionados"
+              <select multiple aria-label="Usuarios seleccionados" [(ngModel)]="destinatariosMarcados"
                 name="selSeleccionados" (keydown.delete)="$event.preventDefault(); quitar()"
                 (keydown.backspace)="$event.preventDefault(); quitar()">
                 @for (usuario of usuariosSeleccionados; track usuario) {
@@ -771,13 +771,13 @@
                         <span>Editar</span>
                       </button>
                       @if (u.estado === 'Activo') {
-                        <button type="button" class="btn-admin-action si-btn-danger-ghost si-btn-xs" (click)="toggleEstadoUsuario(u, $event)"
+                        <button type="button" class="btn-admin-action si-btn-danger-ghost si-btn-xs" (click)="alternarEstadoUsuario(u, $event)"
                           title="Desactivar usuario">
                           <i class="bi bi-person-x-fill"></i>
                           <span>Desactivar</span>
                         </button>
                       } @else {
-                        <button type="button" class="btn-admin-action si-btn-primary si-btn-xs" (click)="toggleEstadoUsuario(u, $event)"
+                        <button type="button" class="btn-admin-action si-btn-primary si-btn-xs" (click)="alternarEstadoUsuario(u, $event)"
                           title="Activar usuario">
                           <i class="bi bi-person-check-fill"></i>
                           <span>Activar</span>
@@ -1223,7 +1223,7 @@
             <div class="detail-row">
               <span class="detail-label">Destinatarios</span>
               <div class="recipients-chips-container">
-                @for (usuario of editMsgDestSeleccionados; track usuario) {
+                @for (usuario of editarMensajeDestinatariosSeleccionados; track usuario) {
                 <span class="recipient-chip">
                   <span>{{ usuario }}</span>
                   <button type="button" class="btn-chip-remove si-btn-chip" (click)="quitarDirectoEdit(usuario)" title="Quitar destinatario" aria-label="Quitar destinatario">
@@ -1237,7 +1237,7 @@
               <div class="recipients-select-wrap">
                 <select #selectDisponibles class="si-form-control" (change)="pasarDirectoEdit(selectDisponibles.value); selectDisponibles.value = ''">
                   <option value="" disabled selected>Agregar destinatario...</option>
-                  @for (usuario of editMsgDestDisponibles; track usuario) {
+                  @for (usuario of editarMensajeDestinatariosDisponibles; track usuario) {
                   <option [value]="usuario">{{ usuario }}</option>
                   }
                 </select>
@@ -1249,42 +1249,42 @@
                 <span class="detail-label">Fecha</span>
                 <div class="detail-value">
                   <i class="bi bi-calendar3"></i>
-                  <span>{{ formatearFechaMensaje(editMsgFecha) }}</span>
+                  <span>{{ formatearFechaMensaje(editarMensajeFecha) }}</span>
                 </div>
               </div>
               <div class="detail-row">
                 <span class="detail-label">Hora</span>
                 <div class="detail-value">
                   <i class="bi bi-clock-history"></i>
-                  <span>{{ formatearHoraMensaje(editMsgHora) }}</span>
+                  <span>{{ formatearHoraMensaje(editarMensajeHora) }}</span>
                 </div>
               </div>
             </div>
 
             <div class="detail-row">
               <span class="detail-label">Asunto / Título</span>
-              <input name="editMsgTitulo" type="text" [(ngModel)]="editMsgTitulo" required placeholder="Ingrese el título" class="si-form-control" />
+              <input name="editarMensajeTitulo" type="text" [(ngModel)]="editarMensajeTitulo" required placeholder="Ingrese el título" class="si-form-control" />
             </div>
 
             <div class="detail-row text-block-row edit-text-block-row">
               <span class="detail-label">Contenido / Descripción</span>
-              <textarea name="editMsgDescripcion" [(ngModel)]="editMsgDescripcion" placeholder="Escriba una descripción" class="si-form-control edit-textarea"></textarea>
+              <textarea name="editarMensajeDescripcion" [(ngModel)]="editarMensajeDescripcion" placeholder="Escriba una descripción" class="si-form-control edit-textarea"></textarea>
             </div>
 
             <div class="detail-row">
               <span class="detail-label">Documentos Adjuntos</span>
               <div class="files-section files-section--edit">
-                @if (editMsgDocumentos.length > 0) {
+                @if (editarMensajeDocumentos.length > 0) {
                 <div class="edit-files-group">
                   <span class="edit-files-label">Documentos existentes:</span>
                   <div class="edit-files-list">
-                    @for (doc of editMsgDocumentos; track doc; let i = $index) {
+                    @for (doc of editarMensajeDocumentos; track doc; let i = $index) {
                     <div class="file-selected-badge">
                       <div class="file-name-info">
                         <i class="bi bi-file-earmark-check-fill"></i>
                         <span>{{ doc }}</span>
                       </div>
-                      <button type="button" class="btn-clear-file si-btn-icon-remove" (click)="removerDocumentoExistenteEditor(i)" title="Remover archivo" aria-label="Remover archivo">
+                      <button type="button" class="btn-clear-file si-btn-icon-remove" (click)="eliminarDocumentoExistenteEditor(i)" title="Remover archivo" aria-label="Remover archivo">
                         <i class="bi bi-x-lg"></i>
                       </button>
                     </div>
@@ -1293,18 +1293,18 @@
                 </div>
                 }
 
-                @if (editMsgNuevosArchivos.length > 0) {
+                @if (editarMensajeNuevosArchivos.length > 0) {
                 <div class="edit-files-group">
                   <span class="edit-files-label">Nuevos documentos:</span>
                   <div class="edit-files-list">
-                    @for (archivo of editMsgNuevosArchivos; track archivo.name; let i = $index) {
+                    @for (archivo of editarMensajeNuevosArchivos; track archivo.name; let i = $index) {
                     <div class="file-selected-badge file-selected-badge--new">
                       <div class="file-name-info file-name-info--new">
                         <i class="bi bi-file-earmark-arrow-up-fill"></i>
                         <span>{{ archivo.name }}</span>
                         <span class="file-size file-size--new">({{ (archivo.size / 1024).toFixed(1) }} KB)</span>
                       </div>
-                      <button type="button" class="btn-clear-file si-btn-icon-remove" (click)="removerNuevoArchivoEditor(i)" title="Remover archivo" aria-label="Remover archivo">
+                      <button type="button" class="btn-clear-file si-btn-icon-remove" (click)="eliminarNuevoArchivoEditor(i)" title="Remover archivo" aria-label="Remover archivo">
                         <i class="bi bi-x-lg"></i>
                       </button>
                     </div>
@@ -1316,10 +1316,10 @@
                 <label class="file-input-container" for="editMsgFile" tabindex="0" role="button" aria-label="Adjuntar nuevos archivos" style="margin-top: 8px;">
                   <i class="bi bi-file-earmark-arrow-up"></i>
                   <span class="file-selector-btn">Buscar archivo</span>
-                  <span class="file-selector-text" [class.has-file]="editMsgNuevosArchivos.length > 0">
-                    {{ editMsgNuevosArchivos.length > 0 ? (editMsgNuevosArchivos.length + ' archivo(s) seleccionado(s)') : 'Ningún archivo seleccionado' }}
+                  <span class="file-selector-text" [class.has-file]="editarMensajeNuevosArchivos.length > 0">
+                    {{ editarMensajeNuevosArchivos.length > 0 ? (editarMensajeNuevosArchivos.length + ' archivo(s) seleccionado(s)') : 'Ningún archivo seleccionado' }}
                   </span>
-                  <input id="editMsgFile" name="editMsgFile" type="file" multiple (change)="onNewFileSelectedEditor($event)" style="display: none;" />
+                  <input id="editMsgFile" name="editMsgFile" type="file" multiple (change)="alSeleccionarNuevoArchivoEditor($event)" style="display: none;" />
                 </label>
               </div>
             </div>
@@ -1520,7 +1520,7 @@
                 <button type="button" class="btn-toggle-pwd-border" (click)="verPasswordEditUsuario = !verPasswordEditUsuario" title="Mostrar/Ocultar contraseña" aria-label="Mostrar u ocultar contraseña">
                   <i class="bi" [class.bi-eye-fill]="!verPasswordEditUsuario" [class.bi-eye-slash-fill]="verPasswordEditUsuario"></i>
                 </button>
-                <button type="button" class="btn-admin-action btn-admin-generate" (click)="generarPasswordEdicionAdmin()" title="Generar contraseña aleatoria">
+                <button type="button" class="btn-admin-action btn-admin-generate" (click)="generarContrasenaEdicionAdmin()" title="Generar contraseña aleatoria">
                   Generar
                 </button>
               </div>
@@ -1554,7 +1554,7 @@
       <div class="modal-header force-password-header">
         <h3 class="force-password-title"><i class="bi bi-shield-lock-fill"></i> Cambio de Contraseña Obligatorio</h3>
       </div>
-      <form (submit)="cambiarPasswordObligatorio($event)">
+      <form (submit)="cambiarContrasenaObligatoria($event)">
         <div class="modal-body force-password-body">
           <p class="force-password-intro">
             Su cuenta ha sido marcada para cambio obligatorio de contraseña en el próximo inicio de sesión. Por favor, introduzca su nueva contraseña para continuar.
