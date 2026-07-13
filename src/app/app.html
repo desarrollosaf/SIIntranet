@@ -34,9 +34,13 @@
         </div>
       </div>
 
-      <button type="submit" class="btn-login">
-        <span>Ingresar al Sistema</span>
-        <i class="bi bi-box-arrow-in-right"></i>
+      <button type="submit" class="btn-login" [disabled]="cargandoLogin">
+        <span>{{ cargandoLogin ? 'Ingresando...' : 'Ingresar al Sistema' }}</span>
+        @if (!cargandoLogin) {
+          <i class="bi bi-box-arrow-in-right"></i>
+        } @else {
+          <i class="bi bi-arrow-repeat animate-spin"></i>
+        }
       </button>
     </form>
 
@@ -362,9 +366,13 @@
         </div>
 
         <div class="form-actions">
-          <button type="submit" class="si-btn-primary">
-            <i class="bi bi-send-fill"></i>
-            <span>Enviar Mensaje</span>
+          <button type="submit" class="si-btn-primary" [disabled]="cargandoMensaje">
+            @if (!cargandoMensaje) {
+              <i class="bi bi-send-fill"></i>
+            } @else {
+              <i class="bi bi-arrow-repeat animate-spin"></i>
+            }
+            <span>{{ cargandoMensaje ? 'Enviando...' : 'Enviar Mensaje' }}</span>
           </button>
           <button type="button" class="btn-secondary si-btn-secondary" (click)="cancelarFormulario()">
             <i class="bi bi-x-circle-fill"></i>
@@ -772,13 +780,13 @@
                       </button>
                       @if (u.estado === 'Activo') {
                         <button type="button" class="btn-admin-action si-btn-danger-ghost si-btn-xs" (click)="alternarEstadoUsuario(u, $event)"
-                          title="Desactivar usuario">
+                          title="Desactivar usuario" [disabled]="cargandoEstadoUsuario">
                           <i class="bi bi-person-x-fill"></i>
                           <span>Desactivar</span>
                         </button>
                       } @else {
                         <button type="button" class="btn-admin-action si-btn-primary si-btn-xs" (click)="alternarEstadoUsuario(u, $event)"
-                          title="Activar usuario">
+                          title="Activar usuario" [disabled]="cargandoEstadoUsuario">
                           <i class="bi bi-person-check-fill"></i>
                           <span>Activar</span>
                         </button>
@@ -826,7 +834,7 @@
 
 
   @if (mostrarPerfilModal) {
-  <div class="modal-backdrop" (click)="cerrarPerfilUsuario()">
+  <div class="modal-backdrop" (mousedown)="alIniciarClickBackdrop($event)" (mouseup)="alTerminarClickBackdropPerfil($event)">
     <div class="modal-card profile-modal animate-slide-up" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3><i class="bi bi-person-badge-fill"></i> Perfil de Usuario</h3>
@@ -893,7 +901,7 @@
   }
 
   @if (calendarioModalAbierto) {
-  <div class="modal-backdrop" (click)="cerrarCalendario()">
+  <div class="modal-backdrop" (mousedown)="alIniciarClickBackdrop($event)" (mouseup)="alTerminarClickBackdropCalendario($event)">
     <div class="modal-card calendar-modal animate-slide-up" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3><i class="bi bi-calendar-event-fill"></i> Calendario Completo</h3>
@@ -1080,9 +1088,13 @@
                 <span class="char-counter" style="font-size: 11px; color: var(--texto-mutado);">{{
                   nuevoRecordatorioCalendario?.length || 0 }}/150</span>
               </div>
-              <button type="submit" class="btn-add-reminder" title="Guardar recordatorio">
-                <i class="bi bi-plus-lg"></i>
-                <span>Agregar</span>
+              <button type="submit" class="btn-add-reminder" title="Guardar recordatorio" [disabled]="cargandoRecordatorio">
+                @if (!cargandoRecordatorio) {
+                  <i class="bi bi-plus-lg"></i>
+                } @else {
+                  <i class="bi bi-arrow-repeat animate-spin"></i>
+                }
+                <span>{{ cargandoRecordatorio ? 'Guardando...' : 'Agregar' }}</span>
               </button>
             </form>
           </div>
@@ -1098,7 +1110,7 @@
   }
 
   @if (mensajeSeleccionado) {
-  <div class="modal-backdrop details-modal-backdrop" (click)="cerrarDetalles()">
+  <div class="modal-backdrop details-modal-backdrop" (mousedown)="alIniciarClickBackdrop($event)" (mouseup)="alTerminarClickBackdropDetalle($event)">
     <div class="modal-card animate-slide-up" [class.unread]="esMensajeNuevo(mensajeSeleccionado)" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3><i class="bi bi-chat-square-text-fill"></i> Detalle del Mensaje</h3>
@@ -1356,9 +1368,13 @@
             <span>Cerrar</span>
           </button>
         } @else {
-          <button type="button" class="btn-modal-save" (click)="guardarCambiosMensajeEnviado()">
-            <i class="bi bi-save-fill"></i>
-            <span>Guardar cambios</span>
+          <button type="button" class="btn-modal-save" (click)="guardarCambiosMensajeEnviado()" [disabled]="cargandoEdicionMensaje">
+            @if (!cargandoEdicionMensaje) {
+              <i class="bi bi-save-fill"></i>
+            } @else {
+              <i class="bi bi-arrow-repeat animate-spin"></i>
+            }
+            <span>{{ cargandoEdicionMensaje ? 'Guardando...' : 'Guardar cambios' }}</span>
           </button>
           <button type="button" class="btn-modal-close" (click)="cancelarEdicionDetalle()">
             <span>Cancelar</span>
@@ -1371,7 +1387,7 @@
 
 
   @if (modalVerUsuarioAbierto && usuarioSeleccionadoAdmin) {
-  <div class="modal-backdrop" (click)="cerrarModalVerUsuario()">
+  <div class="modal-backdrop" (mousedown)="alIniciarClickBackdrop($event)" (mouseup)="alTerminarClickBackdropVerUsuario($event)">
     <div class="modal-card animate-slide-up" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3><i class="bi bi-person-badge-fill"></i> Detalles del Usuario</h3>
@@ -1443,7 +1459,7 @@
   }
 
   @if (modalEditarUsuarioAbierto && usuarioEditandoAdmin) {
-  <div class="modal-backdrop" (click)="cerrarModalEditarUsuario()">
+  <div class="modal-backdrop" (mousedown)="alIniciarClickBackdrop($event)" (mouseup)="alTerminarClickBackdropEditarUsuario($event)">
     <div class="modal-card animate-slide-up" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3><i class="bi bi-person-badge-fill"></i> {{ usuarioEditandoAdmin.id === 0 ? 'Crear Usuario' : 'Editar Usuario' }}</h3>
@@ -1515,10 +1531,10 @@
               <div style="display: flex; gap: 8px; width: 100%;">
                 <div class="input-with-icon" style="flex: 1;">
                   <i class="bi bi-key-fill"></i>
-                  <input id="editPassword" name="editPassword" [type]="verPasswordEditUsuario ? 'text' : 'password'" [(ngModel)]="usuarioEditandoAdmin.password" placeholder="Contraseña del usuario" />
+                  <input id="editPassword" name="editPassword" [type]="verContrasenaEdicionUsuario ? 'text' : 'password'" [(ngModel)]="usuarioEditandoAdmin.password" placeholder="Contraseña del usuario" />
                 </div>
-                <button type="button" class="btn-toggle-pwd-border" (click)="verPasswordEditUsuario = !verPasswordEditUsuario" title="Mostrar/Ocultar contraseña" aria-label="Mostrar u ocultar contraseña">
-                  <i class="bi" [class.bi-eye-fill]="!verPasswordEditUsuario" [class.bi-eye-slash-fill]="verPasswordEditUsuario"></i>
+                <button type="button" class="btn-toggle-pwd-border" (click)="verContrasenaEdicionUsuario = !verContrasenaEdicionUsuario" title="Mostrar/Ocultar contraseña" aria-label="Mostrar u ocultar contraseña">
+                  <i class="bi" [class.bi-eye-fill]="!verContrasenaEdicionUsuario" [class.bi-eye-slash-fill]="verContrasenaEdicionUsuario"></i>
                 </button>
                 <button type="button" class="btn-admin-action btn-admin-generate" (click)="generarContrasenaEdicionAdmin()" title="Generar contraseña aleatoria">
                   Generar
@@ -1534,9 +1550,13 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="submit" class="btn-admin-action-btn btn-success">
-            <i class="bi bi-save-fill"></i>
-            <span>{{ usuarioEditandoAdmin.id === 0 ? 'Crear usuario' : 'Guardar cambios' }}</span>
+          <button type="submit" class="btn-admin-action-btn btn-success" [disabled]="cargandoUsuario">
+            @if (!cargandoUsuario) {
+              <i class="bi bi-save-fill"></i>
+            } @else {
+              <i class="bi bi-arrow-repeat animate-spin"></i>
+            }
+            <span>{{ cargandoUsuario ? 'Guardando...' : (usuarioEditandoAdmin.id === 0 ? 'Crear usuario' : 'Guardar cambios') }}</span>
           </button>
           <button type="button" class="btn-admin-action-btn btn-secondary" (click)="cerrarModalEditarUsuario()">
             <i class="bi bi-x-circle-fill"></i>
@@ -1599,6 +1619,42 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+  }
+
+  @if (confirmacionModalAbierto) {
+  <div class="modal-backdrop force-password-modal-backdrop" (mousedown)="alIniciarClickBackdrop($event)" (mouseup)="clicIniciadoEnBackdrop = false">
+    <div class="modal-card animate-slide-up" style="max-width: 450px;" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>
+          <i class="bi" [class]="confirmacionIcono" 
+             [style.color]="confirmacionTipo === 'danger' ? '#dc2626' : (confirmacionTipo === 'success' ? '#16a34a' : '#f59e0b')"></i> 
+          {{ confirmacionTitulo }}
+        </h3>
+        <button type="button" class="btn-close si-btn-icon" (click)="cancelarConfirmacion()" title="Cerrar" aria-label="Cerrar confirmación">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div class="modal-body" style="padding: 20px 24px; font-size: 15px; line-height: 1.5; color: var(--texto);">
+        <p style="margin: 0;">
+          {{ confirmacionMensajeInicio }}<strong>{{ confirmacionElementoDestacado }}</strong>{{ confirmacionMensajeFin }}
+        </p>
+      </div>
+      <div class="modal-footer modal-footer-between" style="padding: 16px 24px; display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--borde);">
+        <button type="button" class="btn-admin-action-btn btn-secondary" (click)="cancelarConfirmacion()">
+          <i class="bi bi-x-circle-fill"></i>
+          <span>Cancelar</span>
+        </button>
+        <button type="button" class="btn-admin-action-btn" 
+          [class.btn-danger]="confirmacionTipo === 'danger'"
+          [class.btn-success]="confirmacionTipo === 'success'"
+          [class.si-btn-primary]="confirmacionTipo !== 'danger' && confirmacionTipo !== 'success'"
+          (click)="aceptarConfirmacion()">
+          <i class="bi" [class]="confirmacionIcono"></i>
+          <span>{{ confirmacionTextoAceptar }}</span>
+        </button>
+      </div>
     </div>
   </div>
   }

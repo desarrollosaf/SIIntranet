@@ -10,6 +10,20 @@ cp .env.example .env
 npm run start:dev
 ```
 
+## Variables de entorno
+
+El backend usa el archivo `.env`.
+
+Variables actuales:
+- `PORT`: puerto donde corre la API. Por defecto `3000`.
+- `FRONTEND_URL`: URL permitida para CORS. Por defecto `http://localhost:4200`.
+
+Ejemplo:
+```env
+PORT=3000
+FRONTEND_URL=http://localhost:4200
+```
+
 ## Endpoints
 Base URL: `http://localhost:3000/api`
 

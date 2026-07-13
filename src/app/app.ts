@@ -70,7 +70,7 @@ export class App implements OnDestroy {
 
   documentosFormatos: { [categoria: string]: DocumentoFormato[] } = {};
 
-  verPasswordEditUsuario = false;
+  verContrasenaEdicionUsuario = false;
   mostrarContrasenaLogin = false;
   mostrarCambioObligatorioModal = false;
   usuarioPendienteCambio: UsuarioSistema | null = null;
@@ -150,12 +150,12 @@ export class App implements OnDestroy {
     if (this.notificacionTimeout) {
       clearTimeout(this.notificacionTimeout);
     }
-    for (const key in this.envioTimeouts) {
-      if (Object.prototype.hasOwnProperty.call(this.envioTimeouts, key)) {
-        clearTimeout(this.envioTimeouts[key]);
+    for (const key in this.tiemposEnvio) {
+      if (Object.prototype.hasOwnProperty.call(this.tiemposEnvio, key)) {
+        clearTimeout(this.tiemposEnvio[key]);
       }
     }
-    this.generalTimeouts.forEach(t => clearTimeout(t));
+    this.tiemposGenerales.forEach(t => clearTimeout(t));
   }
 
   inicializarVisitas(): void {
@@ -284,9 +284,54 @@ export class App implements OnDestroy {
     });
   }
 
+  obtenerMensajeError(err: any, fallback: string): string {
+    if (err && err.error && err.error.message) {
+      if (typeof err.error.message === 'string') {
+        return err.error.message;
+      }
+      if (Array.isArray(err.error.message)) {
+        return err.error.message.join(' ');
+      }
+    }
+    return fallback;
+  }
+
+  private ultimaNotificacionConexion = 0;
+
+  manejarErrorHttp(err: any, fallback: string, tipo: 'error' | 'exito' | 'info' | 'advertencia' = 'error'): void {
+    if (err && err.status === 0) {
+      const ahora = Date.now();
+      if (ahora - this.ultimaNotificacionConexion > 5000) {
+        this.mostrarNotificacion('No se pudo conectar con el servidor. Verifica que el backend esté activo.', 'error');
+        this.ultimaNotificacionConexion = ahora;
+      }
+      return;
+    }
+
+    const mensaje = this.obtenerMensajeError(err, fallback);
+    this.mostrarNotificacion(mensaje, tipo);
+  }
+
   sesionIniciada = false;
   usuarioLogin = '';
   contrasenaLogin = '';
+
+  cargandoLogin = false;
+  cargandoUsuario = false;
+  cargandoEstadoUsuario = false;
+  cargandoMensaje = false;
+  cargandoEdicionMensaje = false;
+  cargandoRecordatorio = false;
+
+  confirmacionModalAbierto = false;
+  confirmacionTitulo = '';
+  confirmacionMensajeInicio = '';
+  confirmacionElementoDestacado = '';
+  confirmacionMensajeFin = '';
+  confirmacionTextoAceptar = '';
+  confirmacionTipo: 'danger' | 'success' | 'warning' | 'primary' = 'warning';
+  confirmacionIcono = 'bi-exclamation-triangle-fill';
+  confirmacionCallback: (() => void) | null = null;
 
   mostrarPerfilModal = false;
 
@@ -328,8 +373,8 @@ export class App implements OnDestroy {
   formularioHora = '';
   formularioArchivos: File[] = [];
 
-  envioTimeouts: { [key: number]: ReturnType<typeof setTimeout> } = {};
-  private generalTimeouts: ReturnType<typeof setTimeout>[] = [];
+  tiemposEnvio: { [key: number]: ReturnType<typeof setTimeout> } = {};
+  private tiemposGenerales: ReturnType<typeof setTimeout>[] = [];
 
   mensajesBandeja: Mensaje[] = [];
 
@@ -497,15 +542,18 @@ export class App implements OnDestroy {
       creadoPor: this.usuarioActual.nombre
     };
 
+    this.cargandoRecordatorio = true;
     this.http.post<EventoCalendario>(`${this.urlApi}/recordatorios`, body).subscribe({
       next: (response) => {
         this.mostrarNotificacion('Recordatorio agregado correctamente.', 'exito');
+        this.cargandoRecordatorio = false;
         this.nuevoRecordatorioCalendario = '';
         this.nuevoRecordatorioHoraCalendario = '';
         this.cargarRecordatorios();
       },
       error: (err) => {
         console.error(err);
+        this.cargandoRecordatorio = false;
         this.mostrarNotificacion('No se pudo crear el recordatorio.', 'error');
       }
     });
@@ -516,14 +564,23 @@ export class App implements OnDestroy {
     event.stopPropagation();
     if (id === undefined) return;
 
-    this.http.delete<EventoCalendario>(`${this.urlApi}/recordatorios/${id}`).subscribe({
-      next: (response) => {
-        this.mostrarNotificacion('Recordatorio eliminado.', 'exito');
-        this.cargarRecordatorios();
-      },
-      error: (err) => {
-        console.error(err);
-        this.mostrarNotificacion('No se pudo eliminar el recordatorio.', 'error');
+    this.abrirConfirmacion({
+      titulo: 'Eliminar Recordatorio',
+      mensajeInicio: '¿Está seguro de que desea eliminar este recordatorio?',
+      textoAceptar: 'Eliminar',
+      tipo: 'danger',
+      icono: 'bi-trash-fill',
+      callback: () => {
+        this.http.delete<EventoCalendario>(`${this.urlApi}/recordatorios/${id}`).subscribe({
+          next: (response) => {
+            this.mostrarNotificacion('Recordatorio eliminado.', 'exito');
+            this.cargarRecordatorios();
+          },
+          error: (err) => {
+            console.error(err);
+            this.mostrarNotificacion('No se pudo eliminar el recordatorio.', 'error');
+          }
+        });
       }
     });
   }
@@ -695,24 +752,27 @@ export class App implements OnDestroy {
       tipoMensaje: 'enviado' as const
     };
 
+    this.cargandoMensaje = true;
     this.http.post<Mensaje>(`${this.urlApi}/mensajes`, body).subscribe({
       next: (response) => {
         this.mostrarNotificacion('Mensaje enviado correctamente.', 'exito');
+        this.cargandoMensaje = false;
         this.resetearFormulario();
         this.actualizarFechaHora();
         this.cargarMensajesEnviados();
       },
       error: (err) => {
         console.error(err);
+        this.cargandoMensaje = false;
         this.mostrarNotificacion('No se pudo enviar el mensaje. Verifica que el backend esté activo.', 'error');
       }
     });
   }
 
   cancelarEnvio(id: number): void {
-    if (this.envioTimeouts[id]) {
-      clearTimeout(this.envioTimeouts[id]);
-      delete this.envioTimeouts[id];
+    if (this.tiemposEnvio[id]) {
+      clearTimeout(this.tiemposEnvio[id]);
+      delete this.tiemposEnvio[id];
     }
     const msg = this.mensajesBandeja.find(m => m.id === id);
     if (msg) {
@@ -822,7 +882,7 @@ export class App implements OnDestroy {
     this.guardarFoco();
     this.mensajeSeleccionado = msg;
     this.marcarComoVisto(msg);
-    this.generalTimeouts.push(setTimeout(() => {
+    this.tiemposGenerales.push(setTimeout(() => {
       const closeBtn = document.querySelector('.details-modal-backdrop .btn-close') as HTMLElement;
       if (closeBtn) closeBtn.focus();
     }, 50));
@@ -857,17 +917,28 @@ export class App implements OnDestroy {
     event.preventDefault();
     event.stopPropagation();
 
-    this.http.delete<Mensaje>(`${this.urlApi}/mensajes/${msg.id}`).subscribe({
-      next: (response) => {
-        if (this.mensajeSeleccionado && this.mensajeSeleccionado.id === msg.id) {
-          this.mensajeSeleccionado = null;
-        }
-        this.mostrarNotificacion(`El documento "${msg.titulo}" ha sido movido a la Papelera.`, 'exito');
-        this.cargarMensajesRecibidos();
-      },
-      error: (err) => {
-        console.error(err);
-        this.mostrarNotificacion('No se pudo eliminar el mensaje.', 'error');
+    this.abrirConfirmacion({
+      titulo: 'Mover a Papelera',
+      mensajeInicio: '¿Deseas mover el documento "',
+      elementoDestacado: msg.titulo,
+      mensajeFin: '" a la papelera?',
+      textoAceptar: 'Mover',
+      tipo: 'danger',
+      icono: 'bi-trash-fill',
+      callback: () => {
+        this.http.delete<Mensaje>(`${this.urlApi}/mensajes/${msg.id}`).subscribe({
+          next: (response) => {
+            if (this.mensajeSeleccionado && this.mensajeSeleccionado.id === msg.id) {
+              this.mensajeSeleccionado = null;
+            }
+            this.mostrarNotificacion(`El documento "${msg.titulo}" ha sido movido a la Papelera.`, 'exito');
+            this.cargarMensajesRecibidos();
+          },
+          error: (err) => {
+            console.error(err);
+            this.mostrarNotificacion('No se pudo eliminar el mensaje.', 'error');
+          }
+        });
       }
     });
   }
@@ -881,7 +952,7 @@ export class App implements OnDestroy {
       msg.confirmarEliminarSent = true;
       this.cdr.detectChanges();
 
-      this.generalTimeouts.push(setTimeout(() => {
+      this.tiemposGenerales.push(setTimeout(() => {
         if (msg.confirmarEliminarSent) {
           msg.confirmarEliminarSent = false;
           this.cdr.detectChanges();
@@ -915,7 +986,7 @@ export class App implements OnDestroy {
     this.mostrarNotificacion('Preparando respuesta...', 'info');
     this.cdr.detectChanges();
 
-    this.generalTimeouts.push(setTimeout(() => {
+    this.tiemposGenerales.push(setTimeout(() => {
       msg.estadoTemporal = null;
       this.marcarComoVisto(msg);
       this.marcarComoRespondido(msg);
@@ -962,6 +1033,7 @@ export class App implements OnDestroy {
       password: this.contrasenaLogin.trim()
     };
 
+    this.cargandoLogin = true;
     this.http.post<any>(`${this.urlApi}/auth/login`, payload).subscribe({
       next: (response) => {
         this.sesionIniciada = true;
@@ -992,6 +1064,7 @@ export class App implements OnDestroy {
 
         this.usuarioLogin = '';
         this.contrasenaLogin = '';
+        this.cargandoLogin = false;
 
         if (this.usuarioActual.tipo === 'admin') {
           this.cargarUsuarios();
@@ -1005,6 +1078,7 @@ export class App implements OnDestroy {
       },
       error: (err) => {
         console.error(err);
+        this.cargandoLogin = false;
         if (err.status === 403 || (err.error && err.error.message && err.error.message.includes('inactivo'))) {
           const msg = err.error?.message || 'El usuario se encuentra inactivo. Contacte al administrador.';
           this.mostrarNotificacion(msg, 'error');
@@ -1088,7 +1162,7 @@ export class App implements OnDestroy {
   verPerfilUsuario(): void {
     this.guardarFoco();
     this.mostrarPerfilModal = true;
-    this.generalTimeouts.push(setTimeout(() => {
+    this.tiemposGenerales.push(setTimeout(() => {
       const closeBtn = document.querySelector('.profile-modal .btn-close') as HTMLElement;
       if (closeBtn) closeBtn.focus();
     }, 50));
@@ -1121,7 +1195,7 @@ export class App implements OnDestroy {
     this.usuarioSeleccionadoAdmin = usuario;
     this.usuarioEditandoAdmin = null;
     this.modalVerUsuarioAbierto = true;
-    this.generalTimeouts.push(setTimeout(() => {
+    this.tiemposGenerales.push(setTimeout(() => {
       const closeBtn = document.querySelector('.modal-card .btn-close') as HTMLElement;
       if (closeBtn) closeBtn.focus();
     }, 50));
@@ -1138,8 +1212,8 @@ export class App implements OnDestroy {
     this.usuarioEditandoAdmin = { ...usuario };
     this.modalEditarUsuarioAbierto = true;
     this.modalVerUsuarioAbierto = false;
-    this.verPasswordEditUsuario = false;
-    this.generalTimeouts.push(setTimeout(() => {
+    this.verContrasenaEdicionUsuario = false;
+    this.tiemposGenerales.push(setTimeout(() => {
       const firstInput = document.querySelector('#editNombre') as HTMLElement;
       if (firstInput) firstInput.focus();
     }, 50));
@@ -1160,8 +1234,8 @@ export class App implements OnDestroy {
     };
     this.modalEditarUsuarioAbierto = true;
     this.modalVerUsuarioAbierto = false;
-    this.verPasswordEditUsuario = false;
-    this.generalTimeouts.push(setTimeout(() => {
+    this.verContrasenaEdicionUsuario = false;
+    this.tiemposGenerales.push(setTimeout(() => {
       const firstInput = document.querySelector('#editNombre') as HTMLElement;
       if (firstInput) firstInput.focus();
     }, 50));
@@ -1177,22 +1251,75 @@ export class App implements OnDestroy {
           this.usuarioEditandoAdmin.area !== original.area ||
           this.usuarioEditandoAdmin.rol !== original.rol ||
           this.usuarioEditandoAdmin.estado !== original.estado ||
-          this.usuarioEditandoAdmin.password !== original.password;
+          (this.usuarioEditandoAdmin.password && this.usuarioEditandoAdmin.password !== original.password);
         if (isDirty) {
-          if (!confirm('Tiene cambios sin guardar en el usuario. ¿Desea descartar los cambios?')) {
-            return;
-          }
+          this.abrirConfirmacion({
+            titulo: 'Cambios sin guardar',
+            mensajeInicio: 'Tiene cambios sin guardar en el usuario. ¿Deseas descartar los cambios?',
+            textoAceptar: 'Descartar',
+            tipo: 'warning',
+            icono: 'bi-exclamation-triangle-fill',
+            callback: () => {
+              this.modalEditarUsuarioAbierto = false;
+              this.usuarioEditandoAdmin = null;
+            }
+          });
+          return;
         }
       }
     }
     this.modalEditarUsuarioAbierto = false;
     this.usuarioEditandoAdmin = null;
-    this.verPasswordEditUsuario = false;
+    this.verContrasenaEdicionUsuario = false;
     this.restaurarFoco();
   }
 
   cancelarEdicionUsuarioAdmin(): void {
     this.cerrarModalEditarUsuario();
+  }
+
+  clicIniciadoEnBackdrop = false;
+
+  alIniciarClickBackdrop(event: MouseEvent): void {
+    this.clicIniciadoEnBackdrop = (event.target === event.currentTarget);
+  }
+
+  alTerminarClickBackdropEditarUsuario(event: MouseEvent): void {
+    // In edit mode (important form), prefer closing only via X, Cancel, or Save.
+    this.clicIniciadoEnBackdrop = false;
+  }
+
+  alTerminarClickBackdropVerUsuario(event: MouseEvent): void {
+    if (this.clicIniciadoEnBackdrop && event.target === event.currentTarget) {
+      this.cerrarModalVerUsuario();
+    }
+    this.clicIniciadoEnBackdrop = false;
+  }
+
+  alTerminarClickBackdropPerfil(event: MouseEvent): void {
+    if (this.clicIniciadoEnBackdrop && event.target === event.currentTarget) {
+      this.cerrarPerfilUsuario();
+    }
+    this.clicIniciadoEnBackdrop = false;
+  }
+
+  alTerminarClickBackdropCalendario(event: MouseEvent): void {
+    if (this.clicIniciadoEnBackdrop && event.target === event.currentTarget) {
+      this.cerrarCalendario();
+    }
+    this.clicIniciadoEnBackdrop = false;
+  }
+
+  alTerminarClickBackdropDetalle(event: MouseEvent): void {
+    if (this.detalleEditandoMensaje) {
+      // In edit mode, do not close via backdrop click to avoid losing edits!
+      this.clicIniciadoEnBackdrop = false;
+      return;
+    }
+    if (this.clicIniciadoEnBackdrop && event.target === event.currentTarget) {
+      this.cerrarDetalles();
+    }
+    this.clicIniciadoEnBackdrop = false;
   }
 
   guardarCambiosUsuarioAdmin(): void {
@@ -1253,16 +1380,19 @@ export class App implements OnDestroy {
         requiereCambioPassword: this.usuarioEditandoAdmin.requiereCambioPassword ?? false
       };
 
+      this.cargandoUsuario = true;
       this.http.post<UsuarioSistema>(`${this.urlApi}/usuarios`, payload).subscribe({
         next: (response) => {
           this.mostrarNotificacion('Usuario creado correctamente.', 'exito');
           this.modalEditarUsuarioAbierto = false;
           this.usuarioEditandoAdmin = null;
+          this.cargandoUsuario = false;
           this.cargarUsuarios();
         },
         error: (err) => {
           console.error(err);
-          this.mostrarNotificacion('Error al crear el usuario en el servidor.', 'error');
+          this.cargandoUsuario = false;
+          this.manejarErrorHttp(err, 'Error al crear el usuario en el servidor.');
         }
       });
     } else {
@@ -1285,6 +1415,7 @@ export class App implements OnDestroy {
 
       const userId = this.usuarioEditandoAdmin.id;
 
+      this.cargandoUsuario = true;
       this.http.patch<UsuarioSistema>(`${this.urlApi}/usuarios/${userId}`, payload).subscribe({
         next: (response) => {
           if (newPwd) {
@@ -1294,11 +1425,13 @@ export class App implements OnDestroy {
                 this.mostrarNotificacion('Usuario y contraseña actualizados correctamente.', 'exito');
                 this.modalEditarUsuarioAbierto = false;
                 this.usuarioEditandoAdmin = null;
+                this.cargandoUsuario = false;
                 this.cargarUsuarios();
               },
               error: (err) => {
                 console.error(err);
-                this.mostrarNotificacion('Usuario actualizado, pero falló el cambio de contraseña.', 'advertencia');
+                this.cargandoUsuario = false;
+                this.manejarErrorHttp(err, 'Usuario actualizado, pero falló el cambio de contraseña.', 'advertencia');
                 this.modalEditarUsuarioAbierto = false;
                 this.usuarioEditandoAdmin = null;
                 this.cargarUsuarios();
@@ -1308,12 +1441,14 @@ export class App implements OnDestroy {
             this.mostrarNotificacion('Usuario actualizado correctamente.', 'exito');
             this.modalEditarUsuarioAbierto = false;
             this.usuarioEditandoAdmin = null;
+            this.cargandoUsuario = false;
             this.cargarUsuarios();
           }
         },
         error: (err) => {
           console.error(err);
-          this.mostrarNotificacion('Error al actualizar el usuario en el servidor.', 'error');
+          this.cargandoUsuario = false;
+          this.manejarErrorHttp(err, 'Error al actualizar el usuario en el servidor.');
         }
       });
     }
@@ -1327,7 +1462,7 @@ export class App implements OnDestroy {
     const letter2 = chars[Math.floor(Math.random() * chars.length)];
     const password = `Temp-${num}-${letter1}${letter2}`;
     this.usuarioEditandoAdmin.password = password;
-    this.verPasswordEditUsuario = true;
+    this.verContrasenaEdicionUsuario = true;
     this.mostrarNotificacion('Nueva contraseña aleatoria generada.', 'exito');
   }
 
@@ -1348,27 +1483,80 @@ export class App implements OnDestroy {
   }
 
   alternarEstadoUsuario(usuario: UsuarioSistema, event?: Event): void {
+    this.solicitarAlternarEstadoUsuario(usuario, event);
+  }
+
+  solicitarAlternarEstadoUsuario(usuario: UsuarioSistema, event?: Event): void {
     if (event) {
       event.preventDefault();
       event.stopPropagation();
     }
     const nuevoEstado = usuario.estado === 'Activo' ? 'Inactivo' : 'Activo';
-    const accion = nuevoEstado === 'Activo' ? 'activar' : 'desactivar';
-    if (!confirm(`¿Está seguro de que desea ${accion} al usuario "${usuario.nombre}"?`)) {
-      return;
-    }
-    this.http.patch<any>(`${this.urlApi}/usuarios/${usuario.id}`, { estado: nuevoEstado }).subscribe({
-      next: (response) => {
-        const msg = nuevoEstado === 'Activo' ? 'Usuario activado correctamente.' : 'Usuario desactivado correctamente.';
-        this.mostrarNotificacion(msg, 'exito');
-        this.cargarUsuarios();
-      },
-      error: (err) => {
-        console.error(err);
-        const errMsg = nuevoEstado === 'Activo' ? 'Error al activar el usuario.' : 'Error al desactivar el usuario.';
-        this.mostrarNotificacion(errMsg, 'error');
+    const accion = usuario.estado === 'Activo' ? 'desactivar' : 'activar';
+    const textoAceptarConfirmacion = usuario.estado === 'Activo' ? 'Desactivar' : 'Activar';
+    const colorTipo = usuario.estado === 'Activo' ? 'danger' : 'success';
+    const icono = usuario.estado === 'Activo' ? 'bi-person-x-fill' : 'bi-person-check-fill';
+
+    this.abrirConfirmacion({
+      titulo: 'Confirmar Acción',
+      mensajeInicio: `¿Deseas ${accion} al usuario "`,
+      elementoDestacado: usuario.nombre,
+      mensajeFin: '"?',
+      textoAceptar: textoAceptarConfirmacion,
+      tipo: colorTipo,
+      icono: icono,
+      callback: () => {
+        this.cargandoEstadoUsuario = true;
+        this.http.patch<any>(`${this.urlApi}/usuarios/${usuario.id}`, { estado: nuevoEstado }).subscribe({
+          next: (response) => {
+            const msg = nuevoEstado === 'Activo' ? 'Usuario activado correctamente.' : 'Usuario desactivado correctamente.';
+            this.mostrarNotificacion(msg, 'exito');
+            this.cargandoEstadoUsuario = false;
+            this.cargarUsuarios();
+          },
+          error: (err) => {
+            console.error(err);
+            const errMsg = nuevoEstado === 'Activo' ? 'Error al activar el usuario.' : 'Error al desactivar el usuario.';
+            this.cargandoEstadoUsuario = false;
+            this.manejarErrorHttp(err, errMsg);
+          }
+        });
       }
     });
+  }
+
+  abrirConfirmacion(opciones: {
+    titulo: string;
+    mensajeInicio: string;
+    elementoDestacado?: string;
+    mensajeFin?: string;
+    textoAceptar: string;
+    tipo?: 'danger' | 'success' | 'warning' | 'primary';
+    icono?: string;
+    callback: () => void;
+  }): void {
+    this.confirmacionTitulo = opciones.titulo;
+    this.confirmacionMensajeInicio = opciones.mensajeInicio;
+    this.confirmacionElementoDestacado = opciones.elementoDestacado || '';
+    this.confirmacionMensajeFin = opciones.mensajeFin || '';
+    this.confirmacionTextoAceptar = opciones.textoAceptar;
+    this.confirmacionTipo = opciones.tipo || 'warning';
+    this.confirmacionIcono = opciones.icono || 'bi-exclamation-triangle-fill';
+    this.confirmacionCallback = opciones.callback;
+    this.confirmacionModalAbierto = true;
+  }
+
+  cancelarConfirmacion(): void {
+    this.confirmacionModalAbierto = false;
+    this.confirmacionCallback = null;
+  }
+
+  aceptarConfirmacion(): void {
+    if (this.confirmacionCallback) {
+      this.confirmacionCallback();
+    }
+    this.confirmacionModalAbierto = false;
+    this.confirmacionCallback = null;
   }
 
   cargarUsuarios(): void {
@@ -1380,7 +1568,7 @@ export class App implements OnDestroy {
       },
       error: (err) => {
         console.error(err);
-        this.mostrarNotificacion('No se pudo conectar con el servidor. Verifica que el backend esté activo.', 'error');
+        this.manejarErrorHttp(err, 'No se pudo conectar con el servidor. Verifica que el backend esté activo.');
       }
     });
   }
@@ -1394,7 +1582,7 @@ export class App implements OnDestroy {
       },
       error: (err) => {
         console.error(err);
-        this.mostrarNotificacion('No se pudieron cargar los mensajes.', 'error');
+        this.manejarErrorHttp(err, 'No se pudieron cargar los mensajes.');
       }
     });
   }
@@ -1430,7 +1618,7 @@ export class App implements OnDestroy {
       },
       error: (err) => {
         console.error(err);
-        this.mostrarNotificacion('No se pudieron cargar los formatos.', 'error');
+        this.manejarErrorHttp(err, 'No se pudieron cargar los formatos.');
       }
     });
   }
@@ -1443,7 +1631,7 @@ export class App implements OnDestroy {
       },
       error: (err) => {
         console.error(err);
-        this.mostrarNotificacion('No se pudieron cargar los recordatorios.', 'error');
+        this.manejarErrorHttp(err, 'No se pudieron cargar los recordatorios.');
       }
     });
   }
@@ -1460,7 +1648,7 @@ export class App implements OnDestroy {
       },
       error: (err) => {
         console.error(err);
-        this.mostrarNotificacion('No se pudieron cargar los mensajes.', 'error');
+        this.manejarErrorHttp(err, 'No se pudieron cargar los mensajes.');
       }
     });
   }
@@ -1477,7 +1665,7 @@ export class App implements OnDestroy {
       },
       error: (err) => {
         console.error(err);
-        this.mostrarNotificacion('No se pudieron cargar los mensajes.', 'error');
+        this.manejarErrorHttp(err, 'No se pudieron cargar los mensajes.');
       }
     });
   }
@@ -1732,7 +1920,7 @@ export class App implements OnDestroy {
       msg.estadoTemporal = 'Cancelando';
       this.mostrarNotificacion('Cancelando envío del documento...', 'info');
       this.cdr.detectChanges();
-      this.generalTimeouts.push(setTimeout(() => {
+      this.tiemposGenerales.push(setTimeout(() => {
         msg.estadoTemporal = null;
         msg.estado = 'Cancelado';
         this.mostrarNotificacion('Envío cancelado correctamente.', 'exito');
@@ -1749,7 +1937,7 @@ export class App implements OnDestroy {
     this.filtroEventosCalendario = 'Todos';
     this.fechaBusquedaCalendario = this.fechaSeleccionadaCalendario;
     this.cdr.detectChanges();
-    this.generalTimeouts.push(setTimeout(() => {
+    this.tiemposGenerales.push(setTimeout(() => {
       const closeBtn = document.querySelector('.calendar-modal .btn-close') as HTMLElement;
       if (closeBtn) closeBtn.focus();
     }, 50));
@@ -1880,16 +2068,19 @@ export class App implements OnDestroy {
       estado: this.mensajeEditando.estado
     };
 
+    this.cargandoEdicionMensaje = true;
     this.http.patch<Mensaje>(`${this.urlApi}/mensajes/${this.mensajeEditando.id}`, body).subscribe({
       next: (response) => {
         this.mostrarNotificacion('Mensaje enviado actualizado con éxito.', 'exito');
         this.detalleEditandoMensaje = false;
+        this.cargandoEdicionMensaje = false;
         this.mensajeEditando = null;
         this.mensajeSeleccionado = response;
         this.cargarMensajesEnviados();
       },
       error: (err) => {
         console.error(err);
+        this.cargandoEdicionMensaje = false;
         this.mostrarNotificacion('No se pudieron guardar los cambios del mensaje.', 'error');
       }
     });
@@ -1900,12 +2091,6 @@ export class App implements OnDestroy {
   editarMensajeDestinatariosSeleccionados: string[] = [];
   usuariosDisponiblesMarcadosEdicion: string[] = [];
   destinatariosMarcadosEdicion: string[] = [];
-
-  get editarMensajeDestinatariosDisponiblesFiltrados(): string[] {
-    const q = (this.editarMensajeBuscarDestinatario || '').toLowerCase().trim();
-    if (!q) return this.editarMensajeDestinatariosDisponibles;
-    return this.editarMensajeDestinatariosDisponibles.filter(u => u.toLowerCase().includes(q));
-  }
 
   pasarEdit(): void {
     if (this.usuariosDisponiblesMarcadosEdicion.length === 0) return;

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { Usuario } from '../../common/interfaces/common.interfaces';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
@@ -38,6 +38,20 @@ export class UsuariosService {
   }
 
   create(createUsuarioDto: CreateUsuarioDto): Omit<Usuario, 'password'> {
+    const usuarioDuplicado = this.usuarios.find(
+      u => u.usuario.toLowerCase() === createUsuarioDto.usuario.toLowerCase()
+    );
+    if (usuarioDuplicado) {
+      throw new ConflictException('El nombre de usuario ya está registrado.');
+    }
+
+    const correoDuplicado = this.usuarios.find(
+      u => u.correo.toLowerCase() === createUsuarioDto.correo.toLowerCase()
+    );
+    if (correoDuplicado) {
+      throw new ConflictException('El correo ya está registrado.');
+    }
+
     const nuevoUsuario: Usuario = {
       id: this.nextId++,
       nombre: createUsuarioDto.nombre,
@@ -55,6 +69,24 @@ export class UsuariosService {
 
   update(id: number, updateUsuarioDto: UpdateUsuarioDto): Omit<Usuario, 'password'> {
     const usuario = this.findRawOne(id);
+
+    if (updateUsuarioDto.usuario !== undefined) {
+      const usuarioDuplicado = this.usuarios.find(
+        u => u.id !== id && u.usuario.toLowerCase() === updateUsuarioDto.usuario!.toLowerCase()
+      );
+      if (usuarioDuplicado) {
+        throw new ConflictException('El nombre de usuario ya está registrado.');
+      }
+    }
+
+    if (updateUsuarioDto.correo !== undefined) {
+      const correoDuplicado = this.usuarios.find(
+        u => u.id !== id && u.correo.toLowerCase() === updateUsuarioDto.correo!.toLowerCase()
+      );
+      if (correoDuplicado) {
+        throw new ConflictException('El correo ya está registrado.');
+      }
+    }
     
     if (updateUsuarioDto.nombre !== undefined) usuario.nombre = updateUsuarioDto.nombre;
     if (updateUsuarioDto.usuario !== undefined) usuario.usuario = updateUsuarioDto.usuario;
