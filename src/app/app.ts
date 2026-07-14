@@ -156,6 +156,7 @@ export class App implements OnDestroy {
       }
     }
     this.tiemposGenerales.forEach(t => clearTimeout(t));
+    this.detenerIntervaloFechaHora();
   }
 
   inicializarVisitas(): void {
@@ -199,6 +200,9 @@ export class App implements OnDestroy {
       } else {
         this.moduloActual = hash;
         this.cargarDatosModulo(hash);
+        if (hash === 'mensaje') {
+          this.actualizarFechaHoraMensaje();
+        }
       }
     } else {
       this.moduloActual = 'inicio';
@@ -230,7 +234,9 @@ export class App implements OnDestroy {
     }
     this.moduloActual = modulo;
     if (modulo === 'mensaje') {
-      this.actualizarFechaHora();
+      this.actualizarFechaHoraMensaje();
+    } else {
+      this.detenerIntervaloFechaHora();
     }
     this.cargarDatosModulo(modulo);
     this.cdr.detectChanges();
@@ -375,6 +381,7 @@ export class App implements OnDestroy {
 
   tiemposEnvio: { [key: number]: ReturnType<typeof setTimeout> } = {};
   private tiemposGenerales: ReturnType<typeof setTimeout>[] = [];
+  private intervaloFechaHora: ReturnType<typeof setInterval> | null = null;
 
   mensajesBandeja: Mensaje[] = [];
 
@@ -617,7 +624,9 @@ export class App implements OnDestroy {
     }
     this.moduloActual = modulo;
     if (modulo === 'mensaje') {
-      this.actualizarFechaHora();
+      this.actualizarFechaHoraMensaje();
+    } else {
+      this.detenerIntervaloFechaHora();
     }
     this.cargarDatosModulo(modulo);
 
@@ -652,6 +661,26 @@ export class App implements OnDestroy {
     const horas = String(actual.getHours()).padStart(2, '0');
     const minutos = String(actual.getMinutes()).padStart(2, '0');
     this.formularioHora = `${horas}:${minutos}`;
+  }
+
+  actualizarFechaHoraMensaje(): void {
+    this.actualizarFechaHora();
+    this.detenerIntervaloFechaHora();
+    this.intervaloFechaHora = setInterval(() => {
+      if (this.moduloActual === 'mensaje') {
+        this.actualizarFechaHora();
+        this.cdr.detectChanges();
+      } else {
+        this.detenerIntervaloFechaHora();
+      }
+    }, 30000);
+  }
+
+  detenerIntervaloFechaHora(): void {
+    if (this.intervaloFechaHora) {
+      clearInterval(this.intervaloFechaHora);
+      this.intervaloFechaHora = null;
+    }
   }
 
   alSeleccionarArchivo(event: Event): void {
@@ -732,6 +761,8 @@ export class App implements OnDestroy {
       return;
     }
 
+    this.actualizarFechaHora();
+
     const documentosAdjuntos = this.formularioArchivos.length > 0
       ? this.formularioArchivos.map(f => f.name).join(', ')
       : 'Sin adjunto';
@@ -758,7 +789,7 @@ export class App implements OnDestroy {
         this.mostrarNotificacion('Mensaje enviado correctamente.', 'exito');
         this.cargandoMensaje = false;
         this.resetearFormulario();
-        this.actualizarFechaHora();
+        this.actualizarFechaHoraMensaje();
         this.cargarMensajesEnviados();
       },
       error: (err) => {
@@ -831,7 +862,7 @@ export class App implements OnDestroy {
 
   cancelarFormulario(): void {
     this.resetearFormulario();
-    this.actualizarFechaHora();
+    this.actualizarFechaHoraMensaje();
   }
 
   get mensajesFiltrados(): Mensaje[] {
@@ -992,7 +1023,7 @@ export class App implements OnDestroy {
       this.marcarComoRespondido(msg);
 
       this.moduloActual = 'mensaje';
-      this.actualizarFechaHora();
+      this.actualizarFechaHoraMensaje();
       this.resetearFormulario();
 
       const remitenteLower = msg.remitente.toLowerCase();
