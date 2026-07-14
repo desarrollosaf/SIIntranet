@@ -16,7 +16,7 @@
         <div class="input-with-icon">
           <i class="bi bi-person-fill"></i>
           <input id="login_user" name="usuarioLogin" type="text" [(ngModel)]="usuarioLogin"
-            placeholder="Ingrese su usuario" required />
+            required autocomplete="username" />
         </div>
       </div>
 
@@ -26,7 +26,7 @@
           <div class="input-with-icon" style="flex: 1;">
             <i class="bi bi-lock-fill"></i>
             <input id="login_pass" name="contrasenaLogin" [type]="mostrarContrasenaLogin ? 'text' : 'password'" [(ngModel)]="contrasenaLogin"
-              placeholder="Ingrese su contraseña" required />
+              required autocomplete="current-password" />
           </div>
           <button type="button" class="btn-toggle-pwd-border" (click)="mostrarContrasenaLogin = !mostrarContrasenaLogin" title="Mostrar/Ocultar contraseña" aria-label="Mostrar u ocultar contraseña">
             <i class="bi" [class.bi-eye-fill]="!mostrarContrasenaLogin" [class.bi-eye-slash-fill]="mostrarContrasenaLogin"></i>
