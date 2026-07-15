@@ -1051,10 +1051,12 @@ export class App implements OnDestroy {
   hacerLogin(event: Event): void {
     event.preventDefault();
     if (!this.usuarioLogin.trim()) {
+      this.cargandoLogin = false;
       this.mostrarNotificacion('Por favor ingrese su usuario o correo.', 'error');
       return;
     }
     if (!this.contrasenaLogin.trim()) {
+      this.cargandoLogin = false;
       this.mostrarNotificacion('Por favor ingrese su contraseña.', 'error');
       return;
     }
@@ -1067,57 +1069,62 @@ export class App implements OnDestroy {
     this.cargandoLogin = true;
     this.http.post<any>(`${this.urlApi}/auth/login`, payload).subscribe({
       next: (response) => {
-        this.sesionIniciada = true;
-        this.usuarioActual = {
-          nombre: response.user.nombre,
-          rol: response.user.rol,
-          tipo: (response.user.rol === 'Administrador' ? 'admin' : 'normal') as 'admin' | 'normal'
-        };
-
-        sessionStorage.setItem('si_session_logged', 'true');
-        sessionStorage.setItem('si_session_user', JSON.stringify(this.usuarioActual));
-
-        if (response.requiresPasswordChange) {
-          this.mostrarCambioObligatorioModal = true;
-          this.usuarioPendienteCambio = {
-            id: response.user.id,
+        this.zone.run(() => {
+          this.sesionIniciada = true;
+          this.usuarioActual = {
             nombre: response.user.nombre,
-            usuario: response.user.usuario,
-            correo: response.user.correo || '',
-            area: response.user.area || '',
             rol: response.user.rol,
-            estado: 'Activo'
+            tipo: (response.user.rol === 'Administrador' ? 'admin' : 'normal') as 'admin' | 'normal'
           };
-          this.mostrarNotificacion('Debe cambiar su contraseña obligatoriamente.', 'advertencia');
-        } else {
-          this.mostrarNotificacion(`Sesión iniciada como ${response.user.nombre}.`, 'exito');
-        }
 
-        this.usuarioLogin = '';
-        this.contrasenaLogin = '';
-        this.cargandoLogin = false;
+          sessionStorage.setItem('si_session_logged', 'true');
+          sessionStorage.setItem('si_session_user', JSON.stringify(this.usuarioActual));
 
-        if (this.usuarioActual.tipo === 'admin') {
-          this.cargarUsuarios();
-        }
-        this.cargarMensajes();
-        this.cargarRecordatorios();
+          if (response.requiresPasswordChange) {
+            this.mostrarCambioObligatorioModal = true;
+            this.usuarioPendienteCambio = {
+              id: response.user.id,
+              nombre: response.user.nombre,
+              usuario: response.user.usuario,
+              correo: response.user.correo || '',
+              area: response.user.area || '',
+              rol: response.user.rol,
+              estado: 'Activo'
+            };
+            this.mostrarNotificacion('Debe cambiar su contraseña obligatoriamente.', 'advertencia');
+          } else {
+            this.mostrarNotificacion(`Sesión iniciada como ${response.user.nombre}.`, 'exito');
+          }
 
-        window.location.hash = this.moduloActual;
-        window.history.replaceState({ modulo: this.moduloActual }, '', '#' + this.moduloActual);
-        this.cdr.detectChanges();
+          this.usuarioLogin = '';
+          this.contrasenaLogin = '';
+          this.cargandoLogin = false;
+
+          if (this.usuarioActual.tipo === 'admin') {
+            this.cargarUsuarios();
+          }
+          this.cargarMensajes();
+          this.cargarRecordatorios();
+
+          window.location.hash = this.moduloActual;
+          window.history.replaceState({ modulo: this.moduloActual }, '', '#' + this.moduloActual);
+          this.cdr.detectChanges();
+        });
       },
       error: (err) => {
-        console.error(err);
-        this.cargandoLogin = false;
-        if (err.status === 403 || (err.error && err.error.message && err.error.message.includes('inactivo'))) {
-          const msg = err.error?.message || 'El usuario se encuentra inactivo. Contacte al administrador.';
-          this.mostrarNotificacion(msg, 'error');
-        } else if (err.status === 401 || err.status === 404) {
-          this.mostrarNotificacion('Usuario o contraseña incorrectos.', 'error');
-        } else {
-          this.mostrarNotificacion('No se pudo conectar con el servidor. Verifica que el backend esté activo.', 'error');
-        }
+        this.zone.run(() => {
+          console.error(err);
+          this.cargandoLogin = false;
+          if (err.status === 403 || (err.error && err.error.message && err.error.message.includes('inactivo'))) {
+            const msg = err.error?.message || 'El usuario se encuentra inactivo. Contacte al administrador.';
+            this.mostrarNotificacion(msg, 'error');
+          } else if (err.status === 401 || err.status === 404) {
+            this.mostrarNotificacion('Usuario o contraseña incorrectos.', 'error');
+          } else {
+            this.mostrarNotificacion('No se pudo conectar con el servidor. Verifica que el backend esté activo.', 'error');
+          }
+          this.cdr.detectChanges();
+        });
       }
     });
   }
