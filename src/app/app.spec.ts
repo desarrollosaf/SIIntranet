@@ -121,6 +121,8 @@ describe('App', () => {
   });
 
   it('should handle login error and reset loading flag', () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
     const fixture = crearComponente();
     const app = fixture.componentInstance;
     
@@ -135,5 +137,7 @@ describe('App', () => {
     
     expect(app.sesionIniciada).toBe(false);
     expect(app.cargandoLogin).toBe(false);
+
+    consoleSpy.mockRestore();
   });
 });
