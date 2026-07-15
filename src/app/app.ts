@@ -1,6 +1,7 @@
 import { Component, ChangeDetectorRef, HostListener, OnDestroy, NgZone } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../environments/environment';
 
 export interface Mensaje {
   id: number;
@@ -64,7 +65,7 @@ export interface DocumentoFormato {
 })
 export class App implements OnDestroy {
 
-  private readonly urlApi = 'http://localhost:3000/api';
+  private readonly urlApi = environment.apiUrl;
 
   ultimoElementoEnfocado: HTMLElement | null = null;
 
@@ -135,7 +136,9 @@ export class App implements OnDestroy {
   }
 
   constructor(private cdr: ChangeDetectorRef, private zone: NgZone, private http: HttpClient) {
-    this.inicializarDatosPrueba();
+    if (environment.usarDatosPrueba) {
+      this.inicializarDatosPrueba();
+    }
     this.detectarSesionGuardada();
     this.asegurarFechaHoraMensajes();
     this.detectarModuloInicial();
