@@ -2231,8 +2231,15 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .detail-doc-link {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
   a {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     gap: 6px;
     font-size: $font-sm;
@@ -2244,6 +2251,16 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     border-radius: $radius-md;
     text-decoration: none;
     transition: $transition;
+    max-width: 100%;
+    box-sizing: border-box;
+
+    span {
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      min-width: 0;
+      flex: 1;
+    }
 
     &:hover {
       background: $vino;
@@ -2389,6 +2406,21 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 8px;
+}
+
+.edit-files-group {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.edit-files-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #64748b;
+  display: block;
 }
 
 .file-size {

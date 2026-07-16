@@ -220,7 +220,7 @@
       <form class="message-form" (submit)="enviarMensaje($event)">
         <div class="form-card">
           <div class="card-header">
-            <h3><i class="bi bi-info-circle-fill"></i> Información del documento</h3>
+            <h3><i class="bi bi-info-circle-fill"></i> {{ modoFormularioMensaje === 'editar' ? 'Editar mensaje' : 'Información del documento' }}</h3>
           </div>
 
           <div class="message-form-grid">
@@ -263,6 +263,25 @@
             <div class="form-group form-group-full">
               <label>Documentos adjuntos:</label>
               <div class="files-section">
+                @if (modoFormularioMensaje === 'editar' && formularioDocumentosExistentes.length > 0) {
+                <div class="edit-files-group" style="width: 100%; margin-bottom: 8px;">
+                  <span class="edit-files-label" style="font-size: 11.5px; font-weight: 600; color: #64748b; margin-bottom: 6px; display: block;">Documentos existentes:</span>
+                  <div class="files-list">
+                    @for (doc of formularioDocumentosExistentes; track doc; let i = $index) {
+                    <div class="file-selected-badge">
+                      <div class="file-name-info">
+                        <i class="bi bi-file-earmark-check-fill"></i>
+                        <span>{{ doc }}</span>
+                      </div>
+                      <button type="button" class="btn-clear-file si-btn-icon-remove" (click)="eliminarDocumentoExistenteFormulario(i)" title="Remover archivo" aria-label="Remover archivo">
+                        <i class="bi bi-x-lg"></i>
+                      </button>
+                    </div>
+                    }
+                  </div>
+                </div>
+                }
+
                 @if (formularioArchivos.length > 0) {
                 <div class="files-list">
                   @for (archivo of formularioArchivos; track archivo.name; let i = $index) {
@@ -368,15 +387,15 @@
         <div class="form-actions">
           <button type="submit" class="si-btn-primary" [disabled]="cargandoMensaje">
             @if (!cargandoMensaje) {
-              <i class="bi bi-send-fill"></i>
+              <i class="bi" [class.bi-send-fill]="modoFormularioMensaje !== 'editar'" [class.bi-save-fill]="modoFormularioMensaje === 'editar'"></i>
             } @else {
               <i class="bi bi-arrow-repeat animate-spin"></i>
             }
-            <span>{{ cargandoMensaje ? 'Enviando...' : 'Enviar Mensaje' }}</span>
+            <span>{{ cargandoMensaje ? (modoFormularioMensaje === 'editar' ? 'Guardando...' : 'Enviando...') : (modoFormularioMensaje === 'editar' ? 'Guardar cambios' : 'Enviar Mensaje') }}</span>
           </button>
           <button type="button" class="btn-secondary si-btn-secondary" (click)="cancelarFormulario()">
             <i class="bi bi-x-circle-fill"></i>
-            <span>Limpiar</span>
+            <span>{{ modoFormularioMensaje === 'editar' ? 'Cancelar edición' : 'Limpiar' }}</span>
           </button>
         </div>
       </form>
@@ -1119,267 +1138,124 @@
         </button>
       </div>
       <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
-        @if (!detalleEditandoMensaje) {
-          <div class="detail-row">
-            <span class="detail-label">Estado</span>
-            <div class="detail-value" style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
-              @for (est of obtenerEstadosMensaje(mensajeSeleccionado); track est) {
-              <span class="status-badge status-{{ est.toLowerCase() }}">
-                @if (est === 'Nuevo') { <i class="bi bi-star-fill animate-pulse"></i> }
-                @else if (est === 'Visto') { <i class="bi bi-eye-fill"></i> }
-                @else if (est === 'Respondido') { <i class="bi bi-reply-fill"></i> }
-                @else if (est === 'Enviado') { <i class="bi bi-send-fill"></i> }
-                @else if (est === 'Cancelado') { <i class="bi bi-x-circle-fill"></i> }
-                @else if (est === 'Eliminado') { <i class="bi bi-trash3-fill"></i> }
-                @else if (est === 'Enviando') { <i class="bi bi-arrow-repeat animate-spin"></i> }
-                @else if (est === 'Respondiendo') { <i class="bi bi-arrow-repeat animate-spin"></i> }
-                @else if (est === 'Eliminando') { <i class="bi bi-trash3-fill"></i> }
-                @else if (est === 'Cancelando') { <i class="bi bi-x-circle-fill"></i> }
-                <span>{{ est }}</span>
-              </span>
-              }
-            </div>
+        <div class="detail-row">
+          <span class="detail-label">Estado</span>
+          <div class="detail-value" style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+            @for (est of obtenerEstadosMensaje(mensajeSeleccionado); track est) {
+            <span class="status-badge status-{{ est.toLowerCase() }}">
+              @if (est === 'Nuevo') { <i class="bi bi-star-fill animate-pulse"></i> }
+              @else if (est === 'Visto') { <i class="bi bi-eye-fill"></i> }
+              @else if (est === 'Respondido') { <i class="bi bi-reply-fill"></i> }
+              @else if (est === 'Enviado') { <i class="bi bi-send-fill"></i> }
+              @else if (est === 'Cancelado') { <i class="bi bi-x-circle-fill"></i> }
+              @else if (est === 'Eliminado') { <i class="bi bi-trash3-fill"></i> }
+              @else if (est === 'Enviando') { <i class="bi bi-arrow-repeat animate-spin"></i> }
+              @else if (est === 'Respondiendo') { <i class="bi bi-arrow-repeat animate-spin"></i> }
+              @else if (est === 'Eliminando') { <i class="bi bi-trash3-fill"></i> }
+              @else if (est === 'Cancelando') { <i class="bi bi-x-circle-fill"></i> }
+              <span>{{ est }}</span>
+            </span>
+            }
           </div>
-          @if (esMensajeRecibido(mensajeSeleccionado)) {
-          <div class="detail-row">
-            <span class="detail-label">Remitente</span>
-            <div class="detail-value text-accent">
-              <i class="bi bi-person-fill"></i>
-              <strong>{{ mensajeSeleccionado.remitente }}</strong>
-            </div>
+        </div>
+
+        @if (esMensajeRecibido(mensajeSeleccionado)) {
+        <div class="detail-row">
+          <span class="detail-label">Remitente</span>
+          <div class="detail-value text-accent">
+            <i class="bi bi-person-fill"></i>
+            <strong>{{ mensajeSeleccionado.remitente }}</strong>
           </div>
-          } @else {
-          <div class="detail-row">
-            <span class="detail-label">Origen</span>
-            <div class="detail-value text-accent">
-              <i class="bi bi-person-check-fill"></i>
-              <strong>Enviado por ti</strong>
-            </div>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Destinatarios</span>
-            <div class="detail-value text-accent">
-              <i class="bi bi-people-fill"></i>
-              <strong>{{ mensajeSeleccionado.destinatarios }}</strong>
-            </div>
-          </div>
-          }
-          <div class="detail-grid">
-            <div class="detail-row">
-              <span class="detail-label">Fecha</span>
-              <div class="detail-value">
-                <i class="bi bi-calendar3"></i>
-                <span>{{ formatearFechaMensaje(mensajeSeleccionado.fecha) }}</span>
-              </div>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Hora</span>
-              <div class="detail-value">
-                <i class="bi bi-clock-history"></i>
-                <span>{{ formatearHoraMensaje(mensajeSeleccionado.hora) }}</span>
-              </div>
-            </div>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Asunto / Título</span>
-            <div class="detail-value text-highlight">
-              <span>{{ mensajeSeleccionado.titulo }}</span>
-            </div>
-          </div>
-          <div class="detail-row text-block-row">
-            <span class="detail-label">Contenido / Descripción</span>
-            <div class="detail-text-content"
-              style="word-break: break-word; overflow-wrap: anywhere; white-space: pre-wrap;">{{
-              mensajeSeleccionado.descripcion }}</div>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Documentos Adjuntos</span>
-            <div class="detail-doc-link" style="display: flex; flex-direction: column; gap: 8px;">
-              @if (normalizarListaDocumentos(mensajeSeleccionado.documento).length === 0) {
-              <span>Sin adjunto</span>
-              } @else {
-              @for (doc of normalizarListaDocumentos(mensajeSeleccionado.documento); track doc) {
-              <a href="#"
-                (click)="marcarComoVisto(mensajeSeleccionado); $event.preventDefault(); $event.stopPropagation(); mostrarNotificacion('Abriendo vista previa del documento: ' + doc, 'info')">
-                <i class="bi" [class.bi-file-earmark-pdf-fill]="doc.endsWith('.pdf')"
-                  [class.bi-file-earmark-word-fill]="doc.endsWith('.docx')"
-                  [class.bi-files]="!doc.endsWith('.pdf') && !doc.endsWith('.docx')">
-                </i>
-                <span>{{ doc }}</span>
-              </a>
-              }
-              }
-            </div>
-          </div>
+        </div>
         } @else {
-          <div class="detail-grid grid-1col">
-            <div class="detail-row">
-              <span class="detail-label">Estado</span>
-              <div class="detail-value" style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
-                @for (est of obtenerEstadosMensaje(mensajeSeleccionado); track est) {
-                <span class="status-badge status-{{ est.toLowerCase() }}">
-                  <span>{{ est }}</span>
-                </span>
-                }
-              </div>
-            </div>
+        <div class="detail-row">
+          <span class="detail-label">Origen</span>
+          <div class="detail-value text-accent">
+            <i class="bi bi-person-check-fill"></i>
+            <strong>Enviado por ti</strong>
+          </div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Destinatarios</span>
+          <div class="detail-value text-accent">
+            <i class="bi bi-people-fill"></i>
+            <strong>{{ mensajeSeleccionado.destinatarios }}</strong>
+          </div>
+        </div>
+        }
 
-            <div class="detail-row">
-              <span class="detail-label">Origen</span>
-              <div class="detail-value text-accent">
-                <i class="bi bi-person-check-fill"></i>
-                <strong>Enviado por ti</strong>
-              </div>
-            </div>
-
-            <div class="detail-row">
-              <span class="detail-label">Destinatarios</span>
-              <div class="recipients-chips-container">
-                @for (usuario of editarMensajeDestinatariosSeleccionados; track usuario) {
-                <span class="recipient-chip">
-                  <span>{{ usuario }}</span>
-                  <button type="button" class="btn-chip-remove si-btn-chip" (click)="quitarDirectoEdit(usuario)" title="Quitar destinatario" aria-label="Quitar destinatario">
-                    <i class="bi bi-x-lg"></i>
-                  </button>
-                </span>
-                } @empty {
-                <span class="chips-empty-hint">No hay destinatarios seleccionados. Debe agregar al menos uno.</span>
-                }
-              </div>
-              <div class="recipients-select-wrap">
-                <select #selectDisponibles class="si-form-control" (change)="pasarDirectoEdit(selectDisponibles.value); selectDisponibles.value = ''">
-                  <option value="" disabled selected>Agregar destinatario...</option>
-                  @for (usuario of editarMensajeDestinatariosDisponibles; track usuario) {
-                  <option [value]="usuario">{{ usuario }}</option>
-                  }
-                </select>
-              </div>
-            </div>
-
-            <div class="detail-grid">
-              <div class="detail-row">
-                <span class="detail-label">Fecha</span>
-                <div class="detail-value">
-                  <i class="bi bi-calendar3"></i>
-                  <span>{{ formatearFechaMensaje(editarMensajeFecha) }}</span>
-                </div>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">Hora</span>
-                <div class="detail-value">
-                  <i class="bi bi-clock-history"></i>
-                  <span>{{ formatearHoraMensaje(editarMensajeHora) }}</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="detail-row">
-              <span class="detail-label">Asunto / Título</span>
-              <input name="editarMensajeTitulo" type="text" [(ngModel)]="editarMensajeTitulo" required placeholder="Ingrese el título" class="si-form-control" />
-            </div>
-
-            <div class="detail-row text-block-row edit-text-block-row">
-              <span class="detail-label">Contenido / Descripción</span>
-              <textarea name="editarMensajeDescripcion" [(ngModel)]="editarMensajeDescripcion" placeholder="Escriba una descripción" class="si-form-control edit-textarea"></textarea>
-            </div>
-
-            <div class="detail-row">
-              <span class="detail-label">Documentos Adjuntos</span>
-              <div class="files-section files-section--edit">
-                @if (editarMensajeDocumentos.length > 0) {
-                <div class="edit-files-group">
-                  <span class="edit-files-label">Documentos existentes:</span>
-                  <div class="edit-files-list">
-                    @for (doc of editarMensajeDocumentos; track doc; let i = $index) {
-                    <div class="file-selected-badge">
-                      <div class="file-name-info">
-                        <i class="bi bi-file-earmark-check-fill"></i>
-                        <span>{{ doc }}</span>
-                      </div>
-                      <button type="button" class="btn-clear-file si-btn-icon-remove" (click)="eliminarDocumentoExistenteEditor(i)" title="Remover archivo" aria-label="Remover archivo">
-                        <i class="bi bi-x-lg"></i>
-                      </button>
-                    </div>
-                    }
-                  </div>
-                </div>
-                }
-
-                @if (editarMensajeNuevosArchivos.length > 0) {
-                <div class="edit-files-group">
-                  <span class="edit-files-label">Nuevos documentos:</span>
-                  <div class="edit-files-list">
-                    @for (archivo of editarMensajeNuevosArchivos; track archivo.name; let i = $index) {
-                    <div class="file-selected-badge file-selected-badge--new">
-                      <div class="file-name-info file-name-info--new">
-                        <i class="bi bi-file-earmark-arrow-up-fill"></i>
-                        <span>{{ archivo.name }}</span>
-                        <span class="file-size file-size--new">({{ (archivo.size / 1024).toFixed(1) }} KB)</span>
-                      </div>
-                      <button type="button" class="btn-clear-file si-btn-icon-remove" (click)="eliminarNuevoArchivoEditor(i)" title="Remover archivo" aria-label="Remover archivo">
-                        <i class="bi bi-x-lg"></i>
-                      </button>
-                    </div>
-                    }
-                  </div>
-                </div>
-                }
-
-                <label class="file-input-container" for="editMsgFile" tabindex="0" role="button" aria-label="Adjuntar nuevos archivos" style="margin-top: 8px;">
-                  <i class="bi bi-file-earmark-arrow-up"></i>
-                  <span class="file-selector-btn">Buscar archivo</span>
-                  <span class="file-selector-text" [class.has-file]="editarMensajeNuevosArchivos.length > 0">
-                    {{ editarMensajeNuevosArchivos.length > 0 ? (editarMensajeNuevosArchivos.length + ' archivo(s) seleccionado(s)') : 'Ningún archivo seleccionado' }}
-                  </span>
-                  <input id="editMsgFile" name="editMsgFile" type="file" multiple (change)="alSeleccionarNuevoArchivoEditor($event)" style="display: none;" />
-                </label>
-              </div>
+        <div class="detail-grid">
+          <div class="detail-row">
+            <span class="detail-label">Fecha</span>
+            <div class="detail-value">
+              <i class="bi bi-calendar3"></i>
+              <span>{{ formatearFechaMensaje(mensajeSeleccionado.fecha) }}</span>
             </div>
           </div>
-        }
+          <div class="detail-row">
+            <span class="detail-label">Hora</span>
+            <div class="detail-value">
+              <i class="bi bi-clock-history"></i>
+              <span>{{ formatearHoraMensaje(mensajeSeleccionado.hora) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-label">Asunto / Título</span>
+          <div class="detail-value text-highlight">
+            <span>{{ mensajeSeleccionado.titulo }}</span>
+          </div>
+        </div>
+
+        <div class="detail-row text-block-row">
+          <span class="detail-label">Contenido / Descripción</span>
+          <div class="detail-text-content" style="word-break: break-word; overflow-wrap: anywhere; white-space: pre-wrap;">{{ mensajeSeleccionado.descripcion }}</div>
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-label">Documentos Adjuntos</span>
+          <div class="detail-doc-link" style="display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 100%; min-width: 0;">
+            @if (!mensajeSeleccionado.documento || mensajeSeleccionado.documento === 'Sin adjunto' || normalizarListaDocumentos(mensajeSeleccionado.documento).length === 0) {
+            <span class="text-muted"><i class="bi bi-paperclip"></i> Sin adjunto</span>
+            } @else {
+            @for (doc of normalizarListaDocumentos(mensajeSeleccionado.documento); track doc) {
+            <a [href]="'http://localhost:3000/api/mensajes/descargar/' + doc" target="_blank" title="Descargar archivo">
+              <i class="bi" [class.bi-file-earmark-pdf-fill]="doc.endsWith('.pdf')" [class.bi-file-earmark-word-fill]="doc.endsWith('.docx')" [class.bi-files]="!doc.endsWith('.pdf') && !doc.endsWith('.docx')"></i>
+              <span>{{ doc }}</span>
+            </a>
+            }
+            }
+          </div>
+        </div>
       </div>
       <div class="modal-footer">
-        @if (!detalleEditandoMensaje) {
-          @if (puedeEditarMensajeEnviado(mensajeSeleccionado)) {
-          <button type="button" class="btn-modal-reply" (click)="activarEdicionDetalle()">
-            <i class="bi bi-pencil-fill"></i>
-            <span>Editar</span>
+        @if (puedeEditarMensajeEnviado(mensajeSeleccionado)) {
+        <button type="button" class="btn-modal-reply" (click)="activarEdicionModuloMensaje(mensajeSeleccionado)">
+          <i class="bi bi-pencil-fill"></i>
+          <span>Editar</span>
+        </button>
+        <button type="button" class="btn-modal-delete" (click)="eliminarMensajeEnviado(mensajeSeleccionado, $event)">
+          <i class="bi bi-trash"></i>
+          <span>Eliminar</span>
+        </button>
+        } @else if (esMensajeRecibido(mensajeSeleccionado)) {
+          @if (puedeResponderMensaje(mensajeSeleccionado)) {
+          <button type="button" class="btn-modal-reply" (click)="responderMensaje(mensajeSeleccionado, $event); cerrarDetalles()">
+            <i class="bi bi-reply-fill"></i>
+            <span>Redactar Respuesta</span>
           </button>
-          <button type="button" class="btn-modal-delete" (click)="eliminarMensajeEnviado(mensajeSeleccionado, $event)">
+          }
+          @if (mensajeSeleccionado.estado !== 'Eliminado') {
+          <button type="button" class="btn-modal-delete" (click)="eliminarMensaje(mensajeSeleccionado, $event)">
             <i class="bi bi-trash"></i>
             <span>Eliminar</span>
           </button>
-          } @else if (esMensajeRecibido(mensajeSeleccionado)) {
-            @if (puedeResponderMensaje(mensajeSeleccionado)) {
-            <button type="button" class="btn-modal-reply"
-              (click)="responderMensaje(mensajeSeleccionado, $event); cerrarDetalles()">
-              <i class="bi bi-reply-fill"></i>
-              <span>Redactar Respuesta</span>
-            </button>
-            }
-            @if (mensajeSeleccionado.estado !== 'Eliminado') {
-            <button type="button" class="btn-modal-delete" (click)="eliminarMensaje(mensajeSeleccionado, $event)">
-              <i class="bi bi-trash"></i>
-              <span>Eliminar</span>
-            </button>
-            }
           }
-          <button type="button" class="btn-modal-close" (click)="cerrarDetalles()">
-            <span>Cerrar</span>
-          </button>
-        } @else {
-          <button type="button" class="btn-modal-save" (click)="guardarCambiosMensajeEnviado()" [disabled]="cargandoEdicionMensaje">
-            @if (!cargandoEdicionMensaje) {
-              <i class="bi bi-save-fill"></i>
-            } @else {
-              <i class="bi bi-arrow-repeat animate-spin"></i>
-            }
-            <span>{{ cargandoEdicionMensaje ? 'Guardando...' : 'Guardar cambios' }}</span>
-          </button>
-          <button type="button" class="btn-modal-close" (click)="cancelarEdicionDetalle()">
-            <span>Cancelar</span>
-          </button>
         }
+        <button type="button" class="btn-modal-close" (click)="cerrarDetalles()">
+          <span>Cerrar</span>
+        </button>
       </div>
     </div>
   </div>

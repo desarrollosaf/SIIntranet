@@ -81,13 +81,8 @@ export class App implements OnDestroy {
   verConfirmarPassword = false;
 
   mensajeEditando: Mensaje | null = null;
-  detalleEditandoMensaje = false;
-  editarMensajeTitulo = '';
-  editarMensajeDescripcion = '';
-  editarMensajeFecha = '';
-  editarMensajeHora = '';
-  editarMensajeDocumentos: string[] = [];
-  editarMensajeNuevosArchivos: File[] = [];
+  modoFormularioMensaje: 'crear' | 'editar' = 'crear';
+  formularioDocumentosExistentes: string[] = [];
 
   esMensajeNuevo(msg: Mensaje | null | undefined): boolean {
     if (!msg) return false;
@@ -329,7 +324,6 @@ export class App implements OnDestroy {
   cargandoUsuario = false;
   cargandoEstadoUsuario = false;
   cargandoMensaje = false;
-  cargandoEdicionMensaje = false;
   cargandoRecordatorio = false;
 
   confirmacionModalAbierto = false;
@@ -667,10 +661,14 @@ export class App implements OnDestroy {
   }
 
   actualizarFechaHoraMensaje(): void {
+    if (this.modoFormularioMensaje === 'editar') {
+      this.detenerIntervaloFechaHora();
+      return;
+    }
     this.actualizarFechaHora();
     this.detenerIntervaloFechaHora();
     this.intervaloFechaHora = setInterval(() => {
-      if (this.moduloActual === 'mensaje') {
+      if (this.moduloActual === 'mensaje' && this.modoFormularioMensaje !== 'editar') {
         this.actualizarFechaHora();
         this.cdr.detectChanges();
       } else {
@@ -764,43 +762,85 @@ export class App implements OnDestroy {
       return;
     }
 
-    this.actualizarFechaHora();
+    if (this.modoFormularioMensaje === 'editar' && this.mensajeEditando) {
+      const todosDocNames = [
+        ...this.formularioDocumentosExistentes,
+        ...this.formularioArchivos.map(f => f.name)
+      ];
 
-    const documentosAdjuntos = this.formularioArchivos.length > 0
-      ? this.formularioArchivos.map(f => f.name).join(', ')
-      : 'Sin adjunto';
+      const finalDocumento = todosDocNames.length > 0
+        ? todosDocNames.join(', ')
+        : 'Sin adjunto';
 
-    const actual = new Date();
-    const hoyStr = this.formatearFechaLocal(actual);
-    const horaStr = `${String(actual.getHours()).padStart(2, '0')}:${String(actual.getMinutes()).padStart(2, '0')}`;
+      const body = {
+        titulo: this.formularioTitulo.trim(),
+        descripcion: this.formularioDescripcion.trim(),
+        destinatarios: this.usuariosSeleccionados.join(', '),
+        documento: finalDocumento,
+        estado: this.mensajeEditando.estado
+      };
 
-    const body = {
-      titulo: this.formularioTitulo.trim(),
-      descripcion: this.formularioDescripcion.trim(),
-      remitente: this.usuarioActual.nombre,
-      destinatarios: this.usuariosSeleccionados.join(', '),
-      documento: documentosAdjuntos,
-      fecha: this.formularioFecha || hoyStr,
-      hora: this.formularioHora || horaStr,
-      estado: 'Enviado' as const,
-      tipoMensaje: 'enviado' as const
-    };
+      this.cargandoMensaje = true;
+      this.http.patch<Mensaje>(`${this.urlApi}/mensajes/${this.mensajeEditando.id}`, body).subscribe({
+        next: (response) => {
+          this.mostrarNotificacion('Mensaje actualizado con éxito.', 'exito');
+          this.cargandoMensaje = false;
 
-    this.cargandoMensaje = true;
-    this.http.post<Mensaje>(`${this.urlApi}/mensajes`, body).subscribe({
-      next: (response) => {
-        this.mostrarNotificacion('Mensaje enviado correctamente.', 'exito');
-        this.cargandoMensaje = false;
-        this.resetearFormulario();
-        this.actualizarFechaHoraMensaje();
-        this.cargarMensajesEnviados();
-      },
-      error: (err) => {
-        console.error(err);
-        this.cargandoMensaje = false;
-        this.mostrarNotificacion('No se pudo enviar el mensaje. Verifica que el backend esté activo.', 'error');
-      }
-    });
+          const prevModulo = this.moduloPrevioAEdicion;
+          this.resetearFormulario();
+          this.actualizarFechaHoraMensaje();
+          this.cargarMensajesEnviados();
+          this.cambiarModulo(prevModulo);
+
+          // Re-open the detail modal with the updated message
+          this.verDetallesMensaje(response);
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error(err);
+          this.cargandoMensaje = false;
+          this.mostrarNotificacion('No se pudieron guardar los cambios del mensaje.', 'error');
+        }
+      });
+    } else {
+      this.actualizarFechaHora();
+
+      const documentosAdjuntos = this.formularioArchivos.length > 0
+        ? this.formularioArchivos.map(f => f.name).join(', ')
+        : 'Sin adjunto';
+
+      const actual = new Date();
+      const hoyStr = this.formatearFechaLocal(actual);
+      const horaStr = `${String(actual.getHours()).padStart(2, '0')}:${String(actual.getMinutes()).padStart(2, '0')}`;
+
+      const body = {
+        titulo: this.formularioTitulo.trim(),
+        descripcion: this.formularioDescripcion.trim(),
+        remitente: this.usuarioActual.nombre,
+        destinatarios: this.usuariosSeleccionados.join(', '),
+        documento: documentosAdjuntos,
+        fecha: this.formularioFecha || hoyStr,
+        hora: this.formularioHora || horaStr,
+        estado: 'Enviado' as const,
+        tipoMensaje: 'enviado' as const
+      };
+
+      this.cargandoMensaje = true;
+      this.http.post<Mensaje>(`${this.urlApi}/mensajes`, body).subscribe({
+        next: (response) => {
+          this.mostrarNotificacion('Mensaje enviado correctamente.', 'exito');
+          this.cargandoMensaje = false;
+          this.resetearFormulario();
+          this.actualizarFechaHoraMensaje();
+          this.cargarMensajesEnviados();
+        },
+        error: (err) => {
+          console.error(err);
+          this.cargandoMensaje = false;
+          this.mostrarNotificacion('No se pudo enviar el mensaje. Verifica que el backend esté activo.', 'error');
+        }
+      });
+    }
   }
 
   cancelarEnvio(id: number): void {
@@ -852,6 +892,8 @@ export class App implements OnDestroy {
     return this.usuariosDisponibles.filter(u => u.toLowerCase().includes(query));
   }
 
+  moduloPrevioAEdicion = 'inicio';
+
   resetearFormulario(): void {
     this.formularioTitulo = '';
     this.formularioDescripcion = '';
@@ -860,12 +902,19 @@ export class App implements OnDestroy {
     this.usuariosDisponiblesMarcados = [];
     this.destinatariosMarcados = [];
     this.buscarDestinatario = '';
+    this.modoFormularioMensaje = 'crear';
+    this.mensajeEditando = null;
+    this.formularioDocumentosExistentes = [];
     this.actualizarUsuariosDisponibles();
   }
 
   cancelarFormulario(): void {
+    const editando = this.modoFormularioMensaje === 'editar';
     this.resetearFormulario();
     this.actualizarFechaHoraMensaje();
+    if (editando) {
+      this.cambiarModulo(this.moduloPrevioAEdicion);
+    }
   }
 
   get mensajesFiltrados(): Mensaje[] {
@@ -924,7 +973,6 @@ export class App implements OnDestroy {
 
   cerrarDetalles(): void {
     this.mensajeSeleccionado = null;
-    this.detalleEditandoMensaje = false;
     this.mensajeEditando = null;
     this.restaurarFoco();
   }
@@ -1352,11 +1400,6 @@ export class App implements OnDestroy {
   }
 
   alTerminarClickBackdropDetalle(event: MouseEvent): void {
-    if (this.detalleEditandoMensaje) {
-      // In edit mode, do not close via backdrop click to avoid losing edits!
-      this.clicIniciadoEnBackdrop = false;
-      return;
-    }
     if (this.clicIniciadoEnBackdrop && event.target === event.currentTarget) {
       this.cerrarDetalles();
     }
@@ -2005,180 +2048,40 @@ export class App implements OnDestroy {
     return allowed.includes(msg.estado);
   }
 
-  activarEdicionDetalle(): void {
-    if (!this.mensajeSeleccionado) return;
-    const msg = this.mensajeSeleccionado;
+  activarEdicionModuloMensaje(msg: Mensaje): void {
+    if (!msg) return;
     this.mensajeEditando = msg;
-    
-    if (!msg.fecha) {
-      msg.fecha = this.formatearFechaLocal(new Date());
-    }
-    if (!msg.hora) {
-      const d = new Date();
-      const h = String(d.getHours()).padStart(2, '0');
-      const m = String(d.getMinutes()).padStart(2, '0');
-      msg.hora = `${h}:${m}`;
-    }
-    
-    this.editarMensajeTitulo = msg.titulo;
-    this.editarMensajeDescripcion = msg.descripcion;
-    this.editarMensajeFecha = msg.fecha;
-    this.editarMensajeHora = msg.hora;
-    
+    this.modoFormularioMensaje = 'editar';
+    this.moduloPrevioAEdicion = this.moduloActual;
+
+    this.formularioTitulo = msg.titulo;
+    this.formularioDescripcion = msg.descripcion;
+    this.formularioFecha = msg.fecha;
+    this.formularioHora = msg.hora;
+
     const actuales = this.normalizarListaDestinatarios(msg.destinatarios);
-    this.editarMensajeDestinatariosSeleccionados = [...actuales];
-    
-    const todosUsuarios = this.usuariosSistema.map(u => u.nombre);
-    const pool = Array.from(new Set([
-      ...todosUsuarios,
-      'Administrador del sistema',
-      'María Rodríguez López',
-      'Juan Pérez García',
-      'Dirección de Finanzas',
-      'Dirección de Informática',
-      'Dirección de Recursos Materiales'
-    ]));
-    
-    this.editarMensajeDestinatariosDisponibles = pool.filter(u => !actuales.includes(u)).sort();
-    
-    this.editarMensajeDocumentos = this.normalizarListaDocumentos(msg.documento);
-    this.editarMensajeNuevosArchivos = [];
-    
-    this.detalleEditandoMensaje = true;
-    this.cdr.detectChanges();
-  }
+    this.usuariosSeleccionados = [...actuales];
+    this.actualizarUsuariosDisponibles();
 
-  cancelarEdicionDetalle(): void {
-    this.detalleEditandoMensaje = false;
-    this.mensajeEditando = null;
-    this.cdr.detectChanges();
-  }
+    this.formularioDocumentosExistentes = this.normalizarListaDocumentos(msg.documento);
+    this.formularioArchivos = [];
 
-  eliminarDocumentoExistenteEditor(index: number): void {
-    this.editarMensajeDocumentos.splice(index, 1);
-    this.cdr.detectChanges();
-  }
+    this.mensajeSeleccionado = null;
 
-  eliminarNuevoArchivoEditor(index: number): void {
-    this.editarMensajeNuevosArchivos.splice(index, 1);
-    this.cdr.detectChanges();
-  }
+    this.detenerIntervaloFechaHora();
+    this.moduloActual = 'mensaje';
 
-  alSeleccionarNuevoArchivoEditor(event: any): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      for (let i = 0; i < input.files.length; i++) {
-        this.editarMensajeNuevosArchivos.push(input.files[i]);
-      }
-    }
-    this.cdr.detectChanges();
-  }
-
-  guardarCambiosMensajeEnviado(): void {
-    if (!this.mensajeEditando) return;
-
-    if (!this.editarMensajeTitulo.trim()) {
-      this.mostrarNotificacion('El título no puede estar vacío.', 'error');
-      return;
+    const hash = '#mensaje';
+    if (window.location.hash !== hash) {
+      window.history.pushState({ modulo: 'mensaje' }, '', hash);
     }
 
-    if (!this.editarMensajeDescripcion || !this.editarMensajeDescripcion.trim()) {
-      this.mostrarNotificacion('La descripción no puede estar vacía.', 'error');
-      return;
-    }
-
-    if (this.editarMensajeDestinatariosSeleccionados.length === 0) {
-      this.mostrarNotificacion('Debe haber al menos un destinatario.', 'error');
-      return;
-    }
-
-    const todosDocNames = [
-      ...this.editarMensajeDocumentos,
-      ...this.editarMensajeNuevosArchivos.map(f => f.name)
-    ];
-
-    const finalDocumento = todosDocNames.length > 0
-      ? todosDocNames.join(', ')
-      : 'Sin adjunto';
-
-    const body = {
-      titulo: this.editarMensajeTitulo.trim(),
-      descripcion: this.editarMensajeDescripcion.trim(),
-      destinatarios: this.editarMensajeDestinatariosSeleccionados.join(', '),
-      documento: finalDocumento,
-      estado: this.mensajeEditando.estado
-    };
-
-    this.cargandoEdicionMensaje = true;
-    this.http.patch<Mensaje>(`${this.urlApi}/mensajes/${this.mensajeEditando.id}`, body).subscribe({
-      next: (response) => {
-        this.mostrarNotificacion('Mensaje enviado actualizado con éxito.', 'exito');
-        this.detalleEditandoMensaje = false;
-        this.cargandoEdicionMensaje = false;
-        this.mensajeEditando = null;
-        this.mensajeSeleccionado = response;
-        this.cargarMensajesEnviados();
-      },
-      error: (err) => {
-        console.error(err);
-        this.cargandoEdicionMensaje = false;
-        this.mostrarNotificacion('No se pudieron guardar los cambios del mensaje.', 'error');
-      }
-    });
-  }
-
-  editarMensajeBuscarDestinatario = '';
-  editarMensajeDestinatariosDisponibles: string[] = [];
-  editarMensajeDestinatariosSeleccionados: string[] = [];
-  usuariosDisponiblesMarcadosEdicion: string[] = [];
-  destinatariosMarcadosEdicion: string[] = [];
-
-  pasarEdit(): void {
-    if (this.usuariosDisponiblesMarcadosEdicion.length === 0) return;
-    const aMover = [...this.usuariosDisponiblesMarcadosEdicion];
-    this.editarMensajeDestinatariosSeleccionados = [...this.editarMensajeDestinatariosSeleccionados, ...aMover];
-    this.editarMensajeDestinatariosDisponibles = this.editarMensajeDestinatariosDisponibles.filter(u => !aMover.includes(u));
-    this.usuariosDisponiblesMarcadosEdicion = [];
     this.cdr.detectChanges();
   }
 
-  quitarEdit(): void {
-    if (this.destinatariosMarcadosEdicion.length === 0) return;
-    const aMover = [...this.destinatariosMarcadosEdicion];
-    this.editarMensajeDestinatariosDisponibles = [...this.editarMensajeDestinatariosDisponibles, ...aMover].sort();
-    this.editarMensajeDestinatariosSeleccionados = this.editarMensajeDestinatariosSeleccionados.filter(u => !aMover.includes(u));
-    this.destinatariosMarcadosEdicion = [];
+  eliminarDocumentoExistenteFormulario(index: number): void {
+    this.formularioDocumentosExistentes.splice(index, 1);
     this.cdr.detectChanges();
-  }
-
-  pasarTodosEdit(): void {
-    this.editarMensajeDestinatariosSeleccionados = [...this.editarMensajeDestinatariosSeleccionados, ...this.editarMensajeDestinatariosDisponibles];
-    this.editarMensajeDestinatariosDisponibles = [];
-    this.usuariosDisponiblesMarcadosEdicion = [];
-    this.cdr.detectChanges();
-  }
-
-  quitarTodosEdit(): void {
-    this.editarMensajeDestinatariosDisponibles = [...this.editarMensajeDestinatariosDisponibles, ...this.editarMensajeDestinatariosSeleccionados].sort();
-    this.editarMensajeDestinatariosSeleccionados = [];
-    this.destinatariosMarcadosEdicion = [];
-    this.cdr.detectChanges();
-  }
-
-  pasarDirectoEdit(usuario: string): void {
-    if (this.editarMensajeDestinatariosDisponibles.includes(usuario)) {
-      this.editarMensajeDestinatariosSeleccionados = [...this.editarMensajeDestinatariosSeleccionados, usuario];
-      this.editarMensajeDestinatariosDisponibles = this.editarMensajeDestinatariosDisponibles.filter(u => u !== usuario);
-    }
-    this.usuariosDisponiblesMarcadosEdicion = this.usuariosDisponiblesMarcadosEdicion.filter(u => u !== usuario);
-  }
-
-  quitarDirectoEdit(usuario: string): void {
-    if (!this.editarMensajeDestinatariosDisponibles.includes(usuario)) {
-      this.editarMensajeDestinatariosDisponibles = [...this.editarMensajeDestinatariosDisponibles, usuario].sort();
-      this.editarMensajeDestinatariosSeleccionados = this.editarMensajeDestinatariosSeleccionados.filter(u => u !== usuario);
-    }
-    this.destinatariosMarcadosEdicion = this.destinatariosMarcadosEdicion.filter(u => u !== usuario);
   }
 
   irAFechaCalendario(): void {
