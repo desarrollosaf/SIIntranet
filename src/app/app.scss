@@ -1769,8 +1769,15 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
   .saf-placeholder {
     font-size: 9px;
+    border-right: none;
+    padding-right: 0;
+    line-height: 1.1;
+    text-align: right;
+
     div {
       font-size: 9px;
+      line-height: 1.1;
+      display: block !important;
     }
   }
 
@@ -1811,6 +1818,130 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     button {
       padding: 8px 10px;
       font-size: 12px;
+    }
+  }
+
+  // Phase 3 optimization - Recent Messages
+  .recent-message {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    padding: 10px 12px;
+
+    strong {
+      white-space: normal !important;
+      word-break: break-word;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      font-size: 13px;
+    }
+
+    p {
+      white-space: normal !important;
+      word-break: break-word;
+      font-size: 11.5px;
+    }
+  }
+
+  .message-meta {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
+    max-width: 100%;
+    gap: 4px;
+  }
+
+  // Phase 3 optimization - Details Modal & Attachments
+  .modal-backdrop {
+    padding: 12px;
+  }
+
+  .modal-card {
+    max-height: calc(100vh - 24px);
+  }
+
+  .modal-header {
+    padding: 14px 16px;
+  }
+
+  .modal-body {
+    padding: 16px 12px;
+    gap: 12px;
+  }
+
+  .modal-footer {
+    padding: 12px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+
+    button {
+      width: 100% !important;
+      justify-content: center;
+      margin: 0 !important;
+      padding: 10px 14px;
+      font-size: 13.5px;
+    }
+  }
+
+  .detail-row {
+    gap: 2px;
+  }
+
+  .detail-value {
+    font-size: 13px !important;
+
+    &.text-highlight {
+      font-size: 14px !important;
+    }
+  }
+
+  .text-block-row {
+    padding: 10px 12px;
+
+    .detail-text-content {
+      font-size: 13px;
+    }
+  }
+
+  .detail-doc-link {
+    a {
+      max-width: 100%;
+      box-sizing: border-box;
+      display: flex !important;
+      align-items: center;
+
+      span {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        min-width: 0;
+        flex: 1;
+      }
+    }
+  }
+
+  .file-selected-badge {
+    max-width: 100%;
+
+    .file-name-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+
+      span {
+        max-width: 100% !important;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        flex: 1;
+        min-width: 0;
+      }
     }
   }
 }
