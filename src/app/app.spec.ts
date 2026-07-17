@@ -65,9 +65,10 @@ describe('App', () => {
     const fixture = crearComponente();
     const app = fixture.componentInstance;
     app.mostrarNotificacion('Recordatorio agregado correctamente.', 'exito');
-    expect(app.notificacion?.mensaje).toBe('Recordatorio agregado correctamente.');
+    expect(app.notificaciones.length).toBe(1);
+    expect(app.notificaciones[0].mensaje).toBe('Recordatorio agregado correctamente.');
     vi.advanceTimersByTime(3100);
-    expect(app.notificacion).toBeNull();
+    expect(app.notificaciones.length).toBe(0);
     vi.useRealTimers();
   });
 

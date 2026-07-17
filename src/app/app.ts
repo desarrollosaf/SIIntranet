@@ -145,9 +145,7 @@ export class App implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.notificacionTimeout) {
-      clearTimeout(this.notificacionTimeout);
-    }
+    this.timeoutsActivos.forEach(t => clearTimeout(t));
     for (const key in this.tiemposEnvio) {
       if (Object.prototype.hasOwnProperty.call(this.tiemposEnvio, key)) {
         clearTimeout(this.tiemposEnvio[key]);
@@ -257,16 +255,14 @@ export class App implements OnDestroy {
 
   recordatoriosCalendario: EventoCalendario[] = [];
 
-  notificacion: { mensaje: string; tipo: 'error' | 'exito' | 'info' | 'advertencia' } | null = null;
-  private notificacionTimeout: ReturnType<typeof setTimeout> | null = null;
+  notificaciones: Array<{ id: number; mensaje: string; tipo: 'error' | 'exito' | 'info' | 'advertencia' }> = [];
+  private timeoutsActivos: ReturnType<typeof setTimeout>[] = [];
 
   mostrarNotificacion(mensaje: string, tipo: 'error' | 'exito' | 'info' | 'advertencia' = 'info'): void {
-    if (this.notificacionTimeout) {
-      clearTimeout(this.notificacionTimeout);
-      this.notificacionTimeout = null;
-    }
+    const id = Date.now() + Math.random();
+    
     this.zone.run(() => {
-      this.notificacion = { mensaje, tipo };
+      this.notificaciones.push({ id, mensaje, tipo });
       this.cdr.detectChanges();
     });
 
@@ -277,14 +273,26 @@ export class App implements OnDestroy {
       duration = 4000;
     }
 
+    let timeoutId: ReturnType<typeof setTimeout>;
+
     this.zone.runOutsideAngular(() => {
-      this.notificacionTimeout = setTimeout(() => {
+      timeoutId = setTimeout(() => {
         this.zone.run(() => {
-          this.notificacion = null;
-          this.cdr.detectChanges();
-          this.notificacionTimeout = null;
+          this.cerrarNotificacion(id);
         });
+        const index = this.timeoutsActivos.indexOf(timeoutId);
+        if (index > -1) {
+          this.timeoutsActivos.splice(index, 1);
+        }
       }, duration);
+      this.timeoutsActivos.push(timeoutId);
+    });
+  }
+
+  cerrarNotificacion(id: number): void {
+    this.zone.run(() => {
+      this.notificaciones = this.notificaciones.filter(n => n.id !== id);
+      this.cdr.detectChanges();
     });
   }
 
@@ -1351,6 +1359,7 @@ export class App implements OnDestroy {
             callback: () => {
               this.modalEditarUsuarioAbierto = false;
               this.usuarioEditandoAdmin = null;
+              this.restaurarFoco();
             }
           });
           return;

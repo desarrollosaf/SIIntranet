@@ -1317,16 +1317,16 @@
         </div>
       </div>
       <div class="modal-footer modal-footer-wrap">
-        <button type="button" class="btn-admin-action-btn si-btn-primary" (click)="abrirModalEditarUsuario(usuarioSeleccionadoAdmin)">
+        <button type="button" class="si-btn-primary" (click)="abrirModalEditarUsuario(usuarioSeleccionadoAdmin)">
           <i class="bi bi-pencil-fill"></i>
           <span>Editar</span>
         </button>
-        <button type="button" class="btn-admin-action-btn si-btn-ghost"
+        <button type="button" class="si-btn-ghost"
           (click)="descargarPdfUsuario(usuarioSeleccionadoAdmin)">
           <i class="bi bi-file-earmark-pdf-fill"></i>
           <span>Descargar PDF</span>
         </button>
-        <button type="button" class="btn-admin-action-btn si-btn-secondary" (click)="cerrarModalVerUsuario()">
+        <button type="button" class="si-btn-secondary" (click)="cerrarModalVerUsuario()">
           <span>Cerrar</span>
         </button>
       </div>
@@ -1426,7 +1426,7 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="submit" class="btn-admin-action-btn btn-success" [disabled]="cargandoUsuario">
+          <button type="submit" class="si-btn-success" [disabled]="cargandoUsuario">
             @if (!cargandoUsuario) {
               <i class="bi bi-save-fill"></i>
             } @else {
@@ -1434,7 +1434,7 @@
             }
             <span>{{ cargandoUsuario ? 'Guardando...' : (usuarioEditandoAdmin.id === 0 ? 'Crear usuario' : 'Guardar cambios') }}</span>
           </button>
-          <button type="button" class="btn-admin-action-btn btn-secondary" (click)="cerrarModalEditarUsuario()">
+          <button type="button" class="si-btn-secondary" (click)="cerrarModalEditarUsuario()">
             <i class="bi bi-x-circle-fill"></i>
             <span>Cancelar</span>
           </button>
@@ -1485,7 +1485,7 @@
           </div>
         </div>
         <div class="modal-footer modal-footer-between">
-          <button type="submit" class="btn-admin-action-btn btn-success">
+          <button type="submit" class="si-btn-success">
             <i class="bi bi-save-fill"></i>
             <span>Actualizar y Entrar</span>
           </button>
@@ -1518,13 +1518,13 @@
         </p>
       </div>
       <div class="modal-footer modal-footer-between" style="padding: 16px 24px; display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--borde);">
-        <button type="button" class="btn-admin-action-btn btn-secondary" (click)="cancelarConfirmacion()">
+        <button type="button" class="si-btn-secondary" (click)="cancelarConfirmacion()">
           <i class="bi bi-x-circle-fill"></i>
           <span>Cancelar</span>
         </button>
-        <button type="button" class="btn-admin-action-btn" 
-          [class.btn-danger]="confirmacionTipo === 'danger'"
-          [class.btn-success]="confirmacionTipo === 'success'"
+        <button type="button" 
+          [class.si-btn-danger]="confirmacionTipo === 'danger'"
+          [class.si-btn-success]="confirmacionTipo === 'success'"
           [class.si-btn-primary]="confirmacionTipo !== 'danger' && confirmacionTipo !== 'success'"
           (click)="aceptarConfirmacion()">
           <i class="bi" [class]="confirmacionIcono"></i>
@@ -1538,21 +1538,26 @@
 </div>
 }
 
-@if (notificacion) {
-<div class="notificacion-banner" [class.notif-error]="notificacion.tipo === 'error'"
-  [class.notif-exito]="notificacion.tipo === 'exito'" [class.notif-info]="notificacion.tipo === 'info'"
-  [class.notif-advertencia]="notificacion.tipo === 'advertencia'">
-  <div class="notif-content">
-    @if (notificacion.tipo === 'error') {
-    <i class="bi bi-exclamation-circle-fill"></i>
-    } @else if (notificacion.tipo === 'exito') {
-    <i class="bi bi-check-circle-fill"></i>
-    } @else if (notificacion.tipo === 'advertencia') {
-    <i class="bi bi-exclamation-triangle-fill"></i>
-    } @else {
-    <i class="bi bi-info-circle-fill"></i>
-    }
-    <span>{{ notificacion.mensaje }}</span>
+<div class="notificaciones-container">
+  @for (n of notificaciones; track n.id) {
+  <div class="notificacion-banner" [class.notif-error]="n.tipo === 'error'"
+    [class.notif-exito]="n.tipo === 'exito'" [class.notif-info]="n.tipo === 'info'"
+    [class.notif-advertencia]="n.tipo === 'advertencia'">
+    <div class="notif-content">
+      @if (n.tipo === 'error') {
+      <i class="bi bi-exclamation-circle-fill"></i>
+      } @else if (n.tipo === 'exito') {
+      <i class="bi bi-check-circle-fill"></i>
+      } @else if (n.tipo === 'advertencia') {
+      <i class="bi bi-exclamation-triangle-fill"></i>
+      } @else {
+      <i class="bi bi-info-circle-fill"></i>
+      }
+      <span>{{ n.mensaje }}</span>
+    </div>
+    <button type="button" class="btn-close-notif" (click)="cerrarNotificacion(n.id)" title="Cerrar notificación" aria-label="Cerrar notificación">
+      <i class="bi bi-x-lg"></i>
+    </button>
   </div>
+  }
 </div>
-}

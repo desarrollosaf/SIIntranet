@@ -101,8 +101,8 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 .top-navbar {
   min-height: 86px;
   background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-top: 4px solid $vino;
   border-bottom: 1px solid rgba(226, 232, 240, 0.8);
   display: grid;
@@ -112,8 +112,8 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   padding: 14px 48px;
   position: sticky;
   top: 0;
-  z-index: 100;
-  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.02);
+  z-index: 1000;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
 }
 
 .brand-section {
@@ -248,6 +248,11 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       }
     }
   }
+}
+
+.main-menu button.active:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
 }
 
 .navbar-right {
@@ -713,14 +718,26 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   &:focus {
+    outline: none;
     border-color: $vino;
     background: white;
     box-shadow: 0 0 0 3px rgba(133, 0, 63, 0.12);
   }
 
+  &:focus-visible {
+    outline: 2px solid $vino;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(133, 0, 63, 0.18);
+  }
+
   &::placeholder {
     color: #94a3b8;
   }
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: $vino;
 }
 
 .input-with-icon {
@@ -1226,6 +1243,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
+.si-badge,
 .status-badge,
 .profile-badge,
 .calendar-event-type,
@@ -1237,7 +1255,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   gap: 6px;
   padding: 4px 10px;
   border-radius: 999px;
-  font-size: $font-xs;
+  font-size: 11px;
   font-weight: 700;
   white-space: nowrap;
   letter-spacing: 0.3px;
@@ -1249,64 +1267,101 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
+// Badge color variants
+.si-badge-new,
+.status-nuevo,
+.status-new,
+.status-new-sm,
+.profile-badge,
+.event-recordatorio,
+.si-badge-reminder {
+  background: #fdf2f8 !important;
+  color: #9d174d !important;
+  border-color: rgba(157, 23, 77, 0.15) !important;
+}
+
+.si-badge-seen,
 .status-visto,
 .status-seen,
 .status-seen-inbox,
 .status-success-badge,
-.event-recibido {
-  background: #f0fdf4;
-  color: #166534;
-  border-color: rgba(22, 101, 52, 0.15);
+.event-recibido,
+.status-active,
+.si-badge-active {
+  background: #f0fdf4 !important;
+  color: #166534 !important;
+  border-color: rgba(22, 101, 52, 0.15) !important;
 }
 
-.status-respondido,
-.status-answered,
+.si-badge-sent,
 .status-enviado,
 .status-sent,
 .status-enviando,
 .status-sending,
 .status-sending-badge,
-.status-respondiendo,
 .status-cargando,
 .event-enviado {
-  background: #eff6ff;
-  color: #1e40af;
-  border-color: rgba(30, 64, 175, 0.15);
+  background: #eff6ff !important;
+  color: #1e40af !important;
+  border-color: rgba(30, 64, 175, 0.15) !important;
 }
 
+.si-badge-replied,
+.status-respondido,
+.status-answered,
+.status-respondiendo {
+  background: #ecfeff !important;
+  color: #0e7490 !important;
+  border-color: rgba(14, 116, 144, 0.15) !important;
+}
+
+.si-badge-cancelled,
 .status-cancelado,
 .status-cancelled,
 .status-cancelled-badge,
-.status-eliminado,
-.status-eliminando,
 .status-cancelando {
-  background: #fef2f2;
-  color: #991b1b;
-  border-color: rgba(153, 27, 27, 0.15);
+  background: #fef2f2 !important;
+  color: #991b1b !important;
+  border-color: rgba(153, 27, 27, 0.15) !important;
 }
 
-.status-nuevo,
-.status-new,
-.status-new-sm,
-.profile-badge,
-.event-recordatorio {
-  background: #fdf2f8;
-  color: #9d174d;
-  border-color: rgba(157, 23, 77, 0.15);
+.si-badge-deleted,
+.status-eliminado,
+.status-eliminando {
+  background: #f3f4f6 !important;
+  color: #374151 !important;
+  border-color: rgba(55, 65, 81, 0.15) !important;
 }
 
+.si-badge-pending,
 .status-pending,
 .status-pending-inbox,
 .status-guardando {
-  background: #fffbeb;
-  color: #854d0e;
-  border-color: rgba(133, 77, 14, 0.15);
+  background: #fffbeb !important;
+  color: #854d0e !important;
+  border-color: rgba(133, 77, 14, 0.15) !important;
 }
 
+.si-badge-inactive,
+.status-inactive,
 .status-archived {
-  background: #f8fafc;
-  color: #475569;
-  border-color: rgba(71, 85, 105, 0.15);
+  background: #f8fafc !important;
+  color: #475569 !important;
+  border-color: rgba(71, 85, 105, 0.15) !important;
+}
+
+.si-badge-admin,
+.status-admin {
+  background: #eef2ff !important;
+  color: #3730a3 !important;
+  border-color: rgba(55, 48, 163, 0.15) !important;
+}
+
+.si-badge-user,
+.status-user {
+  background: #f8fafc !important;
+  color: #475569 !important;
+  border-color: rgba(71, 85, 105, 0.15) !important;
 }
 
 .inbox-actions {
@@ -1619,7 +1674,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 820px) {
   .recipients-container {
     grid-template-columns: 1fr;
     margin: 12px 8px 20px;
@@ -1641,7 +1696,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 820px) {
   .main-area {
     padding: 20px 16px;
   }
@@ -1737,15 +1792,15 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     // Snapping & padding offsets
     scroll-snap-type: x proximity;
     scroll-padding-left: 16px;
-    scroll-padding-right: 24px;
+    scroll-padding-right: 48px;
     margin-left: -16px;
     margin-right: -16px;
     padding-left: 16px !important;
-    padding-right: 24px !important;
+    padding-right: 48px !important;
 
-    // Mask gradient at the end (fades out right 8%)
-    mask-image: linear-gradient(to right, #000 92%, rgba(0, 0, 0, 0) 99%);
-    -webkit-mask-image: linear-gradient(to right, #000 92%, rgba(0, 0, 0, 0) 99%);
+    // Mask gradient at the end (fades out right 5%)
+    mask-image: linear-gradient(to right, #000 95%, rgba(0, 0, 0, 0) 99%);
+    -webkit-mask-image: linear-gradient(to right, #000 95%, rgba(0, 0, 0, 0) 99%);
 
     &::-webkit-scrollbar {
       display: none;
@@ -1819,12 +1874,12 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     margin-left: -12px;
     margin-right: -12px;
     padding-left: 12px !important;
-    padding-right: 20px !important;
+    padding-right: 40px !important;
     scroll-padding-left: 12px;
-    scroll-padding-right: 20px;
+    scroll-padding-right: 40px;
 
-    mask-image: linear-gradient(to right, #000 90%, rgba(0, 0, 0, 0) 98%);
-    -webkit-mask-image: linear-gradient(to right, #000 90%, rgba(0, 0, 0, 0) 98%);
+    mask-image: linear-gradient(to right, #000 93%, rgba(0, 0, 0, 0) 99%);
+    -webkit-mask-image: linear-gradient(to right, #000 93%, rgba(0, 0, 0, 0) 99%);
 
     button {
       padding: 8px 10px;
@@ -2035,7 +2090,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   background-color: rgba(15, 23, 42, 0.3);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  z-index: 200;
+  z-index: 1050;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2836,22 +2891,32 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   color: #15803d;
 }
 
-.notificacion-banner {
+.notificaciones-container {
   position: fixed;
   bottom: 28px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 400;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 10px;
+  pointer-events: none;
+  width: auto;
+  max-width: 560px;
+}
+
+.notificacion-banner {
+  pointer-events: auto;
   min-width: 340px;
   max-width: 560px;
   border-radius: 14px;
   padding: 14px 18px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   gap: 20px;
   box-shadow: 0 20px 40px rgba(15, 23, 42, 0.22);
-  animation: slideUpCenter 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 
   .notif-content {
     display: flex;
@@ -2864,6 +2929,35 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     i {
       font-size: 18px;
       flex-shrink: 0;
+    }
+  }
+
+  .btn-close-notif {
+    background: transparent;
+    border: 0;
+    color: currentColor;
+    opacity: 0.65;
+    cursor: pointer;
+    padding: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: $transition;
+    margin-left: auto;
+
+    &:hover {
+      opacity: 1;
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    &:focus-visible {
+      outline: 2px solid currentColor;
+      outline-offset: 1px;
+    }
+
+    i {
+      font-size: 14px;
     }
   }
 
@@ -4297,69 +4391,10 @@ tr.selected-row td:first-child {
   margin-top: 24px;
 }
 
-.btn-admin-action-btn {
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  background: white;
-  color: $texto-suave;
-  border-radius: $radius-md;
+// Unificación de botones de administración (INT-004)
+.modal-footer [class*="si-btn-"] {
   padding: 8px 14px;
   font-size: $font-sm;
-  font-weight: 700;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  transition: $transition;
-
-  i {
-    font-size: 14px;
-  }
-
-  &:hover {
-    background: rgba(133, 0, 63, 0.05);
-    color: $vino;
-    border-color: $vino;
-    transform: translateY(-1px);
-  }
-
-  &.btn-secondary {
-    background: #f8fafc;
-    color: $texto-suave;
-    border-color: rgba(226, 232, 240, 0.8);
-
-    &:hover {
-      background: #f1f5f9;
-      color: $texto;
-      border-color: rgba(203, 213, 225, 0.8);
-      transform: translateY(-1px);
-    }
-  }
-
-  &.btn-success {
-    background: #f0fdf4;
-    color: #166534;
-    border-color: rgba(22, 101, 52, 0.15);
-
-    &:hover {
-      background: #dcfce7;
-      color: #15803d;
-      border-color: #15803d;
-      transform: translateY(-1px);
-    }
-  }
-
-  &.btn-danger {
-    background: #fef2f2;
-    color: #991b1b;
-    border-color: rgba(153, 27, 27, 0.15);
-
-    &:hover {
-      background: #fee2e2;
-      color: #b91c1c;
-      border-color: #b91c1c;
-      transform: translateY(-1px);
-    }
-  }
 }
 
 .calendar-event-item.clickable {
@@ -4427,7 +4462,7 @@ tr.selected-row td:first-child {
 }
 
 .details-modal-backdrop {
-  z-index: 250 !important;
+  z-index: 1060 !important;
 
   .modal-card {
     background: #ffffff !important;
@@ -4688,31 +4723,7 @@ textarea[disabled] {
   margin-top: 4px;
 }
 
-.si-form-control {
-  width: 100%;
-  border: 1px solid rgba(203, 213, 225, 0.8);
-  border-radius: $radius-md;
-  padding: 8px 12px;
-  font-size: $font-md;
-  color: $texto;
-  background: white;
-  outline: none;
-  font-family: inherit;
-  transition: $transition;
 
-  &::placeholder {
-    color: #94a3b8;
-  }
-
-  &:hover {
-    border-color: rgba(168, 28, 86, 0.4);
-  }
-
-  &:focus {
-    border-color: $vino;
-    box-shadow: 0 0 0 3px rgba(133, 0, 63, 0.12);
-  }
-}
 
 .edit-textarea {
   min-height: 80px;
@@ -4776,7 +4787,7 @@ textarea[disabled] {
 }
 
 .force-password-modal-backdrop {
-  z-index: 1050;
+  z-index: 1100;
   background: rgba(15, 23, 42, 0.9);
 }
 
@@ -5160,91 +5171,7 @@ textarea[disabled] {
   }
 }
 
-.btn-admin-action-btn {
-  &.btn-success {
-    background: $si-success;
-    color: white;
-    border: none;
-    box-shadow: 0 4px 12px rgba(22, 101, 52, 0.18);
 
-    &:hover {
-      background: $si-success-dark;
-      transform: translateY(-1px);
-    }
-
-    &:focus,
-    &:focus-visible {
-      background: $si-success-dark;
-      color: white;
-      box-shadow: 0 0 0 4px rgba(22, 101, 52, 0.25) !important;
-      outline: 2px solid #22c55e !important;
-      outline-offset: 2px !important;
-    }
-
-    &:active {
-      background: #14532d !important;
-      color: white !important;
-      transform: translateY(0) !important;
-      box-shadow: none !important;
-    }
-  }
-
-  &.btn-secondary {
-    background: $si-secondary-bg;
-    color: $si-secondary-color;
-    border: 1px solid $si-secondary-border;
-
-    &:hover {
-      background: $si-secondary-hover;
-      color: $texto;
-      transform: translateY(-1px);
-    }
-
-    &:focus,
-    &:focus-visible {
-      background: $si-secondary-hover;
-      color: $texto;
-      box-shadow: 0 0 0 4px rgba(71, 85, 105, 0.15) !important;
-      outline: 2px solid #94a3b8 !important;
-      outline-offset: 2px !important;
-    }
-
-    &:active {
-      background: #cbd5e1 !important;
-      color: $texto !important;
-      border-color: #cbd5e1 !important;
-      transform: translateY(0) !important;
-    }
-  }
-
-  &.btn-danger {
-    background: $si-danger;
-    color: white;
-    border: none;
-    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.18);
-
-    &:hover {
-      background: $si-danger-dark;
-      transform: translateY(-1px);
-    }
-
-    &:focus,
-    &:focus-visible {
-      background: $si-danger-dark;
-      color: white;
-      box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.25) !important;
-      outline: 2px solid #ef4444 !important;
-      outline-offset: 2px !important;
-    }
-
-    &:active {
-      background: #991b1b !important;
-      color: white !important;
-      transform: translateY(0) !important;
-      box-shadow: none !important;
-    }
-  }
-}
 
 .btn-delete-view {
   background: $si-danger-bg;
@@ -5431,125 +5358,7 @@ textarea[disabled] {
   }
 }
 
-.si-badge,
-.status-badge,
-.profile-badge,
-.calendar-event-type,
-.event-recibido,
-.event-enviado,
-.event-recordatorio {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 700;
-  white-space: nowrap;
-  letter-spacing: 0.3px;
-  line-height: 1.2;
-  border: 1px solid transparent;
 
-  i {
-    font-size: 10px;
-  }
-}
-
-// System of badges and status mappings
-.si-badge-new,
-.status-nuevo,
-.status-new,
-.status-new-sm,
-.profile-badge,
-.event-recordatorio,
-.si-badge-reminder {
-  background: #fdf2f8 !important;
-  color: #9d174d !important;
-  border-color: rgba(157, 23, 77, 0.15) !important;
-}
-
-.si-badge-seen,
-.status-visto,
-.status-seen,
-.status-seen-inbox,
-.status-success-badge,
-.event-recibido,
-.status-active,
-.si-badge-active {
-  background: #f0fdf4 !important;
-  color: #166534 !important;
-  border-color: rgba(22, 101, 52, 0.15) !important;
-}
-
-.si-badge-sent,
-.status-enviado,
-.status-sent,
-.status-enviando,
-.status-sending,
-.status-sending-badge,
-.event-enviado {
-  background: #eff6ff !important;
-  color: #1e40af !important;
-  border-color: rgba(30, 64, 175, 0.15) !important;
-}
-
-.si-badge-replied,
-.status-respondido,
-.status-answered,
-.status-respondiendo,
-.si-badge-replied {
-  background: #ecfeff !important;
-  color: #0e7490 !important;
-  border-color: rgba(14, 116, 144, 0.15) !important;
-}
-
-.si-badge-cancelled,
-.status-cancelado,
-.status-cancelled,
-.status-cancelled-badge,
-.status-cancelando {
-  background: #fef2f2 !important;
-  color: #991b1b !important;
-  border-color: rgba(153, 27, 27, 0.15) !important;
-}
-
-.si-badge-deleted,
-.status-eliminado,
-.status-eliminando {
-  background: #f3f4f6 !important;
-  color: #374151 !important;
-  border-color: rgba(55, 65, 81, 0.15) !important;
-}
-
-.si-badge-pending,
-.status-pending,
-.status-pending-inbox,
-.status-guardando {
-  background: #fffbeb !important;
-  color: #854d0e !important;
-  border-color: rgba(133, 77, 14, 0.15) !important;
-}
-
-.si-badge-inactive,
-.status-inactive {
-  background: #f8fafc !important;
-  color: #475569 !important;
-  border-color: rgba(71, 85, 105, 0.15) !important;
-}
-
-.si-badge-admin,
-.status-admin {
-  background: #eef2ff !important;
-  color: #3730a3 !important;
-  border-color: rgba(55, 48, 163, 0.15) !important;
-}
-
-.si-badge-user,
-.status-user {
-  background: #f8fafc !important;
-  color: #475569 !important;
-  border-color: rgba(71, 85, 105, 0.15) !important;
-}
 
 .recent-empty {
   margin: 16px !important;
