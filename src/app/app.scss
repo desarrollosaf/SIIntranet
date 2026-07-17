@@ -4046,6 +4046,8 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     tr {
       display: block;
       width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
     }
 
     thead {
@@ -4074,6 +4076,9 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       white-space: normal;
       text-align: right;
       font-size: 13px;
+      min-width: 0;
+      overflow-wrap: break-word;
+      word-break: break-word;
 
       &::before {
         font-weight: 700;
@@ -4105,10 +4110,59 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
       &.actions-cell {
+        display: block !important;
+        width: 100% !important;
+        text-align: left !important;
         border-top: 1px solid rgba(226, 232, 240, 0.8);
         margin-top: 8px;
         padding-top: 12px;
-        justify-content: flex-end;
+        justify-content: flex-start !important;
+
+        &::before {
+          content: "Acciones:";
+          display: block !important;
+          margin-bottom: 8px;
+          text-align: left !important;
+        }
+
+        .actions-cell-wrap {
+          width: 100% !important;
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 8px !important;
+          min-width: 0 !important;
+
+          .btn-admin-action {
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+            justify-content: center !important;
+            white-space: normal !important;
+            display: inline-flex !important;
+          }
+        }
+      }
+
+      // Ajustes responsive específicos de Administración (Empty State)
+      &[colspan="5"] {
+        display: block !important;
+        width: 100% !important;
+        padding: 0 !important;
+        text-align: center !important;
+        justify-content: center !important;
+
+        &::before {
+          content: none !important;
+          display: none !important;
+        }
+
+        .admin-empty {
+          border: none !important;
+          background: transparent !important;
+          padding: 10px 0 !important;
+          margin: 0 !important;
+          box-shadow: none !important;
+        }
       }
     }
   }
@@ -6040,6 +6094,38 @@ textarea[disabled] {
 
       span {
         display: inline !important;
+      }
+    }
+  }
+
+  // Ajustes responsive específicos de Administración
+  .admin-module {
+    .inbox-header {
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 12px !important;
+
+      h3 {
+        width: 100% !important;
+      }
+
+      & > div {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+        width: 100% !important;
+
+        .btn-admin-action {
+          width: 100% !important;
+          justify-content: center !important;
+        }
+
+        .badge-count {
+          width: auto !important;
+          align-self: flex-start !important;
+          box-sizing: border-box !important;
+        }
       }
     }
   }
