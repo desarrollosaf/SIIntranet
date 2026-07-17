@@ -3693,6 +3693,18 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     background: $vino-oscuro;
     color: white;
   }
+
+  &:focus-visible {
+    background-color: $vino !important;
+    color: white !important;
+    outline: 2px solid white !important;
+    outline-offset: -3px !important;
+    box-shadow: 0 4px 10px rgba(133, 0, 63, 0.25) !important;
+
+    span {
+      color: white !important;
+    }
+  }
 }
 
 .calendar-day-has-events {
@@ -4487,13 +4499,40 @@ tr.selected-row td:first-child {
 .sent-message-item:focus-visible,
 .calendar-card-compact:focus-visible,
 .formato-category summary:focus-visible,
-.admin-table tbody tr:focus-visible,
 .calendar-day:focus-visible,
 .calendar-event-item:focus-visible {
   outline: 2px solid $vino !important;
   outline-offset: 2px !important;
   box-shadow: 0 0 0 4px rgba(133, 0, 63, 0.18) !important;
   background-color: rgba(133, 0, 63, 0.02) !important;
+}
+
+// Foco adaptativo para filas de administración (INT-002)
+.admin-table tbody tr:focus-visible {
+  @media (max-width: 768px) {
+    outline: 2px solid $vino !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 4px rgba(133, 0, 63, 0.18) !important;
+    background-color: rgba(133, 0, 63, 0.02) !important;
+  }
+  @media (min-width: 769px) {
+    outline: none !important;
+  }
+}
+
+.admin-table tbody tr:focus-visible td {
+  @media (min-width: 769px) {
+    background-color: rgba(133, 0, 63, 0.04) !important;
+    box-shadow: inset 0 1px 0 $vino, inset 0 -1px 0 $vino !important;
+
+    &:first-child {
+      box-shadow: inset 3px 0 0 $vino, inset 0 1px 0 $vino, inset 0 -1px 0 $vino !important;
+    }
+
+    &:last-child {
+      box-shadow: inset -1px 0 0 $vino, inset 0 1px 0 $vino, inset 0 -1px 0 $vino !important;
+    }
+  }
 }
 
 button:focus-visible,
