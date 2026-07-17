@@ -393,7 +393,7 @@
             }
             <span>{{ cargandoMensaje ? (modoFormularioMensaje === 'editar' ? 'Guardando...' : 'Enviando...') : (modoFormularioMensaje === 'editar' ? 'Guardar cambios' : 'Enviar Mensaje') }}</span>
           </button>
-          <button type="button" class="btn-secondary si-btn-secondary" (click)="cancelarFormulario()">
+          <button type="button" class="si-btn-secondary" (click)="cancelarFormulario()">
             <i class="bi bi-x-circle-fill"></i>
             <span>{{ modoFormularioMensaje === 'editar' ? 'Cancelar edición' : 'Limpiar' }}</span>
           </button>
@@ -787,24 +787,24 @@
                   </td>
                   <td class="actions-cell">
                     <div class="actions-cell-wrap">
-                      <button type="button" class="btn-admin-action si-btn-ghost si-btn-xs" (click)="seleccionarUsuarioAdmin(u)"
+                      <button type="button" class="si-btn-ghost si-btn-xs" (click)="seleccionarUsuarioAdmin(u)"
                         title="Ver detalles">
                         <i class="bi bi-eye-fill"></i>
                         <span>Ver</span>
                       </button>
-                      <button type="button" class="btn-admin-action si-btn-primary si-btn-xs" (click)="abrirModalEditarUsuario(u)"
+                      <button type="button" class="si-btn-ghost si-btn-xs" (click)="abrirModalEditarUsuario(u)"
                         title="Editar usuario">
                         <i class="bi bi-pencil-fill"></i>
                         <span>Editar</span>
                       </button>
                       @if (u.estado === 'Activo') {
-                        <button type="button" class="btn-admin-action si-btn-danger-ghost si-btn-xs" (click)="alternarEstadoUsuario(u, $event)"
+                        <button type="button" class="si-btn-danger-ghost si-btn-xs" (click)="alternarEstadoUsuario(u, $event)"
                           title="Desactivar usuario" [disabled]="cargandoEstadoUsuario">
                           <i class="bi bi-person-x-fill"></i>
                           <span>Desactivar</span>
                         </button>
                       } @else {
-                        <button type="button" class="btn-admin-action si-btn-primary si-btn-xs" (click)="alternarEstadoUsuario(u, $event)"
+                        <button type="button" class="si-btn-ghost si-btn-xs" (click)="alternarEstadoUsuario(u, $event)"
                           title="Activar usuario" [disabled]="cargandoEstadoUsuario">
                           <i class="bi bi-person-check-fill"></i>
                           <span>Activar</span>
@@ -911,7 +911,7 @@
           <i class="bi bi-box-arrow-left"></i>
           <span>Cerrar Sesión</span>
         </button>
-        <button type="button" class="btn-modal-close" (click)="cerrarPerfilUsuario()">
+        <button type="button" class="si-btn-ghost" (click)="cerrarPerfilUsuario()">
           <span>Cerrar</span>
         </button>
       </div>
@@ -1120,7 +1120,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn-modal-close" (click)="cerrarCalendario()">
+        <button type="button" class="si-btn-ghost" (click)="cerrarCalendario()">
           <span>Cerrar</span>
         </button>
       </div>
@@ -1231,29 +1231,29 @@
       </div>
       <div class="modal-footer">
         @if (puedeEditarMensajeEnviado(mensajeSeleccionado)) {
-        <button type="button" class="btn-modal-reply" (click)="activarEdicionModuloMensaje(mensajeSeleccionado)">
+        <button type="button" class="si-btn-primary" (click)="activarEdicionModuloMensaje(mensajeSeleccionado)">
           <i class="bi bi-pencil-fill"></i>
           <span>Editar</span>
         </button>
-        <button type="button" class="btn-modal-delete" (click)="eliminarMensajeEnviado(mensajeSeleccionado, $event)">
+        <button type="button" class="si-btn-danger" (click)="eliminarMensajeEnviado(mensajeSeleccionado, $event)">
           <i class="bi bi-trash"></i>
           <span>Eliminar</span>
         </button>
         } @else if (esMensajeRecibido(mensajeSeleccionado)) {
           @if (puedeResponderMensaje(mensajeSeleccionado)) {
-          <button type="button" class="btn-modal-reply" (click)="responderMensaje(mensajeSeleccionado, $event); cerrarDetalles()">
+          <button type="button" class="si-btn-primary" (click)="responderMensaje(mensajeSeleccionado, $event); cerrarDetalles()">
             <i class="bi bi-reply-fill"></i>
             <span>Redactar Respuesta</span>
           </button>
           }
           @if (mensajeSeleccionado.estado !== 'Eliminado') {
-          <button type="button" class="btn-modal-delete" (click)="eliminarMensaje(mensajeSeleccionado, $event)">
+          <button type="button" class="si-btn-danger" (click)="eliminarMensaje(mensajeSeleccionado, $event)">
             <i class="bi bi-trash"></i>
             <span>Eliminar</span>
           </button>
           }
         }
-        <button type="button" class="btn-modal-close" (click)="cerrarDetalles()">
+        <button type="button" class="si-btn-ghost" (click)="cerrarDetalles()">
           <span>Cerrar</span>
         </button>
       </div>
@@ -1555,9 +1555,6 @@
       }
       <span>{{ n.mensaje }}</span>
     </div>
-    <button type="button" class="btn-close-notif" (click)="cerrarNotificacion(n.id)" title="Cerrar notificación" aria-label="Cerrar notificación">
-      <i class="bi bi-x-lg"></i>
-    </button>
   </div>
   }
 </div>
