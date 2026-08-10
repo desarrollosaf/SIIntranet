@@ -4,7 +4,13 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
 
-describe('AppController (e2e)', () => {
+interface HealthResponse {
+  status: string;
+  app: string;
+  timestamp: string;
+}
+
+describe('HealthController (e2e)', () => {
   let app: INestApplication<App>;
 
   beforeEach(async () => {
@@ -16,11 +22,21 @@ describe('AppController (e2e)', () => {
     await app.init();
   });
 
-  it('/ (GET)', () => {
+  it('/health (GET)', () => {
     return request(app.getHttpServer())
-      .get('/')
+      .get('/health')
       .expect(200)
-      .expect('Hello World!');
+      .expect((response) => {
+        const body = response.body as HealthResponse;
+
+        expect(body).toEqual(
+          expect.objectContaining({
+            status: 'ok',
+            app: 'SIIntranet API',
+          }),
+        );
+        expect(body.timestamp).toEqual(expect.any(String));
+      });
   });
 
   afterEach(async () => {
