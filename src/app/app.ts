@@ -343,6 +343,7 @@ export class App implements OnDestroy {
   confirmacionTipo: 'danger' | 'success' | 'warning' | 'primary' = 'warning';
   confirmacionIcono = 'bi-exclamation-triangle-fill';
   confirmacionCallback: (() => void) | null = null;
+  focoAnteriorConfirmacion: HTMLElement | null = null;
 
   mostrarPerfilModal = false;
 
@@ -575,6 +576,7 @@ export class App implements OnDestroy {
     event.preventDefault();
     event.stopPropagation();
     if (id === undefined) return;
+    const disparador = this.obtenerDisparador(event);
 
     this.abrirConfirmacion({
       titulo: 'Eliminar Recordatorio',
@@ -586,11 +588,14 @@ export class App implements OnDestroy {
         this.http.delete<EventoCalendario>(`${this.urlApi}/recordatorios/${id}`).subscribe({
           next: (response) => {
             this.mostrarNotificacion('Recordatorio eliminado.', 'exito');
-            this.cargarRecordatorios();
+            this.cargarRecordatorios(() => {
+              this.enfocarPrimero(disparador, document.querySelector('.calendar-modal .btn-close') as HTMLElement | null);
+            });
           },
           error: (err) => {
             console.error(err);
             this.mostrarNotificacion('No se pudo eliminar el recordatorio.', 'error');
+            this.enfocarPrimero(disparador);
           }
         });
       }
@@ -1006,6 +1011,7 @@ export class App implements OnDestroy {
   eliminarMensaje(msg: Mensaje, event: Event): void {
     event.preventDefault();
     event.stopPropagation();
+    const disparador = this.obtenerDisparador(event);
 
     this.abrirConfirmacion({
       titulo: 'Mover a Papelera',
@@ -1020,13 +1026,18 @@ export class App implements OnDestroy {
           next: (response) => {
             if (this.mensajeSeleccionado && this.mensajeSeleccionado.id === msg.id) {
               this.mensajeSeleccionado = null;
+              this.mensajeEditando = null;
+              this.ultimoElementoEnfocado = null;
             }
             this.mostrarNotificacion(`El documento "${msg.titulo}" ha sido movido a la Papelera.`, 'exito');
-            this.cargarMensajesRecibidos();
+            this.cargarMensajesRecibidos(() => {
+              this.enfocarPrimero(disparador, this.obtenerAnclaModulo());
+            });
           },
           error: (err) => {
             console.error(err);
             this.mostrarNotificacion('No se pudo eliminar el mensaje.', 'error');
+            this.enfocarPrimero(disparador);
           }
         });
       }
@@ -1584,6 +1595,8 @@ export class App implements OnDestroy {
       event.preventDefault();
       event.stopPropagation();
     }
+    const disparador = this.obtenerDisparador(event);
+    const fila = disparador?.closest('tr') as HTMLElement | null;
     const nuevoEstado = usuario.estado === 'Activo' ? 'Inactivo' : 'Activo';
     const accion = usuario.estado === 'Activo' ? 'desactivar' : 'activar';
     const textoAceptarConfirmacion = usuario.estado === 'Activo' ? 'Desactivar' : 'Activar';
@@ -1605,13 +1618,16 @@ export class App implements OnDestroy {
             const msg = nuevoEstado === 'Activo' ? 'Usuario activado correctamente.' : 'Usuario desactivado correctamente.';
             this.mostrarNotificacion(msg, 'exito');
             this.cargandoEstadoUsuario = false;
-            this.cargarUsuarios();
+            this.cargarUsuarios(() => {
+              this.enfocarPrimero(disparador, fila, this.obtenerAnclaModulo());
+            });
           },
           error: (err) => {
             console.error(err);
             const errMsg = nuevoEstado === 'Activo' ? 'Error al activar el usuario.' : 'Error al desactivar el usuario.';
             this.cargandoEstadoUsuario = false;
             this.manejarErrorHttp(err, errMsg);
+            this.enfocarPrimero(disparador, fila);
           }
         });
       }
@@ -1636,12 +1652,14 @@ export class App implements OnDestroy {
     this.confirmacionTipo = opciones.tipo || 'warning';
     this.confirmacionIcono = opciones.icono || 'bi-exclamation-triangle-fill';
     this.confirmacionCallback = opciones.callback;
+    this.guardarFocoConfirmacion();
     this.confirmacionModalAbierto = true;
   }
 
   cancelarConfirmacion(): void {
     this.confirmacionModalAbierto = false;
     this.confirmacionCallback = null;
+    this.restaurarFocoConfirmacion();
   }
 
   aceptarConfirmacion(): void {
@@ -1650,18 +1668,21 @@ export class App implements OnDestroy {
     }
     this.confirmacionModalAbierto = false;
     this.confirmacionCallback = null;
+    this.focoAnteriorConfirmacion = null;
   }
 
-  cargarUsuarios(): void {
+  cargarUsuarios(alTerminar?: () => void): void {
     this.http.get<UsuarioSistema[]>(`${this.urlApi}/usuarios`).subscribe({
       next: (users) => {
         this.usuariosSistema = users;
         this.actualizarUsuariosDisponibles();
         this.cdr.detectChanges();
+        alTerminar?.();
       },
       error: (err) => {
         console.error(err);
         this.manejarErrorHttp(err, 'No se pudo conectar con el servidor. Verifica que el backend esté activo.');
+        alTerminar?.();
       }
     });
   }
@@ -1716,20 +1737,22 @@ export class App implements OnDestroy {
     });
   }
 
-  cargarRecordatorios(): void {
+  cargarRecordatorios(alTerminar?: () => void): void {
     this.http.get<EventoCalendario[]>(`${this.urlApi}/recordatorios`).subscribe({
       next: (recordatorios) => {
         this.recordatoriosCalendario = recordatorios;
         this.cdr.detectChanges();
+        alTerminar?.();
       },
       error: (err) => {
         console.error(err);
         this.manejarErrorHttp(err, 'No se pudieron cargar los recordatorios.');
+        alTerminar?.();
       }
     });
   }
 
-  cargarMensajesRecibidos(): void {
+  cargarMensajesRecibidos(alTerminar?: () => void): void {
     this.http.get<Mensaje[]>(`${this.urlApi}/mensajes/recibidos`).subscribe({
       next: (recibidos) => {
         const enviados = this.mensajesBandeja.filter(m => this.esMensajeEnviado(m));
@@ -1738,10 +1761,12 @@ export class App implements OnDestroy {
         this.mensajesBandeja = [...recibidos, ...filtradosEnviados];
         this.asegurarFechaHoraMensajes();
         this.cdr.detectChanges();
+        alTerminar?.();
       },
       error: (err) => {
         console.error(err);
         this.manejarErrorHttp(err, 'No se pudieron cargar los mensajes.');
+        alTerminar?.();
       }
     });
   }
@@ -2209,6 +2234,35 @@ export class App implements OnDestroy {
       this.ultimoElementoEnfocado.focus();
       this.ultimoElementoEnfocado = null;
     }
+  }
+
+  private estaConectado(el: HTMLElement | null | undefined): el is HTMLElement {
+    return !!el && el.isConnected;
+  }
+
+  private enfocarPrimero(...candidatos: (HTMLElement | null | undefined)[]): void {
+    const objetivo = candidatos.find(el => this.estaConectado(el));
+    objetivo?.focus();
+  }
+
+  private obtenerAnclaModulo(): HTMLElement | null {
+    return document.querySelector('h1[tabindex="-1"]');
+  }
+
+  private obtenerDisparador(event?: Event): HTMLElement | null {
+    if (event?.currentTarget instanceof HTMLElement) {
+      return event.currentTarget;
+    }
+    return document.activeElement as HTMLElement | null;
+  }
+
+  guardarFocoConfirmacion(): void {
+    this.focoAnteriorConfirmacion = document.activeElement as HTMLElement;
+  }
+
+  restaurarFocoConfirmacion(): void {
+    this.enfocarPrimero(this.focoAnteriorConfirmacion, this.obtenerAnclaModulo());
+    this.focoAnteriorConfirmacion = null;
   }
 
   esCampoEditable(el: any): boolean {
