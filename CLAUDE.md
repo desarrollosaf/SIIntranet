@@ -1,279 +1,250 @@
-# SIIntranet — Guía para Claude Code
+# SIIntranet — Reconstrucción V2
 
-## Proyecto
+## Propósito de esta rama
 
-SIIntranet contiene:
+La rama `reconstruccion/siintranet-v2` contiene la reconstrucción completa de SIIntranet desde cero.
 
-- Frontend: Angular 22 con componentes standalone, TypeScript, SCSS, Bootstrap 5 y Bootstrap Icons.
-- Backend: NestJS 11 organizado por módulos de dominio.
-- Tests frontend: Vitest.
-- Tests backend: Jest.
+El código heredado presente actualmente en esta rama proviene de SIIntranet V1 y existe únicamente como referencia funcional temporal durante la fase de análisis.
 
-Antes de trabajar, inspeccionar el código real y el estado de Git. No asumir que este documento sustituye al repositorio como fuente de verdad.
+La nueva aplicación debe diseñarse y construirse desde una arquitectura nueva.
 
----
-
-## Estado actual de arquitectura
-
-### Frontend
-
-El frontend está actualmente concentrado principalmente en:
-
-- `src/app/app.ts`
-- `src/app/app.html`
-- `src/app/app.scss`
-
-Son archivos grandes que contienen múltiples secciones funcionales y comparten estado y estilos.
-
-`app.routes.ts` está configurado pero actualmente el sistema no utiliza Angular Router para navegar entre módulos; la navegación se gestiona mediante estado interno.
-
-Consecuencias:
-
-- localizar la sección exacta antes de editar;
-- realizar cambios mínimos y localizados;
-- no reescribir archivos completos;
-- no introducir una separación arquitectónica grande dentro de un fix;
-- si una tarea revela necesidad de modularización, reportarla como refactor independiente.
-
-### Backend
-
-El backend sigue estructura modular en:
-
-`backend/src/modules/`
-
-Dominios actuales incluyen:
-
-- auth
-- usuarios
-- mensajes
-- formatos
-- recordatorios
-- archivos
-- health
-
-Mantener esta estructura para cambios backend.
+No asumir que la arquitectura, organización de carpetas, servicios, componentes, estado, routing, frontend o backend actuales deben conservarse.
 
 ---
 
-## Estado temporal del sistema
+## Estado actual
 
-### Persistencia
+Estamos en FASE 0: análisis y diseño.
 
-Actualmente el backend utiliza almacenamiento temporal en memoria.
+Todavía NO se ha aprobado la arquitectura definitiva de V2.
 
-No existe todavía una integración definitiva con base de datos.
+Mientras esta fase siga vigente:
 
-No introducir ORM, drivers, migraciones ni persistencia real salvo que la tarea lo solicite explícitamente.
+- no eliminar la implementación heredada;
+- no crear todavía un proyecto Angular nuevo;
+- no crear todavía un proyecto NestJS nuevo;
+- no instalar dependencias;
+- no modificar `package.json`;
+- no generar componentes;
+- no implementar funcionalidades;
+- no refactorizar V1;
+- no corregir bugs de V1;
+- no hacer cambios de producción.
 
-Cuando comience la fase de integración de base de datos, actualizar esta sección.
-
-### Autenticación
-
-La autenticación actual es temporal/mock.
-
-`backend/src/modules/auth/auth.service.ts` contiene comportamiento provisional, incluyendo credenciales de desarrollo.
-
-No transformar esta autenticación, introducir JWT, hashing u otro sistema por iniciativa propia.
-
-Cualquier cambio de autenticación debe ser una tarea explícita.
-
-### Producción
-
-`src/environments/environment.prod.ts` todavía requiere la URL definitiva del backend productivo.
-
-No inventar ni sustituir esa URL sin información de despliegue confirmada.
+La tarea actual es comprender el sistema existente como especificación funcional y diseñar correctamente el nuevo sistema antes de escribir código.
 
 ---
 
-## Comandos
+## Relación con SIIntranet V1
 
-### Frontend
+V1 debe utilizarse únicamente para descubrir:
 
-Ejecutar desde la raíz del repositorio:
+- funcionalidades existentes;
+- flujos de usuario;
+- campos;
+- roles;
+- módulos;
+- reglas de negocio;
+- comportamiento esperado;
+- estados;
+- validaciones;
+- llamadas requeridas;
+- experiencia visual;
+- responsive;
+- accesibilidad;
+- errores y decisiones que no deben repetirse.
 
-```bash
-npm run build
-npm test -- --watch=false
-npm run start
-```
+No copiar automáticamente:
 
-### Backend
+- arquitectura;
+- estructura de carpetas;
+- `app.ts`;
+- `app.html`;
+- `app.scss`;
+- navegación basada en condicionales;
+- servicios actuales;
+- backend actual;
+- mocks;
+- código HTTP;
+- estado global;
+- estilos;
+- hacks o workarounds.
 
-Ejecutar desde `backend/`:
-
-```bash
-npm run build
-npm test
-npm run test:e2e
-npm run start:dev
-```
-
-Antes de utilizar `npm run lint`, comprobar si el script ejecuta correcciones automáticas.
-
-No utilizar comandos con `--fix` como una validación puramente de lectura sin advertirlo.
+La paridad buscada es funcional, no estructural.
 
 ---
 
-## Validación después de cambios
+## Objetivo arquitectónico
 
-### Si solo cambia frontend
+La nueva versión debe diseñarse con separación clara de responsabilidades.
 
-Ejecutar:
+Como mínimo deben estudiarse explícitamente antes de implementar:
 
-```bash
-npm run build
-npm test -- --watch=false
-git diff --check
-git diff --stat
-git status --short
-```
+- dominios funcionales;
+- frontend;
+- backend;
+- routing;
+- componentes y páginas;
+- servicios;
+- modelos;
+- DTOs;
+- estado;
+- configuración y environments;
+- autenticación;
+- autorización y roles;
+- base de datos;
+- contrato API;
+- manejo de archivos;
+- manejo de errores;
+- notificaciones;
+- modales y confirmaciones;
+- accesibilidad;
+- responsive;
+- testing;
+- seguridad;
+- configuración para desarrollo y producción.
 
-### Si solo cambia backend
+No adoptar una tecnología o patrón adicional únicamente porque sea popular.
 
-Ejecutar desde `backend/`:
+Cada decisión arquitectónica importante debe justificarse en función de SIIntranet.
 
-```bash
-npm run build
-npm test
-```
+---
 
-y posteriormente desde la raíz:
+## Frontend V2
 
-```bash
-git diff --check
-git diff --stat
-git status --short
-```
+El frontend debe diseñarse desde cero.
 
-### Si el cambio afecta integración frontend/backend
+Se espera utilizar Angular con una arquitectura por responsabilidades y funcionalidades, no un componente raíz monolítico.
 
-Validar ambos lados.
+Las pantallas o responsabilidades principales deben evaluarse como páginas/componentes independientes.
 
-No afirmar que una tarea está terminada únicamente porque compila.
+Los componentes visuales significativos deben mantener separación de archivos:
+
+- `*.component.ts`
+- `*.component.html`
+- `*.component.scss`
+
+No interpretar esto como “crear un componente por cada if”.
+
+Crear componentes cuando exista una responsabilidad funcional, visual o reutilizable suficientemente clara.
+
+Angular Router debe evaluarse como mecanismo principal de navegación.
+
+Las llamadas HTTP no deben quedar dispersas dentro de componentes si pertenecen a servicios de dominio.
+
+Los servicios deben organizarse según responsabilidades o dominios, evitando tanto un servicio gigante como un servicio artificial por cada componente.
+
+---
+
+## Backend V2
+
+El backend también se reconstruirá desde cero.
+
+NestJS puede evaluarse nuevamente como tecnología objetivo, pero no reutilizar automáticamente la implementación actual.
+
+Antes de implementarlo deben definirse:
+
+- dominios;
+- módulos;
+- endpoints;
+- DTOs;
+- entidades;
+- persistencia;
+- autenticación;
+- autorización;
+- archivos;
+- validación;
+- errores;
+- configuración;
+- seguridad;
+- testing.
+
+No utilizar almacenamiento temporal en memoria como arquitectura definitiva.
+
+---
+
+## Base de datos
+
+La integración de base de datos debe diseñarse antes de implementar funcionalidades que dependan de persistencia.
+
+No seleccionar ORM, driver o estrategia de migraciones sin análisis y aprobación.
+
+El modelo de datos debe derivarse de los requisitos funcionales y reglas de negocio.
+
+---
+
+## Autenticación y seguridad
+
+La autenticación de V1 es solamente una referencia funcional.
+
+No reutilizar credenciales hardcodeadas, contraseñas en texto plano ni mecanismos mock.
+
+La estrategia definitiva de autenticación, contraseñas, sesiones/tokens, roles y autorización debe diseñarse explícitamente antes de implementarse.
+
+Si una decisión depende de información que todavía debe proporcionar el administrador o supervisor, marcarla como decisión pendiente en lugar de inventarla.
+
+---
+
+## UX, responsive y accesibilidad
+
+V1 contiene aprendizajes importantes que deben convertirse en requisitos de V2.
+
+La nueva aplicación debe considerar desde el inicio:
+
+- escritorio;
+- tablet;
+- móvil;
+- 320 px cuando aplique;
+- navegación por teclado;
+- estados `hover`, `active`, `focus-visible`, `disabled` y seleccionado;
+- restauración de foco;
+- focus trapping en diálogos cuando corresponda;
+- Escape y backdrop;
+- áreas táctiles;
+- layouts sin overflow accidental;
+- estados vacíos;
+- carga;
+- errores;
+- notificaciones.
+
+No posponer responsive o accesibilidad hasta el final del proyecto.
+
+---
+
+## Testing
+
+La estrategia de pruebas debe definirse antes de comenzar la implementación.
+
+Cada nueva funcionalidad debe incluir las pruebas adecuadas según su responsabilidad.
+
+No construir primero todo el sistema para agregar pruebas al final.
+
+---
+
+## Política de cambios durante FASE 0
+
+Durante análisis y arquitectura:
+
+1. inspeccionar V1;
+2. documentar funcionalidad;
+3. detectar reglas de negocio;
+4. identificar decisiones pendientes;
+5. proponer arquitectura;
+6. comparar alternativas;
+7. esperar aprobación antes de implementar.
+
+No modificar la implementación heredada salvo solicitud explícita.
+
+No borrar archivos todavía.
+
+No crear código nuevo de aplicación todavía.
 
 ---
 
 ## Git
 
-Antes de modificar código:
+Antes de cualquier modificación:
 
 ```bash
 git branch --show-current
 git status --short
-```
-
-Reglas:
-
-- trabajar sobre la rama actualmente seleccionada;
-- no cambiar de rama por iniciativa propia;
-- no asumir que ramas históricas siguen activas;
-- no hacer merge, rebase, reset destructivo ni reescribir historial sin una tarea explícita;
-- nunca utilizar `--force` o `--no-verify` como solución automática;
-- preservar cambios locales existentes del usuario;
-- si `git status --short` muestra cambios locales previos ajenos a la tarea, detenerse y reportarlos antes de editar;
-- nunca descartar, restaurar, sobrescribir o incluir cambios previos del usuario sin autorización explícita.
-
----
-
-## Dependencias
-
-No instalar, actualizar ni eliminar dependencias como efecto secundario de otra tarea.
-
-Si parece necesaria una dependencia nueva:
-
-1. explicar por qué;
-2. comprobar si puede resolverse con el stack existente;
-3. tratar la instalación como decisión explícita.
-
-No modificar `package.json`, archivos lock, `angular.json`, `tsconfig*` ni configuración de build como efecto secundario de un fix, salvo que la tarea lo requiera explícitamente.
-
----
-
-## Archivos y datos sensibles
-
-No exponer, imprimir, registrar ni incluir en respuestas secretos provenientes de:
-
-- `.env`
-- credenciales
-- tokens
-- claves
-- configuraciones privadas
-
-Utilizar `.env.example` para comprender la estructura esperada cuando sea suficiente.
-
-Archivos especialmente delicados:
-
-- `backend/src/modules/auth/auth.service.ts`
-- `src/environments/environment.prod.ts`
-- configuración de entorno y despliegue
-
----
-
-## Política de cambios
-
-Para fixes y mejoras pequeñas:
-
-1. inspeccionar primero el código relevante;
-2. identificar la causa;
-3. modificar únicamente lo necesario;
-4. evitar duplicación;
-5. evitar `!important` nuevo salvo que la cascada lo exija;
-6. no mezclar refactors no relacionados;
-7. revisar el diff completo;
-8. ejecutar las validaciones correspondientes.
-
-Si durante una tarea se encuentra otro problema, reportarlo por separado en lugar de incorporarlo automáticamente.
-
----
-
-## Frontend visual y responsive
-
-SIIntranet tiene trabajo previo de responsive, accesibilidad y UX/UI.
-
-Al modificar UI:
-
-- comprobar escritorio;
-- comprobar móvil, incluyendo 320 px cuando aplique;
-- comprobar teclado y mouse cuando el elemento sea interactivo;
-- conservar estados `hover`, `active`, `focus-visible`, `disabled` y seleccionado;
-- evitar layout shift provocado por estados interactivos;
-- no ocultar overflow globalmente para disimular un problema local.
-
----
-
-## Tests
-
-La cobertura actual no es suficiente para asumir ausencia de regresiones.
-
-Frontend y especialmente backend requieren ampliar cobertura conforme se modifique lógica existente.
-
-Cuando una tarea cambie comportamiento de negocio, agregar o actualizar pruebas relevantes cuando sea razonable dentro del alcance.
-
-No realizar una campaña de tests o refactor general como efecto secundario de un fix pequeño.
-
----
-
-## Fase actual
-
-El proyecto se encuentra en estabilización previa a integración definitiva de base de datos y despliegue.
-
-Mientras esta fase siga vigente:
-
-- priorizar correcciones, UX/UI, accesibilidad, tests y estabilidad;
-- no agregar funcionalidades nuevas por iniciativa propia;
-- no iniciar refactors arquitectónicos amplios sin solicitud explícita.
-
----
-
-## Principio general
-
-Priorizar:
-
-- cambios pequeños;
-- comportamiento existente;
-- mantenibilidad;
-- accesibilidad;
-- consistencia;
-- facilidad de revisión y reversión.
-
-No aprovechar una tarea puntual para rediseñar la arquitectura completa del proyecto.
