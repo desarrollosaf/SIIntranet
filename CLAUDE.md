@@ -248,3 +248,24 @@ Antes de cualquier modificación:
 ```bash
 git branch --show-current
 git status --short
+```
+
+La rama esperada para esta reconstrucción es:
+
+`reconstruccion/siintranet-v2`
+
+No cambiar de rama por iniciativa propia.
+
+No hacer `git add`, commit, push, merge, rebase, reset destructivo ni reescritura de historial salvo solicitud explícita.
+
+Preservar cualquier cambio local existente.
+
+---
+
+## Principio general
+
+Primero diseñar.
+
+Después implementar.
+
+SIIntranet V2 debe construirse utilizando el conocimiento adquirido con V1, pero sin heredar automáticamente su deuda técnica.
