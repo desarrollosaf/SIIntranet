@@ -1,4 +1,5 @@
-export type UserRole = 'Usuario' | 'Administrador';
+import { UserRole } from '../../../common/types/user-role.type';
+
 export type UserStatus = 'Activo' | 'Inactivo';
 
 /**
