@@ -1,3 +1,28 @@
-<main>
+<header class="app-header">
+  <div class="app-header__brand">
+    <img
+      src="/assets/img/congreso_logo_horizontal-p-2000.png"
+      alt="Logotipo institucional"
+      class="app-header__logo"
+    />
+    <span class="app-header__title">SIIntranet</span>
+  </div>
+
+  <nav class="app-header__nav" aria-label="Navegación principal">
+    <a routerLink="/inicio">Inicio</a>
+  </nav>
+
+  <div class="app-header__user">
+    @if (currentUser(); as usuario) {
+      <span class="app-header__username">{{ usuario.nombre }}</span>
+    }
+    <button type="button" class="btn btn-outline-secondary btn-sm" (click)="onLogout()">
+      <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+      Cerrar sesión
+    </button>
+  </div>
+</header>
+
+<main class="app-main">
   <router-outlet />
 </main>

@@ -14,10 +14,23 @@ export const routes: Routes = [
     path: '',
     component: AppShell,
     canActivate: [authGuard],
-    children: [],
+    children: [
+      {
+        path: 'inicio',
+        loadComponent: () =>
+          import('./features/inicio/pages/inicio-page/inicio-page').then(
+            (m) => m.InicioPage,
+          ),
+      },
+      {
+        path: '',
+        redirectTo: 'inicio',
+        pathMatch: 'full',
+      },
+    ],
   },
   {
     path: '**',
-    redirectTo: '',
+    redirectTo: 'inicio',
   },
 ];
