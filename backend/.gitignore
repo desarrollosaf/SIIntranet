@@ -7,6 +7,9 @@
 # Test coverage
 /coverage
 
+# Almacenamiento físico provisional de archivos subidos (desarrollo)
+/storage/
+
 # Environment files
 .env
 .env.*

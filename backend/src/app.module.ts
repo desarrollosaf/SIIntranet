@@ -4,15 +4,25 @@ import { HealthModule } from './modules/health/health.module';
 import { UsuariosModule } from './modules/usuarios/usuarios.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { DevIdentityMiddleware } from './modules/auth/dev-identity/dev-identity.middleware';
+import { ArchivosModule } from './modules/archivos/archivos.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      // Jest fija NODE_ENV=test automáticamente antes de que se ejecute
+      // cualquier código de test (incluida la primera importación de este
+      // módulo). Ignorar el .env real durante los tests evita que la
+      // configuración local del desarrollador (p. ej. backend/.env creado
+      // para pruebas manuales) filtre valores no controlados hacia
+      // suites automatizadas — los tests ya fijan explícitamente las
+      // variables que necesitan vía process.env.
+      ignoreEnvFile: process.env.NODE_ENV === 'test',
     }),
     HealthModule,
     UsuariosModule,
     AuthModule,
+    ArchivosModule,
   ],
 })
 export class AppModule implements NestModule {
