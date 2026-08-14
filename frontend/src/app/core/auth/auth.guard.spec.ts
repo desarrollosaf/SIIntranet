@@ -1,5 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { CanActivateFn, Router, UrlTree } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { authGuard } from './auth.guard';
 import { AuthService } from './auth.service';
@@ -12,7 +14,9 @@ describe('authGuard', () => {
   let router: Router;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
     authService = TestBed.inject(AuthService);
     router = TestBed.inject(Router);
   });
@@ -22,7 +26,12 @@ describe('authGuard', () => {
   });
 
   it('con sesión activa permite el acceso', () => {
-    authService.login('sergio', 'clave123');
+    (authService as any).currentUserSignal.set({
+      id: 'dev-usuario-2',
+      nombre: 'sergio',
+      usuario: 'sergio',
+      rol: 'Usuario',
+    });
 
     const resultado = executeGuard({} as any, {} as any);
 

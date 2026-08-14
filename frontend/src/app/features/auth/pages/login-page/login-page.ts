@@ -34,12 +34,13 @@ export class LoginPage {
     }
 
     const { usuario, password } = this.form.getRawValue();
-    const exito = this.authService.login(usuario, password);
 
-    if (exito) {
-      this.router.navigateByUrl('/');
-    } else {
-      this.loginFallido = true;
-    }
+    this.authService.login(usuario, password).subscribe((exito) => {
+      if (exito) {
+        this.router.navigateByUrl('/');
+      } else {
+        this.loginFallido = true;
+      }
+    });
   }
 }
