@@ -150,13 +150,40 @@ export class ArchivosService {
 
   async obtenerParaDescarga(id: string, actorId: string): Promise<{ archivo: Archivo; rutaFisica: string }> {
     const archivo = this.buscarAutorizado(id, actorId);
+    const rutaFisica = this.resolverRutaFisica(archivo);
+
+    return { archivo: { ...archivo }, rutaFisica };
+  }
+
+  /**
+   * Acceso interno, SIN autorización propia — a diferencia de
+   * obtenerPorId()/obtenerParaDescarga(), este método NO aplica la regla
+   * uploader-only. Solo debe usarse desde otro dominio backend (nunca desde
+   * un controller expuesto por HTTP) DESPUÉS de que ese dominio haya
+   * resuelto su propia política de acceso (p. ej. Mensajería verificando
+   * que el actor es remitente/destinatario del mensaje que referencia este
+   * archivo antes de llamar aquí).
+   */
+  async obtenerParaUsoInterno(id: string): Promise<{ archivo: Archivo; rutaFisica: string }> {
+    const archivo = this.archivos.get(id);
+
+    if (!archivo) {
+      throw new NotFoundException('Archivo no encontrado.');
+    }
+
+    const rutaFisica = this.resolverRutaFisica(archivo);
+
+    return { archivo: { ...archivo }, rutaFisica };
+  }
+
+  private resolverRutaFisica(archivo: Archivo): string {
     const rutaFisica = join(this.storageDir, archivo.nombreAlmacenado);
 
     if (!existsSync(rutaFisica)) {
       throw new NotFoundException('Archivo no disponible.');
     }
 
-    return { archivo: { ...archivo }, rutaFisica };
+    return rutaFisica;
   }
 
   /**

@@ -42,5 +42,6 @@ function resolverTamanoMaximoBytes(configService: ConfigService): number {
   ],
   controllers: [ArchivosController],
   providers: [ArchivosService],
+  exports: [ArchivosService],
 })
 export class ArchivosModule {}
