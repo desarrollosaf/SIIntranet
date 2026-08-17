@@ -66,6 +66,44 @@
           }
         </div>
 
+        <div class="mt-3 d-flex flex-wrap gap-2">
+          @if (esRecibido(mensaje)) {
+            @if (mensaje.estado === 'Enviado' && mensaje.contenidoDisponible) {
+              <a [routerLink]="['/mensajes', mensaje.id, 'responder']" class="btn btn-sm btn-outline-primary">
+                Responder
+              </a>
+            }
+          } @else {
+            @if (esEditable(mensaje)) {
+              <a [routerLink]="['/mensajes', mensaje.id, 'editar']" class="btn btn-sm btn-outline-secondary">
+                Editar
+              </a>
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-warning"
+                [disabled]="procesandoAccion()"
+                (click)="onCancelar(mensaje.id)"
+              >
+                Cancelar
+              </button>
+            }
+            @if (mensaje.estado !== 'Eliminado') {
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-danger"
+                [disabled]="procesandoAccion()"
+                (click)="onEliminar(mensaje.id)"
+              >
+                Eliminar
+              </button>
+            }
+          }
+        </div>
+
+        @if (errorAccion()) {
+          <p class="text-danger small mt-2" role="alert">{{ errorAccion() }}</p>
+        }
+
         @if (avisoVisto()) {
           <p class="text-warning small mt-2" role="alert">{{ avisoVisto() }}</p>
         }

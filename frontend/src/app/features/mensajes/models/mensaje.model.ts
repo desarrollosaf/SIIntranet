@@ -57,6 +57,14 @@ export interface CrearMensajeDatos {
   descripcion: string;
   destinatarioIds: string[];
   archivoIds?: string[];
+  respuestaAId?: string;
+}
+
+export interface ActualizarMensajeDatos {
+  titulo?: string;
+  descripcion?: string;
+  destinatarioIds?: string[];
+  archivoIds?: string[];
 }
 
 export function esMensajeRecibido(mensaje: MensajeDetalle): mensaje is MensajeRecibido {

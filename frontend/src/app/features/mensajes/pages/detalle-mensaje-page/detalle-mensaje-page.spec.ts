@@ -153,4 +153,220 @@ describe('DetalleMensajePage', () => {
     expect(fixture.componentInstance['detalle']()).toEqual(recibidoNuevo);
     expect(fixture.componentInstance['avisoVisto']()).toBeTruthy();
   });
+
+  describe('acciones: Responder / Editar / Cancelar / Eliminar', () => {
+    const recibidoVisto: MensajeRecibido = { ...recibidoNuevo, estadoLectura: 'Visto' };
+
+    const recibidoEliminado: MensajeRecibido = {
+      id: 'mensaje-1',
+      remitente: recibidoNuevo.remitente,
+      fechaCreacion: new Date().toISOString(),
+      estado: 'Eliminado',
+      contenidoDisponible: false,
+      estadoLectura: 'Nuevo',
+      estadoRespuesta: 'Pendiente',
+    };
+
+    const enviadoEditable: MensajeEnviado = {
+      id: 'mensaje-1',
+      fechaCreacion: new Date().toISOString(),
+      estado: 'Enviado',
+      contenidoDisponible: true,
+      destinatarios: [
+        { usuarioId: 'dev-usuario-2', nombre: 'Dos', usuario: 'dos', estadoLectura: 'Nuevo', estadoRespuesta: 'Pendiente' },
+      ],
+      titulo: 'Asunto',
+      descripcion: 'Contenido',
+      archivoIds: [],
+    };
+
+    const enviadoConVisto: MensajeEnviado = {
+      ...enviadoEditable,
+      destinatarios: [
+        { usuarioId: 'dev-usuario-2', nombre: 'Dos', usuario: 'dos', estadoLectura: 'Visto', estadoRespuesta: 'Pendiente' },
+      ],
+    };
+
+    const enviadoCancelado: MensajeEnviado = { ...enviadoEditable, estado: 'Cancelado' };
+
+    const enviadoEliminado: MensajeEnviado = {
+      id: 'mensaje-1',
+      fechaCreacion: new Date().toISOString(),
+      estado: 'Eliminado',
+      contenidoDisponible: false,
+      destinatarios: [
+        { usuarioId: 'dev-usuario-2', nombre: 'Dos', usuario: 'dos', estadoLectura: 'Nuevo', estadoRespuesta: 'Pendiente' },
+      ],
+    };
+
+    function botonPorTexto(texto: string): HTMLButtonElement | undefined {
+      const compiled = fixture.nativeElement as HTMLElement;
+      return Array.from(compiled.querySelectorAll('button')).find(
+        (b) => b.textContent?.trim() === texto,
+      );
+    }
+
+    function enlacePorTexto(texto: string): HTMLAnchorElement | undefined {
+      const compiled = fixture.nativeElement as HTMLElement;
+      return Array.from(compiled.querySelectorAll('a')).find((a) => a.textContent?.trim() === texto);
+    }
+
+    it('Responder está disponible para un recibido Enviado con contenido disponible', () => {
+      configurar();
+      vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(of(recibidoVisto));
+      vi.spyOn(mensajesService, 'marcarVisto').mockReturnValue(of({}));
+      crearFixture();
+
+      fixture.detectChanges();
+
+      const enlace = enlacePorTexto('Responder');
+      expect(enlace).toBeTruthy();
+      expect(enlace!.getAttribute('href')).toBe('/mensajes/mensaje-1/responder');
+    });
+
+    it('Responder no está disponible para un recibido Eliminado', () => {
+      configurar();
+      vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(of(recibidoEliminado));
+      crearFixture();
+
+      fixture.detectChanges();
+
+      expect(enlacePorTexto('Responder')).toBeUndefined();
+    });
+
+    it('Editar y Cancelar están disponibles cuando el enviado está Enviado y todos los destinatarios Nuevo', () => {
+      configurar();
+      vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(of(enviadoEditable));
+      crearFixture();
+
+      fixture.detectChanges();
+
+      const enlace = enlacePorTexto('Editar');
+      expect(enlace).toBeTruthy();
+      expect(enlace!.getAttribute('href')).toBe('/mensajes/mensaje-1/editar');
+      expect(botonPorTexto('Cancelar')).toBeTruthy();
+    });
+
+    it('Editar y Cancelar no están disponibles si algún destinatario ya está Visto', () => {
+      configurar();
+      vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(of(enviadoConVisto));
+      crearFixture();
+
+      fixture.detectChanges();
+
+      expect(enlacePorTexto('Editar')).toBeUndefined();
+      expect(botonPorTexto('Cancelar')).toBeUndefined();
+    });
+
+    it('Editar y Cancelar no están disponibles para un mensaje Cancelado', () => {
+      configurar();
+      vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(of(enviadoCancelado));
+      crearFixture();
+
+      fixture.detectChanges();
+
+      expect(enlacePorTexto('Editar')).toBeUndefined();
+      expect(botonPorTexto('Cancelar')).toBeUndefined();
+    });
+
+    it('Eliminar está disponible para un enviado Enviado', () => {
+      configurar();
+      vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(of(enviadoEditable));
+      crearFixture();
+      fixture.detectChanges();
+
+      expect(botonPorTexto('Eliminar')).toBeTruthy();
+    });
+
+    it('Eliminar está disponible para un enviado Cancelado', () => {
+      configurar();
+      vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(of(enviadoCancelado));
+      crearFixture();
+      fixture.detectChanges();
+
+      expect(botonPorTexto('Eliminar')).toBeTruthy();
+    });
+
+    it('Eliminar no está disponible para un mensaje ya Eliminado', () => {
+      configurar();
+      vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(of(enviadoEliminado));
+      crearFixture();
+      fixture.detectChanges();
+
+      expect(botonPorTexto('Eliminar')).toBeUndefined();
+    });
+
+    it('Eliminar no está disponible para un recibido', () => {
+      configurar();
+      vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(of(recibidoVisto));
+      vi.spyOn(mensajesService, 'marcarVisto').mockReturnValue(of({}));
+      crearFixture();
+      fixture.detectChanges();
+
+      expect(botonPorTexto('Eliminar')).toBeUndefined();
+    });
+
+    it('Cancelar exitoso llama al servicio y recarga el detalle', () => {
+      configurar();
+      const obtenerDetalleSpy = vi
+        .spyOn(mensajesService, 'obtenerDetalle')
+        .mockReturnValueOnce(of(enviadoEditable))
+        .mockReturnValueOnce(of(enviadoCancelado));
+      vi.spyOn(mensajesService, 'cancelar').mockReturnValue(of({}));
+      crearFixture();
+      fixture.detectChanges();
+
+      botonPorTexto('Cancelar')!.click();
+
+      expect(mensajesService.cancelar).toHaveBeenCalledWith('mensaje-1');
+      expect(obtenerDetalleSpy).toHaveBeenCalledTimes(2);
+      expect(fixture.componentInstance['detalle']()).toEqual(enviadoCancelado);
+      expect(fixture.componentInstance['procesandoAccion']()).toBe(false);
+    });
+
+    it('un fallo al cancelar muestra un error sin destruir el contenido', () => {
+      configurar();
+      vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(of(enviadoEditable));
+      vi.spyOn(mensajesService, 'cancelar').mockReturnValue(throwError(() => new Error('409')));
+      crearFixture();
+      fixture.detectChanges();
+
+      botonPorTexto('Cancelar')!.click();
+
+      expect(fixture.componentInstance['errorAccion']()).toBe('No fue posible cancelar el mensaje.');
+      expect(fixture.componentInstance['detalle']()).toEqual(enviadoEditable);
+      expect(fixture.componentInstance['procesandoAccion']()).toBe(false);
+    });
+
+    it('Eliminar con confirm() en false no llama al servicio', () => {
+      configurar();
+      vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(of(enviadoEditable));
+      vi.spyOn(mensajesService, 'eliminar');
+      vi.spyOn(window, 'confirm').mockReturnValue(false);
+      crearFixture();
+      fixture.detectChanges();
+
+      botonPorTexto('Eliminar')!.click();
+
+      expect(mensajesService.eliminar).not.toHaveBeenCalled();
+    });
+
+    it('Eliminar exitoso recarga el detalle como tombstone', () => {
+      configurar();
+      vi.spyOn(mensajesService, 'obtenerDetalle')
+        .mockReturnValueOnce(of(enviadoEditable))
+        .mockReturnValueOnce(of(enviadoEliminado));
+      vi.spyOn(mensajesService, 'eliminar').mockReturnValue(of({}));
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+      crearFixture();
+      fixture.detectChanges();
+
+      botonPorTexto('Eliminar')!.click();
+
+      expect(mensajesService.eliminar).toHaveBeenCalledWith('mensaje-1');
+      const detalleFinal = fixture.componentInstance['detalle']();
+      expect(detalleFinal?.estado).toBe('Eliminado');
+      expect(detalleFinal?.contenidoDisponible).toBe(false);
+    });
+  });
 });

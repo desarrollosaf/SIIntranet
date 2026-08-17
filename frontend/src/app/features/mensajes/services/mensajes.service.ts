@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../../../core/http/api.config';
 import {
+  ActualizarMensajeDatos,
   CrearMensajeDatos,
   MensajeCreado,
   MensajeDetalle,
@@ -34,6 +35,18 @@ export class MensajesService {
 
   marcarVisto(id: string): Observable<unknown> {
     return this.http.patch(`${API_BASE_URL}/mensajes/${id}/visto`, {});
+  }
+
+  actualizar(id: string, datos: ActualizarMensajeDatos): Observable<MensajeCreado> {
+    return this.http.patch<MensajeCreado>(`${API_BASE_URL}/mensajes/${id}`, datos);
+  }
+
+  cancelar(id: string): Observable<unknown> {
+    return this.http.patch(`${API_BASE_URL}/mensajes/${id}/cancelar`, {});
+  }
+
+  eliminar(id: string): Observable<unknown> {
+    return this.http.patch(`${API_BASE_URL}/mensajes/${id}/eliminar`, {});
   }
 
   urlDescargaAdjunto(mensajeId: string, archivoId: string): string {

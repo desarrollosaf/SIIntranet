@@ -1,5 +1,13 @@
 <section class="redactar-mensaje-page">
-  <h1 class="h4">Redactar mensaje</h1>
+  <h1 class="h4">{{ modoRespuesta() ? 'Responder mensaje' : 'Redactar mensaje' }}</h1>
+
+  @if (modoRespuesta() && cargandoOriginal()) {
+    <p>Cargando mensaje original…</p>
+  }
+
+  @if (modoRespuesta() && errorOriginal()) {
+    <p class="text-danger" role="alert">{{ errorOriginal() }}</p>
+  }
 
   @if (errorUsuarios()) {
     <p class="text-danger" role="alert">{{ errorUsuarios() }}</p>
@@ -13,6 +21,7 @@
         type="text"
         class="form-control"
         [class.is-invalid]="form.controls.titulo.invalid && form.controls.titulo.touched"
+        [readonly]="enviando()"
         formControlName="titulo"
       />
       @if (form.controls.titulo.invalid && form.controls.titulo.touched) {
@@ -27,6 +36,7 @@
         class="form-control"
         rows="4"
         [class.is-invalid]="form.controls.descripcion.invalid && form.controls.descripcion.touched"
+        [readonly]="enviando()"
         formControlName="descripcion"
       ></textarea>
       @if (form.controls.descripcion.invalid && form.controls.descripcion.touched) {
@@ -49,10 +59,16 @@
                   class="form-check-input"
                   [id]="'destinatario-' + usuario.id"
                   [checked]="estaSeleccionado(usuario.id)"
+                  [disabled]="enviando() || esRemitenteOriginal(usuario.id)"
                   (change)="onDestinatarioToggle(usuario.id, $event)"
                 />
                 <label class="form-check-label" [for]="'destinatario-' + usuario.id">
-                  <span class="d-block">{{ usuario.nombre }}</span>
+                  <span class="d-block">
+                    {{ usuario.nombre }}
+                    @if (esRemitenteOriginal(usuario.id)) {
+                      <span class="badge text-bg-light ms-1">Remitente original</span>
+                    }
+                  </span>
                   <span class="d-block text-muted small">{{ usuario.usuario }}</span>
                 </label>
               </div>
@@ -73,6 +89,7 @@
         class="form-control"
         multiple
         accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png"
+        [disabled]="enviando()"
         (change)="onArchivosSeleccionados($event)"
       />
 
@@ -90,6 +107,7 @@
               <button
                 type="button"
                 class="btn btn-sm btn-outline-danger"
+                [disabled]="enviando()"
                 (click)="quitarArchivo(i)"
                 [attr.aria-label]="'Quitar ' + item.file.name"
               >
@@ -105,7 +123,11 @@
       <p class="text-danger" role="alert">{{ error() }}</p>
     }
 
-    <button type="submit" class="btn btn-primary" [disabled]="enviando()">
+    <button
+      type="submit"
+      class="btn btn-primary"
+      [disabled]="enviando() || (modoRespuesta() && !puedeResponder())"
+    >
       {{ enviando() ? 'Enviando…' : 'Enviar' }}
     </button>
   </form>

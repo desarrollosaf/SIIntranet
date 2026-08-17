@@ -63,6 +63,20 @@ export const routes: Routes = [
               ),
           },
           {
+            path: ':id/responder',
+            loadComponent: () =>
+              import('./features/mensajes/pages/redactar-mensaje-page/redactar-mensaje-page').then(
+                (m) => m.RedactarMensajePage,
+              ),
+          },
+          {
+            path: ':id/editar',
+            loadComponent: () =>
+              import('./features/mensajes/pages/editar-mensaje-page/editar-mensaje-page').then(
+                (m) => m.EditarMensajePage,
+              ),
+          },
+          {
             path: ':id',
             loadComponent: () =>
               import('./features/mensajes/pages/detalle-mensaje-page/detalle-mensaje-page').then(

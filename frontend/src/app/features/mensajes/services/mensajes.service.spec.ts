@@ -70,6 +70,57 @@ describe('MensajesService', () => {
     req.flush({});
   });
 
+  it('crear() con respuestaAId conserva ese campo en el body', () => {
+    const datos = {
+      titulo: 'Asunto',
+      descripcion: 'Contenido',
+      destinatarioIds: ['dev-usuario-2'],
+      archivoIds: ['archivo-1'],
+      respuestaAId: 'mensaje-original',
+    };
+
+    service.crear(datos).subscribe();
+
+    const req = httpMock.expectOne(`${API_BASE_URL}/mensajes`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(datos);
+    req.flush({});
+  });
+
+  it('actualizar() hace PATCH a /mensajes/:id con el body exacto', () => {
+    const datos = {
+      titulo: 'Nuevo título',
+      descripcion: 'Nueva descripción',
+      destinatarioIds: ['dev-usuario-2'],
+      archivoIds: ['archivo-1'],
+    };
+
+    service.actualizar('mensaje-1', datos).subscribe();
+
+    const req = httpMock.expectOne(`${API_BASE_URL}/mensajes/mensaje-1`);
+    expect(req.request.method).toBe('PATCH');
+    expect(req.request.body).toEqual(datos);
+    req.flush({});
+  });
+
+  it('cancelar() hace PATCH a /mensajes/:id/cancelar con body vacío', () => {
+    service.cancelar('mensaje-1').subscribe();
+
+    const req = httpMock.expectOne(`${API_BASE_URL}/mensajes/mensaje-1/cancelar`);
+    expect(req.request.method).toBe('PATCH');
+    expect(req.request.body).toEqual({});
+    req.flush({});
+  });
+
+  it('eliminar() hace PATCH a /mensajes/:id/eliminar con body vacío', () => {
+    service.eliminar('mensaje-1').subscribe();
+
+    const req = httpMock.expectOne(`${API_BASE_URL}/mensajes/mensaje-1/eliminar`);
+    expect(req.request.method).toBe('PATCH');
+    expect(req.request.body).toEqual({});
+    req.flush({});
+  });
+
   it('urlDescargaAdjunto() construye la URL correcta', () => {
     const url = service.urlDescargaAdjunto('mensaje-1', 'archivo-1');
 

@@ -3,7 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { MensajesService } from '../../services/mensajes.service';
-import { esMensajeRecibido, MensajeDetalle } from '../../models/mensaje.model';
+import { esMensajeRecibido, MensajeDetalle, MensajeEnviado } from '../../models/mensaje.model';
 
 @Component({
   selector: 'app-detalle-mensaje-page',
@@ -20,6 +20,9 @@ export class DetalleMensajePage {
   protected readonly error = signal<string | null>(null);
   protected readonly detalle = signal<MensajeDetalle | null>(null);
   protected readonly avisoVisto = signal<string | null>(null);
+
+  protected readonly procesandoAccion = signal(false);
+  protected readonly errorAccion = signal<string | null>(null);
 
   protected readonly esRecibido = esMensajeRecibido;
 
@@ -39,6 +42,61 @@ export class DetalleMensajePage {
 
   protected urlDescarga(mensajeId: string, archivoId: string): string {
     return this.mensajesService.urlDescargaAdjunto(mensajeId, archivoId);
+  }
+
+  protected esEditable(mensaje: MensajeEnviado): boolean {
+    return mensaje.estado === 'Enviado' && mensaje.destinatarios.every((d) => d.estadoLectura === 'Nuevo');
+  }
+
+  protected onCancelar(mensajeId: string): void {
+    if (this.procesandoAccion()) {
+      return;
+    }
+
+    this.procesandoAccion.set(true);
+    this.errorAccion.set(null);
+
+    this.mensajesService.cancelar(mensajeId).subscribe({
+      next: () => this.recargarTrasAccion(mensajeId),
+      error: () => {
+        this.errorAccion.set('No fue posible cancelar el mensaje.');
+        this.procesandoAccion.set(false);
+      },
+    });
+  }
+
+  protected onEliminar(mensajeId: string): void {
+    if (this.procesandoAccion()) {
+      return;
+    }
+
+    if (!confirm('¿Deseas eliminar este mensaje?')) {
+      return;
+    }
+
+    this.procesandoAccion.set(true);
+    this.errorAccion.set(null);
+
+    this.mensajesService.eliminar(mensajeId).subscribe({
+      next: () => this.recargarTrasAccion(mensajeId),
+      error: () => {
+        this.errorAccion.set('No fue posible eliminar el mensaje.');
+        this.procesandoAccion.set(false);
+      },
+    });
+  }
+
+  private recargarTrasAccion(mensajeId: string): void {
+    this.mensajesService.obtenerDetalle(mensajeId).subscribe({
+      next: (detalle) => {
+        this.detalle.set(detalle);
+        this.procesandoAccion.set(false);
+      },
+      error: () => {
+        this.errorAccion.set('No fue posible actualizar el mensaje.');
+        this.procesandoAccion.set(false);
+      },
+    });
   }
 
   private cargarDetalle(id: string): void {
