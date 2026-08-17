@@ -1,0 +1,112 @@
+<section class="redactar-mensaje-page">
+  <h1 class="h4">Redactar mensaje</h1>
+
+  @if (errorUsuarios()) {
+    <p class="text-danger" role="alert">{{ errorUsuarios() }}</p>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+    <div class="mb-3">
+      <label for="titulo" class="form-label">Título</label>
+      <input
+        id="titulo"
+        type="text"
+        class="form-control"
+        [class.is-invalid]="form.controls.titulo.invalid && form.controls.titulo.touched"
+        formControlName="titulo"
+      />
+      @if (form.controls.titulo.invalid && form.controls.titulo.touched) {
+        <p class="invalid-feedback d-block" role="alert">El título es obligatorio.</p>
+      }
+    </div>
+
+    <div class="mb-3">
+      <label for="descripcion" class="form-label">Descripción</label>
+      <textarea
+        id="descripcion"
+        class="form-control"
+        rows="4"
+        [class.is-invalid]="form.controls.descripcion.invalid && form.controls.descripcion.touched"
+        formControlName="descripcion"
+      ></textarea>
+      @if (form.controls.descripcion.invalid && form.controls.descripcion.touched) {
+        <p class="invalid-feedback d-block" role="alert">La descripción es obligatoria.</p>
+      }
+    </div>
+
+    <div class="mb-3">
+      <fieldset class="redactar-mensaje-page__destinatarios-fieldset">
+        <legend class="form-label h6">Destinatarios</legend>
+
+        @if (cargandoUsuarios()) {
+          <p>Cargando usuarios…</p>
+        } @else {
+          <div class="redactar-mensaje-page__destinatarios">
+            @for (usuario of usuarios(); track usuario.id) {
+              <div class="form-check redactar-mensaje-page__destinatario">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  [id]="'destinatario-' + usuario.id"
+                  [checked]="estaSeleccionado(usuario.id)"
+                  (change)="onDestinatarioToggle(usuario.id, $event)"
+                />
+                <label class="form-check-label" [for]="'destinatario-' + usuario.id">
+                  <span class="d-block">{{ usuario.nombre }}</span>
+                  <span class="d-block text-muted small">{{ usuario.usuario }}</span>
+                </label>
+              </div>
+            }
+          </div>
+        }
+      </fieldset>
+      @if (form.controls.destinatarioIds.invalid && form.controls.destinatarioIds.touched) {
+        <p class="invalid-feedback d-block" role="alert">Selecciona al menos un destinatario.</p>
+      }
+    </div>
+
+    <div class="mb-3">
+      <label for="archivos" class="form-label">Adjuntos</label>
+      <input
+        id="archivos"
+        type="file"
+        class="form-control"
+        multiple
+        accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png"
+        (change)="onArchivosSeleccionados($event)"
+      />
+
+      @if (seleccionArchivos().length > 0) {
+        <ul class="list-unstyled mt-2 redactar-mensaje-page__archivos">
+          @for (item of seleccionArchivos(); track item.file.name + '-' + $index; let i = $index) {
+            <li class="d-flex justify-content-between align-items-center">
+              <span>
+                {{ item.file.name }}
+                <span class="text-muted small">({{ tamanoLegible(item.file.size) }})</span>
+                @if (item.archivoSubido) {
+                  <span class="badge text-bg-success ms-1">Subido</span>
+                }
+              </span>
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-danger"
+                (click)="quitarArchivo(i)"
+                [attr.aria-label]="'Quitar ' + item.file.name"
+              >
+                Quitar
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+
+    @if (error()) {
+      <p class="text-danger" role="alert">{{ error() }}</p>
+    }
+
+    <button type="submit" class="btn btn-primary" [disabled]="enviando()">
+      {{ enviando() ? 'Enviando…' : 'Enviar' }}
+    </button>
+  </form>
+</section>

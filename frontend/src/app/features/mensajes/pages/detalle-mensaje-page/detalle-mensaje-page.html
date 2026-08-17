@@ -1,0 +1,75 @@
+<section class="detalle-mensaje-page">
+  <a routerLink="/mensajes/recibidos" class="btn btn-sm btn-outline-secondary mb-3">Volver a mensajes</a>
+
+  @if (cargando()) {
+    <p>Cargando mensaje…</p>
+  }
+
+  @if (error()) {
+    <p class="text-danger" role="alert">{{ error() }}</p>
+  }
+
+  @if (!cargando() && !error() && detalle(); as mensaje) {
+    <div class="card">
+      <div class="card-body">
+        @if (!mensaje.contenidoDisponible) {
+          <p class="fst-italic text-muted mb-0">
+            @if (esRecibido(mensaje)) {
+              Mensaje eliminado por el remitente.
+            } @else {
+              Mensaje eliminado.
+            }
+          </p>
+        } @else {
+          <h1 class="h5">{{ mensaje.titulo }}</h1>
+
+          @if (esRecibido(mensaje)) {
+            <p class="text-muted small mb-1">
+              De: {{ mensaje.remitente.nombre }} ({{ mensaje.remitente.usuario }})
+            </p>
+          } @else {
+            <p class="text-muted small mb-1">
+              Para:
+              @for (destinatario of mensaje.destinatarios; track destinatario.usuarioId; let last = $last) {
+                {{ destinatario.nombre }}{{ last ? '' : ', ' }}
+              }
+            </p>
+          }
+
+          <p class="text-muted small">{{ mensaje.fechaCreacion | date: 'medium' }}</p>
+
+          <p class="detalle-mensaje-page__descripcion">{{ mensaje.descripcion }}</p>
+
+          @if (mensaje.archivoIds && mensaje.archivoIds.length > 0) {
+            <div class="mt-3">
+              <h2 class="h6">Adjuntos</h2>
+              <ul class="list-unstyled d-flex flex-wrap gap-2">
+                @for (archivoId of mensaje.archivoIds; track archivoId; let i = $index) {
+                  <li>
+                    <a [href]="urlDescarga(mensaje.id, archivoId)" class="btn btn-sm btn-outline-primary">
+                      <i class="bi bi-paperclip" aria-hidden="true"></i>
+                      Adjunto {{ i + 1 }}
+                    </a>
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+        }
+
+        <div class="mt-3 d-flex flex-wrap gap-2">
+          @if (esRecibido(mensaje)) {
+            <span class="badge text-bg-secondary">Lectura: {{ mensaje.estadoLectura }}</span>
+            <span class="badge text-bg-light">Respuesta: {{ mensaje.estadoRespuesta }}</span>
+          } @else {
+            <span class="badge text-bg-secondary">{{ mensaje.estado }}</span>
+          }
+        </div>
+
+        @if (avisoVisto()) {
+          <p class="text-warning small mt-2" role="alert">{{ avisoVisto() }}</p>
+        }
+      </div>
+    </div>
+  }
+</section>

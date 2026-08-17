@@ -32,6 +32,46 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'mensajes',
+        children: [
+          {
+            path: '',
+            redirectTo: 'recibidos',
+            pathMatch: 'full',
+          },
+          {
+            path: 'recibidos',
+            data: { tipo: 'recibidos' },
+            loadComponent: () =>
+              import('./features/mensajes/pages/bandeja-mensajes-page/bandeja-mensajes-page').then(
+                (m) => m.BandejaMensajesPage,
+              ),
+          },
+          {
+            path: 'enviados',
+            data: { tipo: 'enviados' },
+            loadComponent: () =>
+              import('./features/mensajes/pages/bandeja-mensajes-page/bandeja-mensajes-page').then(
+                (m) => m.BandejaMensajesPage,
+              ),
+          },
+          {
+            path: 'redactar',
+            loadComponent: () =>
+              import('./features/mensajes/pages/redactar-mensaje-page/redactar-mensaje-page').then(
+                (m) => m.RedactarMensajePage,
+              ),
+          },
+          {
+            path: ':id',
+            loadComponent: () =>
+              import('./features/mensajes/pages/detalle-mensaje-page/detalle-mensaje-page').then(
+                (m) => m.DetalleMensajePage,
+              ),
+          },
+        ],
+      },
+      {
         path: '',
         redirectTo: 'inicio',
         pathMatch: 'full',

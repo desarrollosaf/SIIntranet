@@ -1,0 +1,31 @@
+.bandeja-page {
+  padding: 1.5rem;
+}
+
+.bandeja-page__acciones {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.bandeja-page__item--nuevo {
+  border-left: 4px solid #0d6efd;
+}
+
+.bandeja-page__fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.bandeja-page__estados {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
