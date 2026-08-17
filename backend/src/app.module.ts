@@ -6,6 +6,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { DevIdentityMiddleware } from './modules/auth/dev-identity/dev-identity.middleware';
 import { ArchivosModule } from './modules/archivos/archivos.module';
 import { MensajesModule } from './modules/mensajes/mensajes.module';
+import { FormatosModule } from './modules/formatos/formatos.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { MensajesModule } from './modules/mensajes/mensajes.module';
     AuthModule,
     ArchivosModule,
     MensajesModule,
+    FormatosModule,
   ],
 })
 export class AppModule implements NestModule {
