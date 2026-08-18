@@ -4,6 +4,8 @@ Diseño arquitectónico completo de la reconstrucción de SIIntranet, elaborado 
 
 Estructura de este documento: **Contexto previo** (por qué había información suficiente para diseñar) → **Diseño arquitectónico** (razonamiento y alternativas consideradas) → **Arquitectura final revisada** (versión vigente, aprobada con ajustes — sustituye al diseño inicial donde corresponde).
 
+> **Nota global de alcance (ETAPA 14B):** este documento conserva íntegramente decisiones, alternativas y propuestas arquitectónicas históricas, incluidas varias secciones anteriores a esta nota que mencionan Calendario/Recordatorios como módulo, ruta, componente, dependencia de estado o punto de extensión previsto en el diseño original. El responsable del proyecto confirmó posteriormente que Calendario y Recordatorios están **FUERA DEL ALCANCE ACTUAL** de SIIntranet V2. Ninguna referencia histórica a Calendario/Recordatorios en este documento —anterior o posterior a esta nota— debe interpretarse como instrucción vigente de implementación. La sección **PARTE III — Arquitectura final revisada** contiene, además, las anotaciones reconciliadas puntuales correspondientes. Ver también `docs/decisiones-funcionales-v2.md` (D18) y `docs/inventario-funcional-v1.md`.
+
 ---
 
 ## Contexto previo al diseño
@@ -85,7 +87,7 @@ backend/
         ├── auth/            # implementación provisional intercambiable (D08)
         ├── usuarios/        # lectura (cualquier sesión) + administración (Administrador)
         ├── mensajes/        # modelo Mensaje + Destinatario individual (ver §J)
-        ├── recordatorios/
+        ├── recordatorios/   # FUERA DE ALCANCE ACTUAL — ver nota de alcance ETAPA 14B
         ├── formatos/
         ├── archivos/        # subida/almacenamiento/descarga reales (D03/D17)
         ├── auditoria/       # nuevo (D14)
@@ -97,7 +99,7 @@ backend/
 | `auth` | Login, sesión actual, cambio obligatorio; punto único de "quién es el usuario actual" | Consulta a `usuarios` para credenciales; ningún otro módulo reimplementa lógica de sesión |
 | `usuarios` | CRUD, activar/desactivar, reset administrativo de password | No conoce mensajes/formatos; dispara eventos hacia `auditoria` |
 | `mensajes` | Ciclo de vida del mensaje + destinatarios individuales con estado propio (§J) | Depende de `usuarios` y `archivos`; dispara eventos hacia `auditoria` |
-| `recordatorios` | CRUD de recordatorios personales | Independiente |
+| `recordatorios` | **FUERA DE ALCANCE ACTUAL** (ver nota de alcance, ETAPA 14B) — CRUD de recordatorios personales | Independiente |
 | `formatos` | CRUD de documentos institucionales | A la espera de D04 |
 | `archivos` | Subida/almacenamiento/descarga real de adjuntos | Consumido por `mensajes` y `formatos` |
 | `auditoria` | Registro y consulta de acciones relevantes, solo-Administrador | Invocado puntualmente por `auth`, `usuarios`, `mensajes`, `formatos`; nunca al revés |
@@ -185,6 +187,8 @@ No se proponen pruebas exhaustivas por defecto de pantallas sin lógica propia.
 ## PARTE III — Arquitectura final revisada (VIGENTE — sustituye a la Parte II donde corresponde)
 
 La arquitectura de la Parte II quedó **aprobada con ajustes**. Esta parte incorpora los cambios obligatorios aprobados y es la versión que debe seguirse en la implementación.
+
+> **Nota de alcance (ETAPA 14B):** las referencias a `calendario/` y `recordatorios/` en esta Parte III (árbol de módulos, rutas, mapa de features, tabla de servicios, orden de construcción) describían un módulo previsto en el diseño original. El responsable del proyecto confirmó posteriormente que Calendario y Recordatorios no pertenecían al sistema real usado como referencia funcional y quedan **FUERA DE ALCANCE ACTUAL** — no deben implementarse. Se conservan anotadas en el lugar donde aparecían, en vez de eliminarse, para no perder la evidencia de la decisión arquitectónica original. Ver también `docs/decisiones-funcionales-v2.md` (D18) y `docs/inventario-funcional-v1.md`.
 
 ### 1. Árbol final del repositorio
 
@@ -293,7 +297,7 @@ frontend/
     │       │       ├── mensaje.model.ts
     │       │       └── mensaje-destinatario.model.ts
     │       │
-    │       ├── calendario/
+    │       ├── calendario/                                    # FUERA DE ALCANCE ACTUAL — ver nota de alcance ETAPA 14B
     │       │   ├── pages/calendario-page/                   # ruta real `/calendario`, no modal global
     │       │   ├── components/calendario-grid/, evento-item/
     │       │   └── services/recordatorios.service.ts
@@ -334,7 +338,7 @@ backend/
         ├── auth/           # auth.controller.ts, auth.service.ts, guards/, dto/
         ├── usuarios/       # lectura (cualquier sesión) + administración (Administrador)
         ├── mensajes/       # modelo Mensaje + Destinatario individual
-        ├── recordatorios/
+        ├── recordatorios/  # FUERA DE ALCANCE ACTUAL — ver nota de alcance ETAPA 14B
         ├── formatos/
         ├── archivos/       # subida/almacenamiento/descarga reales
         ├── auditoria/
@@ -350,7 +354,7 @@ backend/
 /mensajes/nuevo                  authGuard   — redactar / editar / responder (según origen de navegación)
 /mensajes/bandeja                authGuard
 /mensajes/enviados               authGuard
-/calendario                      authGuard   — página real, no modal
+/calendario                      FUERA DE ALCANCE ACTUAL — ver nota de alcance ETAPA 14B (no implementar)
 /formatos                        authGuard
 /administracion/usuarios         authGuard + adminGuard
 /administracion/auditoria        authGuard + adminGuard
@@ -364,16 +368,16 @@ backend/
 | Feature | Dueño de | Depende de (features) |
 |---|---|---|
 | `auth` | Sesión, login/logout, cambio obligatorio | — |
-| `inicio` | Dashboard | `mensajeria`, `calendario` (lectura) |
+| `inicio` | Dashboard | `mensajeria` (dependencia de `calendario` sin efecto: FUERA DE ALCANCE ACTUAL, ver nota 14B) |
 | `usuarios` | Dominio "persona del sistema": consulta + administración | — |
 | `mensajeria` | Mensaje nuevo, bandeja, enviados, detalle | `usuarios` (destinatarios) |
-| `calendario` | Calendario + recordatorios | `mensajeria` (eventos combinados) |
+| `calendario` | **FUERA DE ALCANCE ACTUAL** (ver nota de alcance, ETAPA 14B) — Calendario + recordatorios | `mensajeria` (eventos combinados) |
 | `formatos` | Repositorio de documentos institucionales | — |
 | `perfil` | Modal de datos de sesión | `auth` |
 | `administracion` | UI administrativa de usuarios | `usuarios` |
 | `auditoria` | Consulta de registro de auditoría | — |
 
-**Regla explícita:** por defecto, ninguna feature depende de otra directamente — la comunicación cruzada pasa por `core`/`shared`. La única excepción es `usuarios`, tratada como **dominio fundacional** (igual que en el backend, donde `mensajes` depende de `usuarios`): tanto `mensajeria` como `administracion` consumen `features/usuarios` directamente. `calendario` depende de `mensajeria` únicamente para leer eventos. Ninguna otra dependencia feature→feature está permitida.
+**Regla explícita:** por defecto, ninguna feature depende de otra directamente — la comunicación cruzada pasa por `core`/`shared`. La única excepción es `usuarios`, tratada como **dominio fundacional** (igual que en el backend, donde `mensajes` depende de `usuarios`): tanto `mensajeria` como `administracion` consumen `features/usuarios` directamente. `calendario` depende de `mensajeria` únicamente para leer eventos (sin efecto actual: `calendario` está FUERA DE ALCANCE, ver nota 14B). Ninguna otra dependencia feature→feature está permitida.
 
 ### 6. Servicios y dependencias corregidos
 
@@ -381,7 +385,7 @@ backend/
 |---|---|---|---|
 | `usuarios.service` | `features/usuarios` | Consulta de personas disponibles (cualquier sesión) **y** operaciones administrativas (protegidas por backend + `adminGuard`) | Decidir permisos por sí mismo; vivir dentro de `administracion` |
 | `mensajes.service` | `features/mensajeria` | CRUD, estados por destinatario, transiciones | Formatear fechas; decidir a qué ruta volver |
-| `recordatorios.service` | `features/calendario` | CRUD de recordatorios | Calcular eventos combinados (eso es de `calendario-page`) |
+| `recordatorios.service` | `features/calendario` | **FUERA DE ALCANCE ACTUAL** (ver nota de alcance, ETAPA 14B) — CRUD de recordatorios | Calcular eventos combinados (eso es de `calendario-page`) |
 | `formatos.service` | `features/formatos` | Listado (y a futuro CRUD si D04) | Gestionar subida física (delega en `core/files`) |
 | `auditoria.service` | `features/auditoria` | Consulta de registros | Registrar auditoría del lado del cliente |
 | `archivos.service` | `core/files` | Subida y descarga real de archivos, genérico | Conocer reglas de negocio de mensajería o formatos |
@@ -408,8 +412,8 @@ V1 permanece intacta en esta rama únicamente como referencia de lectura — y y
 4. **Frontend — dominio de usuarios:** `features/usuarios` y `features/administracion` consumiéndolo.
 5. **Infraestructura mínima de archivos** (`core/files`, subida/descarga/validación) — **antes** de Mensajería completa, para no dejarla incompleta y tener que modificarla después.
 6. **Mensajería completa**, incluidos adjuntos reales: backend `mensajes` con modelo Mensaje/Destinatario, luego `mensaje-nuevo-page`, `bandeja-page`, `enviados-page` y componentes compartidos.
-7. **Calendario y recordatorios**, reutilizando `mensajes.service`.
-8. **Formatos** — paridad de solo lectura con V1.
+7. ~~Calendario y recordatorios, reutilizando `mensajes.service`.~~ **FUERA DE ALCANCE ACTUAL** (ver nota de alcance, ETAPA 14B) — no se ejecuta este paso; se conserva el número original para no renumerar el resto de la lista.
+8. **Formatos** — consulta/descarga (paridad funcional con la referencia real; ver nota de alcance Formatos, ETAPA 14B — sin administración visual).
 9. **Auditoría — página de consulta.**
 10. **Accesibilidad, responsive y testing continuos** en todas las fases anteriores, más una pasada formal de cierre por feature.
 

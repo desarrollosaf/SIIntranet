@@ -43,6 +43,7 @@ No se agregaron decisiones nuevas ni se cambiaron requisitos respecto a lo ya ap
 - **Partes futuras afectadas:** Modelo de datos · Backend · API · Frontend · UX · Seguridad.
 - **Quién debía responder:** Administrador / Supervisor.
 - **Prioridad original:** IMPORTANTE pero no bloqueante.
+- **Nota de alcance (ETAPA 14B):** para el frontend V2 actual (13C), la consulta/descarga de Formatos ya está confirmada e implementada; no se requiere administración visual (crear/editar/eliminar/activar/desactivar/categorías) por ahora. Los endpoints administrativos de backend (13B) permanecen como infraestructura provisional sin consumidor frontend. La pregunta original de D04 (quién administra el catálogo a largo plazo) sigue sin resolver — esta nota no la cierra, solo aclara que no bloquea el alcance frontend vigente.
 
 ### D05 — Perfil y datos de RRHH
 - **Pregunta concreta:** ¿Los campos de Perfil (adscripción, puesto, correo institucional, número de empleado) deben incorporarse al modelo de Usuario, y de dónde provienen?
@@ -169,6 +170,7 @@ No se agregaron decisiones nuevas ni se cambiaron requisitos respecto a lo ya ap
 - **Partes futuras afectadas:** Frontend · UX.
 - **Quién debía responder:** Yo (verificación) / decisión técnica posterior de UX.
 - **Prioridad original:** Puede decidirse posteriormente.
+- **SUPERADA POR ACLARACIÓN DE ALCANCE (ETAPA 14B):** el responsable del proyecto confirmó que Calendario y Recordatorios no forman parte del sistema real tomado como referencia funcional y quedan FUERA DEL ALCANCE ACTUAL de SIIntranet V2. Esta decisión deja de ser aplicable mientras esa exclusión se mantenga — no debe diseñarse ni implementarse el comportamiento calendario↔detalle. Se conserva aquí como evidencia histórica del análisis original.
 
 ### D19 — Requisitos de accesibilidad formal
 - **Pregunta concreta:** ¿Existe una normativa o estándar de accesibilidad formal que V2 deba cumplir?
@@ -199,7 +201,7 @@ El responsable del proyecto aclaró que el objetivo inmediato de V2 **no** es re
 | D01 | Roles | **RESUELTA** | Solo Administrador y Usuario. Área/adscripción/puesto no determinan permisos. Sin sistema dinámico de roles. |
 | D02 | Eliminación de mensajes | **RESUELTA (funcional)** | Eliminar afecta a todos los destinatarios; deja de estar disponible; aviso "eliminado por el remitente"; se conserva evidencia interna (no borrado físico inmediato). Retención/purga definitiva: pendiente. |
 | D03 | Archivos adjuntos | **RESUELTA** | Subida y almacenamiento reales, uno o varios archivos, descarga real por destinatarios autorizados. Estrategia física de almacenamiento diferida a cuando se conozca la infraestructura. |
-| D04 | Administración de Formatos | **PENDIENTE** | Punto de extensión aislado, no bloqueante. |
+| D04 | Administración de Formatos | **PENDIENTE** (frontend actual no bloqueado — ver nota 14B) | Punto de extensión aislado, no bloqueante. Consulta/descarga confirmadas e implementadas; administración visual no requerida actualmente. |
 | D05 | Perfil / usuarios / BD institucional | **PARCIAL** | Existe MySQL institucional real, ya en uso por una versión previa; esquema aún no autorizado/conocido. Administrador debe poder gestionar y crear usuarios. Campos conceptuales (id, nombre, usuario, correo, área, puesto, número de empleado, rol, estado) son provisionales. Prohibido inventar tablas/columnas. |
 | D06 | Ancho mínimo móvil | **PENDIENTE** | Punto de extensión aislado, no bloqueante. |
 | D07 | PDF de usuario | **PENDIENTE** | Punto de extensión aislado, no bloqueante. |
@@ -213,7 +215,7 @@ El responsable del proyecto aclaró que el objetivo inmediato de V2 **no** es re
 | D15 | Recuperación de contraseña | **DIFERIDA** | Mantener el comportamiento funcional de V1 como referencia; flujo nuevo se define después. |
 | D16 | Política de contraseñas | **DIFERIDA** | No fijar todavía complejidad/expiración/recuperación; debe quedar aislada/configurable. |
 | D17 | Tipos y límites de archivo | **RESUELTA (provisional)** | Tipos permitidos: PDF, Word, Excel, PowerPoint, JPG/JPEG, PNG. Sin ejecutables ni tipos peligrosos. Tamaño máximo pendiente de infraestructura, debe ser configurable. |
-| D18 | Calendario → detalle de mensaje | **PENDIENTE** | Requiere verificación funcional + decisión de UX posterior. |
+| D18 | Calendario → detalle de mensaje | **SUPERADA POR ACLARACIÓN DE ALCANCE** | Calendario/Recordatorios quedan FUERA DE ALCANCE ACTUAL de V2 (confirmado por el responsable, ETAPA 14B). No debe diseñarse ni implementarse. Conservada como evidencia histórica. |
 | D19 | Accesibilidad formal | **PENDIENTE** | Se seguirán buenas prácticas ya validadas en V1 mientras se define si hay estándar normativo formal. |
 | D20 | Autorización real en backend | **Tarea de arquitectura** (ya no es decisión de negocio pendiente) | Con D01 resuelto y D08 diferida pero obligada a ser desacoplada, la protección real de endpoints por rol se diseña en la fase de arquitectura, de forma independiente del mecanismo de autenticación concreto que se elija después. |
 
@@ -232,7 +234,11 @@ El responsable del proyecto aclaró que el objetivo inmediato de V2 **no** es re
 
 ### Decisiones que siguen realmente abiertas (no bloquean el diseño estructural)
 
-D04 (administración de Formatos), D06 (ancho mínimo móvil formal), D07 (PDF real de usuario), D08 (autenticación/sesión definitiva — **diferida**, no pendiente ni resuelta), D09 (categorías de Formatos configurables), D15 (recuperación de contraseña), D16 (política definitiva de contraseñas), D18 (comportamiento exacto calendario↔detalle), D19 (estándar de accesibilidad formal), y el esquema físico de la MySQL institucional (parte de D05). Todas se tratan como **puntos de extensión aislados** en la arquitectura de V2, no como diseño cerrado ni como información inventada.
+D04 (administración de Formatos — no bloquea el frontend actual, ver nota 14B), D06 (ancho mínimo móvil formal), D07 (PDF real de usuario), D08 (autenticación/sesión definitiva — **diferida**, no pendiente ni resuelta), D09 (categorías de Formatos configurables), D15 (recuperación de contraseña), D16 (política definitiva de contraseñas), D19 (estándar de accesibilidad formal), y el esquema físico de la MySQL institucional (parte de D05). Todas se tratan como **puntos de extensión aislados** en la arquitectura de V2, no como diseño cerrado ni como información inventada.
+
+### Nota de alcance — Calendario/Recordatorios (ETAPA 14B)
+
+D18 queda **SUPERADA POR ACLARACIÓN DE ALCANCE**: el responsable del proyecto confirmó que Calendario y Recordatorios no formaban parte del sistema real usado como referencia funcional y no forman parte del alcance actual de SIIntranet V2. No se espera información de Calendario/Recordatorios en la base de datos institucional. Ambas funciones quedan FUERA DE ALCANCE ACTUAL y no deben diseñarse ni implementarse; solo podrían reconsiderarse si el administrador/supervisor lo solicita explícitamente en el futuro. Ver también `docs/inventario-funcional-v1.md` (nota posterior de alcance) y `docs/arquitectura-v2.md`.
 
 ---
 

@@ -17,6 +17,10 @@ Este documento **no es un plan de implementación**: es el entregable de investi
 
 ---
 
+> **Nota posterior de alcance V2 (ETAPA 14B):** el código histórico auditado en este documento contiene Calendario y Recordatorios, pero el responsable del proyecto confirmó posteriormente que estas funciones no pertenecían al sistema real tomado como referencia funcional y que no forman parte del alcance actual de SIIntranet V2. No se espera información de Calendario/Recordatorios en la base de datos institucional. Las menciones a Calendario/Recordatorios en las secciones siguientes se conservan íntegramente como evidencia del prototipo auditado, no como requisito funcional vigente para V2. Ver `docs/decisiones-funcionales-v2.md` (D18) y `docs/arquitectura-v2.md` para el estado reconciliado.
+
+---
+
 ## 1. Resumen funcional del sistema
 
 SIIntranet es una intranet institucional del Poder Legislativo del Estado de México con cuatro funciones centrales: mensajería interna (envío/recepción de "documentos" con adjuntos simulados), un calendario con recordatorios personales, un repositorio de formatos institucionales agrupados por área, y administración de usuarios (solo para el rol Administrador). Hoy es una SPA Angular de un solo componente raíz que consume una API REST NestJS cuyo almacenamiento es enteramente en memoria (sin base de datos) y cuya autenticación es un mock sin JWT ni cifrado de contraseñas.
