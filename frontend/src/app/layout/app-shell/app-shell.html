@@ -1,33 +1,143 @@
-<header class="app-header">
-  <div class="app-header__brand">
-    <img
-      src="/assets/img/congreso_logo_horizontal-p-2000.png"
-      alt="Logotipo institucional"
-      class="app-header__logo"
-    />
-    <span class="app-header__title">SIIntranet</span>
+<div class="app-shell">
+  <div class="app-sidebar">
+    <div class="app-sidebar__brand">
+      <img
+        src="/assets/img/congreso_logo_horizontal-p-2000.png"
+        alt="Logotipo institucional"
+        class="app-sidebar__logo"
+      />
+      <span class="app-sidebar__title">SIIntranet</span>
+    </div>
+
+    <nav class="app-sidebar__nav" aria-label="Navegación principal">
+      <span class="app-nav__heading">Navegación</span>
+      @for (item of navPrincipal(); track item.path) {
+        <a
+          [routerLink]="item.path"
+          class="app-sidebar__link"
+          [class.app-sidebar__link--active]="esActivo(item)"
+          [attr.aria-current]="esActivo(item) ? 'page' : null"
+        >
+          <i class="bi {{ item.icon }}" aria-hidden="true"></i>
+          <span>{{ item.label }}</span>
+        </a>
+      }
+
+      @if (navAdministracion().length > 0) {
+        <span class="app-nav__heading">Administración</span>
+        @for (item of navAdministracion(); track item.path) {
+          <a
+            [routerLink]="item.path"
+            class="app-sidebar__link"
+            [class.app-sidebar__link--active]="esActivo(item)"
+            [attr.aria-current]="esActivo(item) ? 'page' : null"
+          >
+            <i class="bi {{ item.icon }}" aria-hidden="true"></i>
+            <span>{{ item.label }}</span>
+          </a>
+        }
+      }
+    </nav>
   </div>
 
-  <nav class="app-header__nav" aria-label="Navegación principal">
-    <a routerLink="/inicio">Inicio</a>
-    <a routerLink="/mensajes/recibidos">Mensajes</a>
-    <a routerLink="/formatos">Formatos</a>
-    @if (currentUser()?.rol === 'Administrador') {
-      <a routerLink="/administracion/usuarios">Administración</a>
+  <header class="app-mobile-header">
+    <div class="app-mobile-header__brand">
+      <img
+        src="/assets/img/congreso_logo_horizontal-p-2000.png"
+        alt="Logotipo institucional"
+        class="app-mobile-header__logo"
+      />
+      <span class="app-mobile-header__title">SIIntranet</span>
+    </div>
+    <button
+      #botonMenu
+      type="button"
+      class="btn btn-outline-secondary btn-sm app-mobile-header__toggle"
+      [attr.aria-expanded]="menuAbierto()"
+      aria-controls="app-drawer"
+      [attr.aria-label]="menuAbierto() ? 'Cerrar menú' : 'Abrir menú'"
+      (click)="alternarMenu()"
+    >
+      <i class="bi" [class.bi-list]="!menuAbierto()" [class.bi-x-lg]="menuAbierto()" aria-hidden="true"></i>
+    </button>
+  </header>
+
+  <div
+    class="app-drawer__backdrop"
+    [class.app-drawer__backdrop--visible]="menuAbierto()"
+    [attr.inert]="menuAbierto() ? null : ''"
+    (click)="cerrarMenu()"
+  ></div>
+
+  <nav
+    id="app-drawer"
+    class="app-drawer"
+    [class.app-drawer--abierto]="menuAbierto()"
+    [attr.inert]="menuAbierto() ? null : ''"
+    aria-label="Menú de navegación"
+  >
+    <span class="app-nav__heading">Navegación</span>
+    @for (item of navPrincipal(); track item.path) {
+      <a
+        [routerLink]="item.path"
+        class="app-drawer__link"
+        [class.app-drawer__link--active]="esActivo(item)"
+        [attr.aria-current]="esActivo(item) ? 'page' : null"
+        (click)="cerrarMenu()"
+      >
+        <i class="bi {{ item.icon }}" aria-hidden="true"></i>
+        <span>{{ item.label }}</span>
+      </a>
     }
+
+    @if (navAdministracion().length > 0) {
+      <span class="app-nav__heading">Administración</span>
+      @for (item of navAdministracion(); track item.path) {
+        <a
+          [routerLink]="item.path"
+          class="app-drawer__link"
+          [class.app-drawer__link--active]="esActivo(item)"
+          [attr.aria-current]="esActivo(item) ? 'page' : null"
+          (click)="cerrarMenu()"
+        >
+          <i class="bi {{ item.icon }}" aria-hidden="true"></i>
+          <span>{{ item.label }}</span>
+        </a>
+      }
+    }
+
+    <div class="app-drawer__usuario">
+      @if (currentUser(); as usuario) {
+        <span class="app-drawer__username">{{ usuario.nombre }}</span>
+      }
+      <button type="button" class="btn btn-sm app-header__logout" (click)="onLogout()">
+        <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+        Cerrar sesión
+      </button>
+    </div>
   </nav>
 
-  <div class="app-header__user">
-    @if (currentUser(); as usuario) {
-      <span class="app-header__username">{{ usuario.nombre }}</span>
-    }
-    <button type="button" class="btn btn-outline-secondary btn-sm" (click)="onLogout()">
-      <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
-      Cerrar sesión
-    </button>
-  </div>
-</header>
+  <div class="app-shell__main-wrapper" [attr.inert]="menuAbierto() ? '' : null">
+    <header class="app-header">
+      <!-- Logo SAF: pendiente de asset oficial. Cuando se reciba, va aquí,
+           a la izquierda del bloque de usuario, sin rediseñar el topbar. -->
+      <div class="app-header__user">
+        @if (currentUser(); as usuario) {
+          <span class="app-header__username">{{ usuario.nombre }}</span>
+        }
+        <button type="button" class="btn btn-sm app-header__logout" (click)="onLogout()">
+          <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+          Cerrar sesión
+        </button>
+      </div>
+    </header>
 
-<main class="app-main">
-  <router-outlet />
-</main>
+    <main class="app-main">
+      <router-outlet />
+    </main>
+
+    <footer class="app-footer">
+      <p class="mb-0">Poder Legislativo del Estado de México — Secretaría de Administración y Finanzas</p>
+    </footer>
+  </div>
+</div>
