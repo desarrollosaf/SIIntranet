@@ -1,0 +1,50 @@
+<section class="formatos-page">
+  <h1 class="h4">Formatos</h1>
+  <p class="text-muted">Consulta y descarga los documentos institucionales disponibles.</p>
+
+  @if (cargando()) {
+    <p>Cargando formatos…</p>
+  }
+
+  @if (!cargando() && error()) {
+    <p class="text-danger" role="alert">{{ error() }}</p>
+  }
+
+  @if (!cargando() && !error()) {
+    @for (grupo of grupos(); track grupo.categoria) {
+      <section class="formatos-page__categoria">
+        <h2 class="h6">{{ grupo.categoria }}</h2>
+
+        @if (grupo.formatos.length === 0) {
+          <p class="text-muted small">Aún no hay formatos disponibles.</p>
+        } @else {
+          <ul class="list-unstyled formatos-page__lista">
+            @for (formato of grupo.formatos; track formato.id) {
+              <li class="card mb-2 formatos-page__item">
+                <div class="card-body">
+                  <div class="fw-semibold formatos-page__nombre">{{ formato.nombre }}</div>
+                  <p class="formatos-page__descripcion">{{ formato.descripcion }}</p>
+
+                  <div class="text-muted small formatos-page__archivo">
+                    Archivo: {{ formato.archivo.nombreOriginal }}
+                  </div>
+                  <div class="text-muted small">
+                    Tamaño: {{ tamanoLegible(formato.archivo.tamano) }}
+                  </div>
+                  <div class="text-muted small">
+                    {{ formato.fechaCreacion | date: 'mediumDate' }}
+                  </div>
+
+                  <a [href]="urlDescarga(formato.id)" class="btn btn-sm btn-outline-primary mt-2">
+                    <i class="bi bi-download" aria-hidden="true"></i>
+                    Descargar
+                  </a>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    }
+  }
+</section>

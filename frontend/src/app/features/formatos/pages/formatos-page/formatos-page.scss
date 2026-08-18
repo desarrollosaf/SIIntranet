@@ -1,0 +1,31 @@
+.formatos-page {
+  padding: 1.5rem;
+}
+
+.formatos-page__categoria {
+  margin-bottom: 1.5rem;
+}
+
+.formatos-page__categoria h2 {
+  overflow-wrap: anywhere;
+}
+
+.formatos-page__lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.formatos-page__item {
+  overflow-wrap: anywhere;
+}
+
+.formatos-page__nombre,
+.formatos-page__descripcion,
+.formatos-page__archivo {
+  overflow-wrap: anywhere;
+}
+
+.formatos-page__descripcion {
+  white-space: pre-wrap;
+}

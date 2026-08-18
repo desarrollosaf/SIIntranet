@@ -97,4 +97,28 @@ describe('AppShell', () => {
 
     expect(enlaces).toContain('Mensajes');
   });
+
+  it('muestra el enlace de Formatos a un Usuario normal', () => {
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const enlaces = Array.from(compiled.querySelectorAll('a')).map((a) => a.textContent?.trim());
+
+    expect(enlaces).toContain('Formatos');
+  });
+
+  it('muestra el enlace de Formatos a un Administrador', () => {
+    establecerSesion({
+      id: 'dev-usuario-1',
+      nombre: 'admin',
+      usuario: 'admin',
+      rol: 'Administrador',
+    });
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const enlaces = Array.from(compiled.querySelectorAll('a')).map((a) => a.textContent?.trim());
+
+    expect(enlaces).toContain('Formatos');
+  });
 });

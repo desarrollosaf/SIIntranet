@@ -24,6 +24,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'formatos',
+        loadComponent: () =>
+          import('./features/formatos/pages/formatos-page/formatos-page').then(
+            (m) => m.FormatosPage,
+          ),
+      },
+      {
         path: 'administracion/usuarios',
         canActivate: [adminGuard],
         loadComponent: () =>

@@ -11,6 +11,7 @@
   <nav class="app-header__nav" aria-label="Navegación principal">
     <a routerLink="/inicio">Inicio</a>
     <a routerLink="/mensajes/recibidos">Mensajes</a>
+    <a routerLink="/formatos">Formatos</a>
     @if (currentUser()?.rol === 'Administrador') {
       <a routerLink="/administracion/usuarios">Administración</a>
     }
