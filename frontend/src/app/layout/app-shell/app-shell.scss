@@ -13,49 +13,190 @@ $color-heading-grupo: #adb5bd;
 $color-workspace: #f4f6f9;
 
 $sidebar-ancho: 16rem;
-$breakpoint-movil: 768px;
 
+// Altura real de la topbar (padding vertical 0.875rem × 2 + botón de cuenta
+// de 2.5rem = 4.25rem) — reutilizada por drawer/backdrop para comenzar
+// exactamente debajo de ella en <992px, sin cubrirla (ver MICROCORRECCIÓN
+// FINAL 15B.1).
+$header-altura: 4.25rem;
+
+// Equivalente al breakpoint `lg` de Bootstrap (992px). No se importa el
+// módulo de variables de Bootstrap aquí para no sumar otro import Sass
+// global (styles.scss ya importa Bootstrap completo) — se documenta el
+// valor en vez de importarlo. Por debajo: drawer overlay. Desde aquí:
+// sidebar persistente con push/collapse.
+$breakpoint-desktop: 992px;
+
+// ===== Shell raíz — header global arriba, cuerpo (sidebar + main) abajo.
+// El header NUNCA vive dentro del área que empuja/colapsa el sidebar, así
+// no se desplaza horizontalmente al abrir/cerrarlo (ver MICROCORRECCIÓN
+// 15B.1). =====
 .app-shell {
   display: flex;
+  flex-direction: column;
   min-height: 100dvh;
+}
+
+.app-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+// ===== Topbar global — branding + toggles a la izquierda, cuenta a la
+// derecha. Ocupa siempre el 100% del ancho y no cambia con el sidebar. =====
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-shrink: 0;
+  min-height: $header-altura;
+  padding: 0.875rem 1.75rem;
+  background-color: $color-superficie;
+  border-bottom: 1px solid $color-borde;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.app-header__start {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  min-width: 0;
+}
+
+.app-header__toggle-mobile {
+  display: none;
+}
+
+.app-header__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.app-header__logo {
+  height: 32px;
+  width: auto;
+  flex-shrink: 0;
+}
+
+.app-header__title {
+  font-weight: 700;
+  color: $color-vino;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// ===== Botón de cuenta (circular, iniciales) + menú desplegable =====
+.app-header__account {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.app-header__account-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: none;
+  background-color: $color-vino;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.875rem;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background-color: $color-vino-oscuro;
+  }
+}
+
+.app-header__account-panel {
+  display: none;
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  min-width: 14rem;
+  background-color: $color-superficie;
+  border: 1px solid $color-borde;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.15);
+  z-index: 1060;
+  overflow: hidden;
+}
+
+.app-header__account-panel--abierto {
+  display: block;
+}
+
+.app-header__account-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid $color-borde;
+}
+
+.app-header__account-nombre {
+  font-weight: 600;
+  color: $color-texto-nav;
+  overflow-wrap: anywhere;
+}
+
+.app-header__account-usuario,
+.app-header__account-rol {
+  font-size: 0.8125rem;
+  color: $color-icono-nav;
+  overflow-wrap: anywhere;
+}
+
+.app-header__account-logout {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: none;
+  color: $color-texto-nav;
+  font-size: 0.9375rem;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
 }
 
 // ===== Sidebar (desktop/laptop) — claro, el vino queda como acento =====
 .app-sidebar {
   width: $sidebar-ancho;
   flex-shrink: 0;
-  background-color: $color-superficie;
-  border-right: 1px solid $color-borde;
-  display: flex;
-  flex-direction: column;
-}
-
-.app-sidebar__brand {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.5rem;
-  padding: 1.75rem 1.5rem 1.25rem;
-}
-
-.app-sidebar__logo {
-  max-width: 9rem;
-  height: auto;
-}
-
-.app-sidebar__title {
-  font-weight: 700;
-  font-size: 1rem;
-  color: $color-vino;
-  letter-spacing: 0.02em;
-}
-
-.app-sidebar__nav {
   display: flex;
   flex-direction: column;
   gap: 0.125rem;
-  padding: 0.5rem 0.75rem 1rem;
-  flex: 1;
+  padding: 0.75rem;
+  background-color: $color-superficie;
+  border-right: 1px solid $color-borde;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: width 0.22s ease, padding 0.22s ease, border-color 0.22s ease;
+}
+
+// Colapsado: el sidebar desaparece por completo (sin rail de iconos) y
+// main-wrapper (flex: 1) recupera el espacio automáticamente — sin grid ni
+// márgenes duplicados, resuelto solo por flexbox.
+.app-sidebar--colapsado {
+  width: 0;
+  padding-left: 0;
+  padding-right: 0;
+  border-right-color: transparent;
 }
 
 // ===== Encabezados de grupo (Navegación / Administración) =====
@@ -111,46 +252,14 @@ $breakpoint-movil: 768px;
   }
 }
 
-// ===== Header compacto (móvil) =====
-.app-mobile-header {
-  display: none;
-  align-items: center;
-  justify-content: space-between;
-  background-color: $color-superficie;
-  border-bottom: 1px solid $color-borde;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-  padding: 0.625rem 1rem;
-}
-
-.app-mobile-header__brand {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  min-width: 0;
-}
-
-.app-mobile-header__logo {
-  height: 28px;
-  width: auto;
-  flex-shrink: 0;
-}
-
-.app-mobile-header__title {
-  font-weight: 700;
-  color: $color-vino;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.app-mobile-header__toggle {
-  flex-shrink: 0;
-}
-
-// ===== Drawer / menú móvil — misma estética clara del sidebar =====
+// ===== Drawer / menú móvil — misma estética clara del sidebar, dedicado
+// exclusivamente a navegación (la cuenta vive en la topbar). =====
 .app-drawer {
   position: fixed;
-  top: 0;
+  // Comienza justo debajo de la topbar (no en top: 0) para no cubrirla —
+  // top + bottom con position: fixed ya calculan la altura restante, sin
+  // necesidad de calc().
+  top: $header-altura;
   bottom: 0;
   left: 0;
   width: min(80vw, 20rem);
@@ -171,25 +280,13 @@ $breakpoint-movil: 768px;
   transform: translateX(0);
 }
 
-.app-drawer__usuario {
-  margin-top: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.5rem;
-  padding: 1rem 0.75rem 0.5rem;
-  border-top: 1px solid $color-borde;
-}
-
-.app-drawer__username {
-  overflow-wrap: anywhere;
-  font-weight: 600;
-  color: $color-texto-nav;
-}
-
 .app-drawer__backdrop {
   position: fixed;
-  inset: 0;
+  // Mismo criterio que .app-drawer: empieza debajo de la topbar.
+  top: $header-altura;
+  right: 0;
+  bottom: 0;
+  left: 0;
   background-color: rgba(15, 23, 42, 0.45);
   opacity: 0;
   pointer-events: none;
@@ -207,54 +304,8 @@ $breakpoint-movil: 768px;
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-height: 100dvh;
   min-width: 0;
   background-color: $color-workspace;
-}
-
-.app-header {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  min-height: 3.5rem;
-  padding: 0.875rem 1.75rem;
-  background-color: $color-superficie;
-  border-bottom: 1px solid $color-borde;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
-}
-
-.app-header__user {
-  display: flex;
-  align-items: center;
-  gap: 0.625rem;
-  padding: 0.375rem 0.75rem;
-  border-radius: 0.5rem;
-  background-color: $color-workspace;
-}
-
-.app-header__username {
-  overflow-wrap: anywhere;
-  font-weight: 600;
-  font-size: 0.9375rem;
-  color: $color-texto-nav;
-}
-
-.app-header__logout {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.375rem 0.75rem;
-  border-radius: 0.5rem;
-  border: 1px solid $color-borde;
-  background-color: $color-superficie;
-  color: $color-texto-nav;
-  font-size: 0.875rem;
-  font-weight: 500;
-
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.04);
-  }
 }
 
 .app-main {
@@ -275,13 +326,18 @@ $breakpoint-movil: 768px;
   border-top: 1px solid $color-borde;
 }
 
-@media (max-width: $breakpoint-movil) {
+// ===== Móvil/tablet (< lg): drawer overlay, sin sidebar persistente =====
+@media (max-width: $breakpoint-desktop - 1) {
   .app-sidebar {
     display: none;
   }
 
-  .app-mobile-header {
-    display: flex;
+  .app-header__toggle-desktop {
+    display: none;
+  }
+
+  .app-header__toggle-mobile {
+    display: inline-block;
   }
 
   .app-main {
@@ -289,9 +345,18 @@ $breakpoint-movil: 768px;
   }
 }
 
-@media (min-width: $breakpoint-movil + 1) {
+// ===== Desktop/laptop (>= lg): sidebar push/collapse, sin drawer =====
+@media (min-width: $breakpoint-desktop) {
   .app-drawer,
   .app-drawer__backdrop {
     display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-sidebar,
+  .app-drawer,
+  .app-drawer__backdrop {
+    transition: none;
   }
 }

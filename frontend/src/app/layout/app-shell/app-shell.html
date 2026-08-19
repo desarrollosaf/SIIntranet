@@ -1,15 +1,86 @@
 <div class="app-shell">
-  <div class="app-sidebar">
-    <div class="app-sidebar__brand">
-      <img
-        src="/assets/img/congreso_logo_horizontal-p-2000.png"
-        alt="Logotipo institucional"
-        class="app-sidebar__logo"
-      />
-      <span class="app-sidebar__title">SIIntranet</span>
+  <header class="app-header">
+    <div class="app-header__start">
+      <button
+        type="button"
+        class="btn btn-outline-secondary btn-sm app-header__toggle-desktop"
+        [attr.aria-expanded]="!sidebarColapsado()"
+        aria-controls="app-sidebar"
+        [attr.aria-label]="sidebarColapsado() ? 'Mostrar navegación' : 'Ocultar navegación'"
+        (click)="alternarSidebar()"
+      >
+        <i class="bi bi-list" aria-hidden="true"></i>
+      </button>
+
+      <button
+        #botonMenu
+        type="button"
+        class="btn btn-outline-secondary btn-sm app-header__toggle-mobile app-mobile-header__toggle"
+        [attr.aria-expanded]="menuAbierto()"
+        aria-controls="app-drawer"
+        [attr.aria-label]="menuAbierto() ? 'Cerrar menú' : 'Abrir menú'"
+        (click)="alternarMenu()"
+      >
+        <i class="bi bi-list" aria-hidden="true"></i>
+      </button>
+
+      <div class="app-header__brand">
+        <img
+          src="/assets/img/congreso_logo_horizontal-p-2000.png"
+          alt="Logotipo institucional"
+          class="app-header__logo"
+        />
+        <span class="app-header__title">SIIntranet</span>
+      </div>
     </div>
 
-    <nav class="app-sidebar__nav" aria-label="Navegación principal">
+    <!-- Logo SAF: pendiente de asset oficial. Cuando se reciba, va aquí, a
+         la izquierda del botón de cuenta, sin rediseñar el topbar. -->
+    <div class="app-header__account">
+      <button
+        #botonCuenta
+        type="button"
+        class="app-header__account-btn"
+        [attr.aria-expanded]="menuUsuarioAbierto()"
+        aria-controls="app-menu-cuenta"
+        aria-haspopup="menu"
+        [attr.aria-label]="'Cuenta de ' + (currentUser()?.nombre ?? 'usuario')"
+        (click)="alternarMenuUsuario()"
+      >
+        {{ iniciales() }}
+      </button>
+
+      <div
+        id="app-menu-cuenta"
+        #panelCuenta
+        class="app-header__account-panel"
+        [class.app-header__account-panel--abierto]="menuUsuarioAbierto()"
+        [attr.inert]="menuUsuarioAbierto() ? null : ''"
+        role="menu"
+      >
+        @if (currentUser(); as usuario) {
+          <div class="app-header__account-info">
+            <span class="app-header__account-nombre">{{ usuario.nombre }}</span>
+            <span class="app-header__account-usuario">{{ usuario.usuario }}</span>
+            <span class="app-header__account-rol">{{ usuario.rol }}</span>
+          </div>
+        }
+        <button type="button" role="menuitem" class="app-header__account-logout" (click)="onLogout()">
+          <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+          Cerrar sesión
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-body">
+    <nav
+      id="app-sidebar"
+      class="app-sidebar"
+      [class.app-sidebar--colapsado]="sidebarColapsado()"
+      [attr.inert]="sidebarColapsado() ? '' : null"
+      aria-label="Navegación principal"
+    >
       <span class="app-nav__heading">Navegación</span>
       @for (item of navPrincipal(); track item.path) {
         <a
@@ -38,29 +109,17 @@
         }
       }
     </nav>
-  </div>
 
-  <header class="app-mobile-header">
-    <div class="app-mobile-header__brand">
-      <img
-        src="/assets/img/congreso_logo_horizontal-p-2000.png"
-        alt="Logotipo institucional"
-        class="app-mobile-header__logo"
-      />
-      <span class="app-mobile-header__title">SIIntranet</span>
+    <div class="app-shell__main-wrapper" [attr.inert]="menuAbierto() ? '' : null">
+      <main class="app-main">
+        <router-outlet />
+      </main>
+
+      <footer class="app-footer">
+        <p class="mb-0">Poder Legislativo del Estado de México — Secretaría de Administración y Finanzas</p>
+      </footer>
     </div>
-    <button
-      #botonMenu
-      type="button"
-      class="btn btn-outline-secondary btn-sm app-mobile-header__toggle"
-      [attr.aria-expanded]="menuAbierto()"
-      aria-controls="app-drawer"
-      [attr.aria-label]="menuAbierto() ? 'Cerrar menú' : 'Abrir menú'"
-      (click)="alternarMenu()"
-    >
-      <i class="bi" [class.bi-list]="!menuAbierto()" [class.bi-x-lg]="menuAbierto()" aria-hidden="true"></i>
-    </button>
-  </header>
+  </div>
 
   <div
     class="app-drawer__backdrop"
@@ -105,39 +164,5 @@
         </a>
       }
     }
-
-    <div class="app-drawer__usuario">
-      @if (currentUser(); as usuario) {
-        <span class="app-drawer__username">{{ usuario.nombre }}</span>
-      }
-      <button type="button" class="btn btn-sm app-header__logout" (click)="onLogout()">
-        <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
-        Cerrar sesión
-      </button>
-    </div>
   </nav>
-
-  <div class="app-shell__main-wrapper" [attr.inert]="menuAbierto() ? '' : null">
-    <header class="app-header">
-      <!-- Logo SAF: pendiente de asset oficial. Cuando se reciba, va aquí,
-           a la izquierda del bloque de usuario, sin rediseñar el topbar. -->
-      <div class="app-header__user">
-        @if (currentUser(); as usuario) {
-          <span class="app-header__username">{{ usuario.nombre }}</span>
-        }
-        <button type="button" class="btn btn-sm app-header__logout" (click)="onLogout()">
-          <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
-          Cerrar sesión
-        </button>
-      </div>
-    </header>
-
-    <main class="app-main">
-      <router-outlet />
-    </main>
-
-    <footer class="app-footer">
-      <p class="mb-0">Poder Legislativo del Estado de México — Secretaría de Administración y Finanzas</p>
-    </footer>
-  </div>
 </div>
