@@ -39,6 +39,21 @@ describe('UsuariosPage', () => {
     expect(component['cargando']()).toBe(false);
   });
 
+  it('el hero muestra "Administración" sin introducir un h1 duplicado', () => {
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelectorAll('h1').length).toBe(1);
+    expect(compiled.querySelector('h1')?.textContent?.trim()).toBe('Administración');
+  });
+
+  it('conserva "Administración de usuarios" como encabezado secundario (h2)', () => {
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('h2')?.textContent?.trim()).toBe('Administración de usuarios');
+  });
+
   it('muestra un mensaje de error si la carga falla', () => {
     vi.spyOn(usuariosService, 'listar').mockReturnValue(throwError(() => new Error('falla')));
 

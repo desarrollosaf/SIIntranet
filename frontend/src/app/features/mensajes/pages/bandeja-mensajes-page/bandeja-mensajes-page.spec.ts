@@ -81,6 +81,18 @@ describe('BandejaMensajesPage', () => {
     expect(fixture.componentInstance['cargando']()).toBe(false);
   });
 
+  it('el hero muestra "Bandeja de entrada" con recibidos', () => {
+    configurar('recibidos');
+    vi.spyOn(mensajesService, 'recibidos').mockReturnValue(of([recibido]));
+    crearFixture();
+
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelectorAll('h1').length).toBe(1);
+    expect(compiled.querySelector('h1')?.textContent?.trim()).toBe('Bandeja de entrada');
+  });
+
   it('carga enviados cuando route.data.tipo es "enviados"', () => {
     configurar('enviados');
     vi.spyOn(mensajesService, 'enviados').mockReturnValue(of([enviado]));
@@ -90,6 +102,17 @@ describe('BandejaMensajesPage', () => {
 
     expect(mensajesService.enviados).toHaveBeenCalled();
     expect(fixture.componentInstance['enviados']()).toEqual([enviado]);
+  });
+
+  it('el hero sigue mostrando "Bandeja de entrada" con enviados', () => {
+    configurar('enviados');
+    vi.spyOn(mensajesService, 'enviados').mockReturnValue(of([enviado]));
+    crearFixture();
+
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('h1')?.textContent?.trim()).toBe('Bandeja de entrada');
   });
 
   it('muestra un mensaje de error si la carga falla', () => {

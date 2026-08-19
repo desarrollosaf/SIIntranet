@@ -1,19 +1,20 @@
 <section class="redactar-mensaje-page">
-  <h1 class="h4">{{ modoRespuesta() ? 'Responder mensaje' : 'Redactar mensaje' }}</h1>
+  <app-page-hero [titulo]="tituloHero()" [icono]="iconoHero()" />
 
-  @if (modoRespuesta() && cargandoOriginal()) {
-    <p>Cargando mensaje original…</p>
-  }
+  <div class="redactar-mensaje-page__form-wrapper">
+    @if (modoRespuesta() && cargandoOriginal()) {
+      <p>Cargando mensaje original…</p>
+    }
 
-  @if (modoRespuesta() && errorOriginal()) {
-    <p class="text-danger" role="alert">{{ errorOriginal() }}</p>
-  }
+    @if (modoRespuesta() && errorOriginal()) {
+      <p class="text-danger" role="alert">{{ errorOriginal() }}</p>
+    }
 
-  @if (errorUsuarios()) {
-    <p class="text-danger" role="alert">{{ errorUsuarios() }}</p>
-  }
+    @if (errorUsuarios()) {
+      <p class="text-danger" role="alert">{{ errorUsuarios() }}</p>
+    }
 
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
     <div class="mb-3">
       <label for="titulo" class="form-label">Título</label>
       <input
@@ -131,4 +132,5 @@
       {{ enviando() ? 'Enviando…' : 'Enviar' }}
     </button>
   </form>
+  </div>
 </section>

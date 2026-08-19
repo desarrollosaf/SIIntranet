@@ -3,6 +3,7 @@ import { DatePipe } from '@angular/common';
 import { FormatosService } from '../../services/formatos.service';
 import { Formato } from '../../models/formato.model';
 import { APARTADOS_FORMATOS } from '../../models/apartados-formatos';
+import { PageHero } from '../../../../shared/components/page-hero/page-hero';
 
 interface GrupoFormatos {
   categoria: string;
@@ -11,7 +12,7 @@ interface GrupoFormatos {
 
 @Component({
   selector: 'app-formatos-page',
-  imports: [DatePipe],
+  imports: [DatePipe, PageHero],
   templateUrl: './formatos-page.html',
   styleUrl: './formatos-page.scss',
 })

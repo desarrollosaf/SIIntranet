@@ -4,12 +4,13 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { MensajesService } from '../../services/mensajes.service';
 import { MensajeEnviado, MensajeRecibido } from '../../models/mensaje.model';
+import { PageHero } from '../../../../shared/components/page-hero/page-hero';
 
 type TipoBandeja = 'recibidos' | 'enviados';
 
 @Component({
   selector: 'app-bandeja-mensajes-page',
-  imports: [RouterLink, DatePipe],
+  imports: [RouterLink, DatePipe, PageHero],
   templateUrl: './bandeja-mensajes-page.html',
   styleUrl: './bandeja-mensajes-page.scss',
 })

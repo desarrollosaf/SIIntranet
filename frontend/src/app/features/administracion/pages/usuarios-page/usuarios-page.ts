@@ -2,10 +2,11 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UsuariosService } from '../../../usuarios/services/usuarios.service';
 import { Usuario } from '../../../usuarios/models/usuario.model';
+import { PageHero } from '../../../../shared/components/page-hero/page-hero';
 
 @Component({
   selector: 'app-usuarios-page',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, PageHero],
   templateUrl: './usuarios-page.html',
   styleUrl: './usuarios-page.scss',
 })

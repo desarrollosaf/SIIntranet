@@ -1,5 +1,7 @@
 <section class="inicio">
-  <h1>Bienvenido, {{ currentUser()?.nombre }}</h1>
+  <app-page-hero titulo="Inicio" icono="bi-house-door" />
+
+  <p>Bienvenido, {{ currentUser()?.nombre }}.</p>
   <p>
     SIIntranet es el sistema interno para la gestión de mensajería y consulta
     de documentos institucionales.

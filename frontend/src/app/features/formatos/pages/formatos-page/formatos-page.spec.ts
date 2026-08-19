@@ -72,6 +72,18 @@ describe('FormatosPage', () => {
     expect(spy).toHaveBeenCalled();
   });
 
+  it('el hero muestra "Formatos" como único h1', () => {
+    configurar();
+    vi.spyOn(formatosService, 'listar').mockReturnValue(of([]));
+    crearFixture();
+
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelectorAll('h1').length).toBe(1);
+    expect(compiled.querySelector('h1')?.textContent?.trim()).toBe('Formatos');
+  });
+
   it('muestra un estado de carga mientras la petición está pendiente', () => {
     configurar();
     vi.spyOn(formatosService, 'listar').mockReturnValue(new Subject<Formato[]>());

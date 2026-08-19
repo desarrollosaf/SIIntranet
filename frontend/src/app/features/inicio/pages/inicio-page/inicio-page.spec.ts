@@ -33,8 +33,14 @@ describe('InicioPage', () => {
     expect(component).toBeTruthy();
   });
 
-  it('renderiza el nombre del CurrentUser con sesión provisional válida', () => {
+  it('el hero muestra "Inicio" como único h1 de la página', () => {
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('sergio');
+    expect(compiled.querySelectorAll('h1').length).toBe(1);
+    expect(compiled.querySelector('h1')?.textContent?.trim()).toBe('Inicio');
+  });
+
+  it('sigue mostrando el nombre del CurrentUser con sesión provisional válida', () => {
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('sergio');
   });
 });

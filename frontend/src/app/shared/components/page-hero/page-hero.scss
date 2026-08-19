@@ -1,0 +1,60 @@
+// Color institucional PROVISIONAL de desarrollo — mismo valor vino usado en
+// el AppShell (frontend/src/app/layout/app-shell/app-shell.scss), sin
+// manual de identidad confirmado todavía. Declarado aquí de forma local e
+// independiente: NO se importa app-shell.scss ni se crea dependencia entre
+// componentes. Sustituir cuando exista un valor oficial.
+$color-vino: #6d1a35;
+$color-vino-tint: #fbf3f5;
+$color-borde: #e9ecef;
+
+.page-hero {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid $color-borde;
+  border-left: 4px solid $color-vino;
+  border-radius: 0.875rem;
+  background: linear-gradient(135deg, #ffffff 0%, $color-vino-tint 100%);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.page-hero__icon-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.625rem;
+  background-color: $color-vino;
+  color: #ffffff;
+  font-size: 1.35rem;
+}
+
+.page-hero__title {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #212529;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 576px) {
+  .page-hero {
+    padding: 1rem 1.125rem;
+    gap: 0.75rem;
+    border-radius: 0.75rem;
+  }
+
+  .page-hero__icon-tile {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1.1rem;
+  }
+
+  .page-hero__title {
+    font-size: 1.375rem;
+  }
+}

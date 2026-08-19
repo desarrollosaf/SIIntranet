@@ -1,9 +1,10 @@
 import { Component, inject } from '@angular/core';
 import { AuthService } from '../../../../core/auth/auth.service';
+import { PageHero } from '../../../../shared/components/page-hero/page-hero';
 
 @Component({
   selector: 'app-inicio-page',
-  imports: [],
+  imports: [PageHero],
   templateUrl: './inicio-page.html',
   styleUrl: './inicio-page.scss',
 })

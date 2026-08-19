@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -8,6 +8,7 @@ import { ArchivosService } from '../../../archivos/services/archivos.service';
 import { Archivo } from '../../../archivos/models/archivo.model';
 import { MensajesService } from '../../services/mensajes.service';
 import { esMensajeRecibido } from '../../models/mensaje.model';
+import { PageHero } from '../../../../shared/components/page-hero/page-hero';
 
 interface SeleccionArchivo {
   file: File;
@@ -16,7 +17,7 @@ interface SeleccionArchivo {
 
 @Component({
   selector: 'app-redactar-mensaje-page',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, PageHero],
   templateUrl: './redactar-mensaje-page.html',
   styleUrl: './redactar-mensaje-page.scss',
 })
@@ -40,6 +41,13 @@ export class RedactarMensajePage {
   protected readonly cargandoOriginal = signal(false);
   protected readonly errorOriginal = signal<string | null>(null);
   protected readonly remitenteOriginalId = signal<string | null>(null);
+
+  protected readonly tituloHero = computed(() =>
+    this.modoRespuesta() ? 'Responder mensaje' : 'Mensaje nuevo',
+  );
+  protected readonly iconoHero = computed(() =>
+    this.modoRespuesta() ? 'bi-reply' : 'bi-pencil-square',
+  );
 
   private respuestaAId: string | null = null;
 

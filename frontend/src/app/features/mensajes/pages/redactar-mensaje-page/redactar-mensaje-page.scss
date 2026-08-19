@@ -1,5 +1,10 @@
 .redactar-mensaje-page {
   padding: 1.5rem;
+}
+
+// El hero ocupa el ancho disponible de la página; solo el formulario
+// conserva el ancho máximo deliberadamente reducido de siempre.
+.redactar-mensaje-page__form-wrapper {
   max-width: 32rem;
 }
 

@@ -63,6 +63,14 @@ describe('RedactarMensajePage', () => {
     expect(component['usuarios']()).toEqual(usuarios);
   });
 
+  it('el hero muestra "Mensaje nuevo" en modo normal', () => {
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelectorAll('h1').length).toBe(1);
+    expect(compiled.querySelector('h1')?.textContent?.trim()).toBe('Mensaje nuevo');
+  });
+
   describe('selección de destinatarios mediante checkboxes', () => {
     it('marcar un checkbox añade el id del usuario', () => {
       fixture.detectChanges();
@@ -378,6 +386,18 @@ describe('RedactarMensajePage — modo respuesta', () => {
     fixture = TestBed.createComponent(RedactarMensajePage);
     component = fixture.componentInstance;
   }
+
+  it('el hero muestra "Responder mensaje" en modo respuesta', () => {
+    configurar();
+    vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(of(originalValido));
+    crearFixture();
+
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelectorAll('h1').length).toBe(1);
+    expect(compiled.querySelector('h1')?.textContent?.trim()).toBe('Responder mensaje');
+  });
 
   it('carga el mensaje original y precarga al remitente como destinatario obligatorio', () => {
     configurar();
