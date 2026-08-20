@@ -1,102 +1,127 @@
 <section class="bandeja-page">
   <app-page-hero titulo="Bandeja de entrada" icono="bi-inbox" />
 
-  <div class="bandeja-page__acciones">
-    <div class="d-flex flex-wrap gap-2">
-      <div class="btn-group" role="group" aria-label="Tipo de bandeja">
+  <div class="bandeja-page__wrapper">
+    <div class="bandeja-page__herramientas">
+      <nav class="bandeja-page__selector" aria-label="Tipo de bandeja">
         <a
           routerLink="/mensajes/recibidos"
-          class="btn btn-sm"
-          [class.btn-primary]="tipo() === 'recibidos'"
-          [class.btn-outline-primary]="tipo() !== 'recibidos'"
+          class="bandeja-page__selector-opcion"
+          [class.bandeja-page__selector-opcion--activa]="tipo() === 'recibidos'"
+          [attr.aria-current]="tipo() === 'recibidos' ? 'page' : null"
         >
           Recibidos
         </a>
         <a
           routerLink="/mensajes/enviados"
-          class="btn btn-sm"
-          [class.btn-primary]="tipo() === 'enviados'"
-          [class.btn-outline-primary]="tipo() !== 'enviados'"
+          class="bandeja-page__selector-opcion"
+          [class.bandeja-page__selector-opcion--activa]="tipo() === 'enviados'"
+          [attr.aria-current]="tipo() === 'enviados' ? 'page' : null"
         >
           Enviados
         </a>
+      </nav>
+
+      <div class="bandeja-page__buscador">
+        <label for="buscador-mensajes" class="visually-hidden">Buscar mensajes</label>
+        <input
+          id="buscador-mensajes"
+          type="search"
+          class="form-control"
+          placeholder="Buscar mensajes..."
+          [value]="terminoBusqueda()"
+          (input)="onBuscar($event)"
+        />
       </div>
-      <a routerLink="/mensajes/redactar" class="btn btn-sm btn-success">Redactar</a>
     </div>
-  </div>
 
-  @if (cargando()) {
-    <p>Cargando mensajes…</p>
-  }
-
-  @if (error()) {
-    <p class="text-danger" role="alert">{{ error() }}</p>
-  }
-
-  @if (!cargando() && !error() && tipo() === 'recibidos') {
-    @if (recibidos().length === 0) {
-      <p class="text-muted">No tienes mensajes recibidos.</p>
-    } @else {
-      <ul class="list-unstyled bandeja-page__lista">
-        @for (mensaje of recibidos(); track mensaje.id) {
-          <li
-            class="card mb-2"
-            [class.bandeja-page__item--nuevo]="mensaje.contenidoDisponible && mensaje.estadoLectura === 'Nuevo'"
-          >
-            <div class="card-body bandeja-page__fila">
-              <div>
-                @if (mensaje.contenidoDisponible) {
-                  <div class="fw-semibold">{{ mensaje.titulo }}</div>
-                  <div class="text-muted small">De: {{ mensaje.remitente.nombre }}</div>
-                } @else {
-                  <div class="fst-italic text-muted">Mensaje eliminado por el remitente</div>
-                }
-                <div class="text-muted small">{{ mensaje.fechaCreacion | date: 'short' }}</div>
-              </div>
-              <div class="bandeja-page__estados">
-                <span class="badge text-bg-secondary">{{ mensaje.estadoLectura }}</span>
-                <span class="badge text-bg-light">{{ mensaje.estadoRespuesta }}</span>
-                <a [routerLink]="['/mensajes', mensaje.id]" class="btn btn-sm btn-outline-primary">Ver</a>
-              </div>
-            </div>
-          </li>
-        }
-      </ul>
+    @if (cargando()) {
+      <p>Cargando mensajes…</p>
     }
-  }
 
-  @if (!cargando() && !error() && tipo() === 'enviados') {
-    @if (enviados().length === 0) {
-      <p class="text-muted">No has enviado mensajes.</p>
-    } @else {
-      <ul class="list-unstyled bandeja-page__lista">
-        @for (mensaje of enviados(); track mensaje.id) {
-          <li class="card mb-2">
-            <div class="card-body bandeja-page__fila">
-              <div>
-                @if (mensaje.contenidoDisponible) {
-                  <div class="fw-semibold">{{ mensaje.titulo }}</div>
-                  <div class="text-muted small">Para: {{ nombresDestinatarios(mensaje) }}</div>
-                } @else {
-                  <div class="fst-italic text-muted">Mensaje eliminado</div>
-                }
-                <div class="text-muted small">{{ mensaje.fechaCreacion | date: 'short' }}</div>
-              </div>
-              <div class="bandeja-page__estados">
-                <span
-                  class="badge"
-                  [class.text-bg-success]="mensaje.estado === 'Enviado'"
-                  [class.text-bg-warning]="mensaje.estado === 'Cancelado'"
-                  [class.text-bg-secondary]="mensaje.estado === 'Eliminado'"
-                >
-                  {{ mensaje.estado }}
+    @if (error()) {
+      <p class="text-danger" role="alert">{{ error() }}</p>
+    }
+
+    @if (!cargando() && !error() && tipo() === 'recibidos') {
+      @if (recibidos().length === 0) {
+        <p class="text-muted">No tienes mensajes recibidos.</p>
+      } @else if (recibidosFiltrados().length === 0) {
+        <p class="text-muted">No se encontraron mensajes.</p>
+      } @else {
+        <ul class="list-unstyled bandeja-page__lista">
+          @for (mensaje of recibidosFiltrados(); track mensaje.id) {
+            <li>
+              <a [routerLink]="['/mensajes', mensaje.id]" class="bandeja-page__fila">
+                <span class="bandeja-page__fila-info">
+                  @if (mensaje.contenidoDisponible) {
+                    <span
+                      class="bandeja-page__fila-titulo"
+                      [class.bandeja-page__fila-titulo--nuevo]="mensaje.estadoLectura === 'Nuevo'"
+                    >
+                      {{ mensaje.titulo }}
+                    </span>
+                  } @else {
+                    <span class="bandeja-page__fila-titulo fst-italic text-muted">
+                      Mensaje eliminado por el remitente
+                    </span>
+                  }
+                  <span class="bandeja-page__fila-meta">
+                    {{ mensaje.remitente.nombre }} · {{ mensaje.fechaCreacion | date: 'short' }}
+                  </span>
                 </span>
-                <a [routerLink]="['/mensajes', mensaje.id]" class="btn btn-sm btn-outline-primary">Ver</a>
-              </div>
-            </div>
-          </li>
-        }
-      </ul>
+                <span class="bandeja-page__fila-estados">
+                  <span
+                    class="badge"
+                    [class.text-bg-primary]="mensaje.estadoLectura === 'Nuevo'"
+                    [class.text-bg-light]="mensaje.estadoLectura !== 'Nuevo'"
+                  >
+                    {{ mensaje.estadoLectura }}
+                  </span>
+                  <span class="badge text-bg-light">{{ mensaje.estadoRespuesta }}</span>
+                </span>
+              </a>
+            </li>
+          }
+        </ul>
+      }
     }
-  }
+
+    @if (!cargando() && !error() && tipo() === 'enviados') {
+      @if (enviados().length === 0) {
+        <p class="text-muted">No has enviado mensajes.</p>
+      } @else if (enviadosFiltrados().length === 0) {
+        <p class="text-muted">No se encontraron mensajes.</p>
+      } @else {
+        <ul class="list-unstyled bandeja-page__lista">
+          @for (mensaje of enviadosFiltrados(); track mensaje.id) {
+            <li>
+              <a [routerLink]="['/mensajes', mensaje.id]" class="bandeja-page__fila">
+                <span class="bandeja-page__fila-info">
+                  @if (mensaje.contenidoDisponible) {
+                    <span class="bandeja-page__fila-titulo">{{ mensaje.titulo }}</span>
+                  } @else {
+                    <span class="bandeja-page__fila-titulo fst-italic text-muted">Mensaje eliminado</span>
+                  }
+                  <span class="bandeja-page__fila-meta">
+                    Para: {{ nombresDestinatarios(mensaje) }} · {{ mensaje.fechaCreacion | date: 'short' }}
+                  </span>
+                </span>
+                <span class="bandeja-page__fila-estados">
+                  <span
+                    class="badge"
+                    [class.text-bg-success]="mensaje.estado === 'Enviado'"
+                    [class.text-bg-warning]="mensaje.estado === 'Cancelado'"
+                    [class.text-bg-secondary]="mensaje.estado === 'Eliminado'"
+                  >
+                    {{ mensaje.estado }}
+                  </span>
+                </span>
+              </a>
+            </li>
+          }
+        </ul>
+      }
+    }
+  </div>
 </section>

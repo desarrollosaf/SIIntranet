@@ -1,31 +1,155 @@
+// Color institucional PROVISIONAL de desarrollo — mismo valor usado en el
+// resto del proyecto (AppShell/PageHero/Inicio/Mensaje nuevo), sin manual de
+// identidad confirmado todavía. Declarado aquí de forma local e
+// independiente, sin crear dependencia entre componentes.
+$color-vino: #6d1a35;
+$color-borde: #e9ecef;
+
 .bandeja-page {
   padding: 1.5rem;
 }
 
-.bandeja-page__acciones {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-bottom: 1.25rem;
+.bandeja-page__wrapper {
+  max-width: 62.5rem; // ~1000px, mismo criterio que Mensaje nuevo/Inicio
+  margin-inline: auto;
 }
 
-.bandeja-page__item--nuevo {
-  border-left: 4px solid #0d6efd;
+.bandeja-page__herramientas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+// ===== Selector Recibidos/Enviados: segmented control con acento vino,
+// sin azul/verde Bootstrap =====
+.bandeja-page__selector {
+  display: inline-flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  background: #f1f3f5;
+  border-radius: 0.625rem;
+}
+
+.bandeja-page__selector-opcion {
+  padding: 0.4rem 0.9rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #495057;
+  text-decoration: none;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.bandeja-page__selector-opcion:hover {
+  color: $color-vino;
+}
+
+.bandeja-page__selector-opcion:focus-visible {
+  outline: 2px solid $color-vino;
+  outline-offset: 2px;
+}
+
+.bandeja-page__selector-opcion--activa {
+  background: #ffffff;
+  color: $color-vino;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.bandeja-page__buscador {
+  flex: 1 1 16rem;
+  max-width: 20rem;
+}
+
+@media (min-width: 768px) {
+  .bandeja-page__buscador {
+    margin-left: auto;
+  }
+}
+
+// ===== Lista: UNA superficie agrupada, filas separadas por divisor
+// horizontal — no cards independientes por mensaje =====
+.bandeja-page__lista {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border: 1px solid $color-borde;
+  border-radius: 0.875rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+.bandeja-page__lista li {
+  border-bottom: 1px solid $color-borde;
+}
+
+.bandeja-page__lista li:last-child {
+  border-bottom: none;
 }
 
 .bandeja-page__fila {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.375rem 1rem;
+  padding: 0.875rem 1.125rem;
+  color: inherit;
+  text-decoration: none;
+  transition: background-color 0.15s ease;
 }
 
-.bandeja-page__estados {
+.bandeja-page__fila:hover {
+  background-color: #f8f5f6;
+}
+
+.bandeja-page__fila:focus-visible {
+  outline: 2px solid $color-vino;
+  outline-offset: -2px;
+}
+
+.bandeja-page__fila-info {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.bandeja-page__fila-titulo {
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+// Sin barra ni fondo azul: el mensaje Nuevo se distingue por mayor peso
+// tipográfico + el badge de texto ya presente en la fila.
+.bandeja-page__fila-titulo--nuevo {
+  font-weight: 700;
+}
+
+.bandeja-page__fila-meta {
+  font-size: 0.8125rem;
+  color: #868e96;
+  overflow-wrap: anywhere;
+}
+
+.bandeja-page__fila-estados {
+  display: flex;
+  flex-shrink: 0;
   flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+@media (max-width: 576px) {
+  .bandeja-page {
+    padding: 1.125rem;
+  }
+
+  .bandeja-page__buscador {
+    flex-basis: 100%;
+    max-width: none;
+  }
 }
