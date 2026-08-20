@@ -351,6 +351,25 @@ $breakpoint-desktop: 992px;
   .app-drawer__backdrop {
     display: none;
   }
+
+  // Topbar y sidebar persistentes durante el scroll — sticky, no fixed: el
+  // sidebar sigue formando parte del flujo (app-body/flex), no requiere
+  // compensar márgenes a mano y respeta el ancho que ya ocupaba. El sidebar
+  // se limita a la altura visible restante bajo la topbar y solo scrollea
+  // internamente si su propio contenido (los links de navegación) la supera.
+  .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+  }
+
+  .app-sidebar {
+    position: sticky;
+    top: $header-altura;
+    max-height: calc(100dvh - #{$header-altura});
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
