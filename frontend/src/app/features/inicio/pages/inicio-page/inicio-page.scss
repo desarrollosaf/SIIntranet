@@ -1,3 +1,232 @@
+// Color institucional PROVISIONAL de desarrollo — mismo valor usado en
+// AppShell y PageHero, sin manual de identidad confirmado todavía.
+// Declarado aquí de forma local e independiente: NO se importa
+// app-shell.scss ni page-hero.scss, ni se crea dependencia entre componentes.
+$color-vino: #6d1a35;
+$color-vino-tint: #fbf3f5;
+$color-borde: #e9ecef;
+
 .inicio {
   padding: 1.5rem;
+}
+
+.inicio__bienvenida {
+  margin: 0 0 1.75rem;
+  font-size: 1.05rem;
+  color: #495057;
+}
+
+// Secuencia vertical simple: título + contenido, separados por espacio, sin
+// panel exterior envolviendo cada sección (ETAPA 15C.1 — rediseño limpio).
+.inicio__seccion {
+  margin-bottom: 2rem;
+}
+
+.inicio__seccion:last-child {
+  margin-bottom: 0;
+}
+
+.inicio__titulo {
+  margin: 0 0 0.875rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #212529;
+}
+
+.inicio__encabezado-seccion {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.875rem;
+}
+
+.inicio__encabezado-seccion .inicio__titulo {
+  margin-bottom: 0;
+}
+
+.inicio__ver-bandeja {
+  flex-shrink: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: $color-vino;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.inicio__ver-bandeja:hover,
+.inicio__ver-bandeja:focus-visible {
+  text-decoration: underline;
+}
+
+// Accesos rápidos: la card individual es la única "caja" de esta sección —
+// no hay contenedor adicional envolviendo el grid.
+.inicio__accesos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+
+.acceso-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  height: 100%;
+  padding: 1rem 1.125rem;
+  background: #ffffff;
+  border: 1px solid $color-borde;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  color: inherit;
+  text-decoration: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.acceso-card:hover {
+  border-color: $color-vino;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.acceso-card:focus-visible {
+  outline: 2px solid $color-vino;
+  outline-offset: 2px;
+}
+
+.acceso-card__icono {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.625rem;
+  background-color: $color-vino-tint;
+  color: $color-vino;
+  font-size: 1.15rem;
+}
+
+.acceso-card__texto {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.acceso-card__nombre {
+  font-weight: 600;
+  color: #212529;
+}
+
+.acceso-card__descripcion {
+  font-size: 0.825rem;
+  color: #6c757d;
+}
+
+// Mensajes recientes y Enlaces institucionales comparten este mismo patrón:
+// UNA lista agrupada (una sola sombra de bloque), filas separadas por
+// divisores horizontales — nunca cards ni sombras por fila.
+.inicio__lista {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border: 1px solid $color-borde;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+.inicio__lista li {
+  border-bottom: 1px solid $color-borde;
+}
+
+.inicio__lista li:last-child {
+  border-bottom: none;
+}
+
+.inicio__fila-mensaje {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  color: inherit;
+  text-decoration: none;
+  transition: background-color 0.15s ease;
+}
+
+.inicio__fila-mensaje:hover {
+  background-color: $color-vino-tint;
+}
+
+.inicio__fila-mensaje:focus-visible {
+  outline: 2px solid $color-vino;
+  outline-offset: -2px;
+}
+
+.inicio__fila-mensaje-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.inicio__fila-mensaje-titulo {
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+// Sin barra ni sombra: el mensaje Nuevo se distingue por el badge de texto
+// y, de forma sobria, por un mayor peso tipográfico del título.
+.inicio__fila-mensaje--nuevo .inicio__fila-mensaje-titulo {
+  font-weight: 700;
+}
+
+.inicio__fila-mensaje-meta {
+  font-size: 0.8rem;
+  color: #6c757d;
+  overflow-wrap: anywhere;
+}
+
+.inicio__fila-enlace {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+a.inicio__fila-enlace:hover {
+  background-color: $color-vino-tint;
+}
+
+a.inicio__fila-enlace:focus-visible {
+  outline: 2px solid $color-vino;
+  outline-offset: -2px;
+}
+
+.inicio__fila-enlace-nombre {
+  min-width: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.inicio__fila-enlace--pendiente {
+  color: #6c757d;
+}
+
+.inicio__fila-enlace-estado {
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  color: #adb5bd;
+}
+
+@media (max-width: 576px) {
+  .inicio {
+    padding: 1.125rem;
+  }
 }

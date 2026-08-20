@@ -1,9 +1,97 @@
 <section class="inicio">
   <app-page-hero titulo="Inicio" icono="bi-house-door" />
 
-  <p>Bienvenido, {{ currentUser()?.nombre }}.</p>
-  <p>
-    SIIntranet es el sistema interno para la gestión de mensajería y consulta
-    de documentos institucionales.
-  </p>
+  <p class="inicio__bienvenida">Bienvenido, {{ currentUser()?.nombre }}.</p>
+
+  <section class="inicio__seccion" aria-labelledby="inicio-accesos-titulo">
+    <h2 id="inicio-accesos-titulo" class="inicio__titulo">Accesos rápidos</h2>
+    <ul class="list-unstyled inicio__accesos-grid">
+      @for (acceso of accesosVisibles(); track acceso.path) {
+        <li>
+          <a [routerLink]="acceso.path" class="acceso-card">
+            <span class="acceso-card__icono">
+              <i class="bi {{ acceso.icon }}" aria-hidden="true"></i>
+            </span>
+            <span class="acceso-card__texto">
+              <span class="acceso-card__nombre">{{ acceso.label }}</span>
+              <span class="acceso-card__descripcion">{{ acceso.descripcion }}</span>
+            </span>
+          </a>
+        </li>
+      }
+    </ul>
+  </section>
+
+  <section class="inicio__seccion" aria-labelledby="inicio-mensajes-titulo">
+    <div class="inicio__encabezado-seccion">
+      <h2 id="inicio-mensajes-titulo" class="inicio__titulo">Mensajes recientes</h2>
+      <a routerLink="/mensajes/recibidos" class="inicio__ver-bandeja">Ver bandeja de entrada</a>
+    </div>
+
+    @if (cargandoMensajes()) {
+      <p class="text-muted">Cargando mensajes…</p>
+    }
+
+    @if (errorMensajes()) {
+      <p class="text-danger" role="alert">{{ errorMensajes() }}</p>
+    }
+
+    @if (!cargandoMensajes() && !errorMensajes()) {
+      @if (mensajesRecientes().length === 0) {
+        <p class="text-muted">No tienes mensajes recientes.</p>
+      } @else {
+        <ul class="list-unstyled inicio__lista">
+          @for (mensaje of mensajesRecientes(); track mensaje.id) {
+            <li>
+              <a
+                [routerLink]="['/mensajes', mensaje.id]"
+                class="inicio__fila-mensaje"
+                [class.inicio__fila-mensaje--nuevo]="mensaje.contenidoDisponible && mensaje.estadoLectura === 'Nuevo'"
+              >
+                <span class="inicio__fila-mensaje-info">
+                  @if (mensaje.contenidoDisponible) {
+                    <span class="inicio__fila-mensaje-titulo">{{ mensaje.titulo }}</span>
+                  } @else {
+                    <span class="inicio__fila-mensaje-titulo fst-italic text-muted">
+                      Mensaje eliminado por el remitente
+                    </span>
+                  }
+                  <span class="inicio__fila-mensaje-meta">
+                    {{ mensaje.remitente.nombre }} · {{ mensaje.fechaCreacion | date: 'short' }}
+                  </span>
+                </span>
+                <span
+                  class="badge"
+                  [class.text-bg-primary]="mensaje.estadoLectura === 'Nuevo'"
+                  [class.text-bg-light]="mensaje.estadoLectura !== 'Nuevo'"
+                >
+                  {{ mensaje.estadoLectura }}
+                </span>
+              </a>
+            </li>
+          }
+        </ul>
+      }
+    }
+  </section>
+
+  <section class="inicio__seccion" aria-labelledby="inicio-enlaces-titulo">
+    <h2 id="inicio-enlaces-titulo" class="inicio__titulo">Enlaces institucionales</h2>
+    <ul class="list-unstyled inicio__lista">
+      @for (enlace of enlaces; track enlace.nombre) {
+        <li>
+          @if (enlace.url) {
+            <a [href]="enlace.url" target="_blank" rel="noopener noreferrer" class="inicio__fila-enlace">
+              <span class="inicio__fila-enlace-nombre">{{ enlace.nombre }}</span>
+            </a>
+          } @else {
+            <div class="inicio__fila-enlace inicio__fila-enlace--pendiente">
+              <span class="inicio__fila-enlace-nombre">{{ enlace.nombre }}</span>
+              <span class="inicio__fila-enlace-estado">Pendiente</span>
+            </div>
+          }
+        </li>
+      }
+    </ul>
+  </section>
 </section>
