@@ -326,6 +326,311 @@ describe('RedactarMensajePage', () => {
   });
 });
 
+describe('RedactarMensajePage — selector de destinatarios con búsqueda', () => {
+  let component: RedactarMensajePage;
+  let fixture: ComponentFixture<RedactarMensajePage>;
+  let usuariosService: UsuariosService;
+  let mensajesService: MensajesService;
+  let archivosService: ArchivosService;
+  let router: Router;
+
+  const usuariosBusqueda: Usuario[] = [
+    {
+      id: 'u-1',
+      nombre: 'Usuario de Prueba Uno',
+      usuario: 'usuario.prueba.uno',
+      rol: 'Usuario',
+      estado: 'Activo',
+    },
+    {
+      id: 'u-2',
+      nombre: 'Usuario de Prueba Dos',
+      usuario: 'usuario.prueba.dos',
+      rol: 'Usuario',
+      estado: 'Activo',
+    },
+    { id: 'u-3', nombre: 'Otra Persona', usuario: 'otra.persona', rol: 'Usuario', estado: 'Activo' },
+  ];
+
+  function eventoBusqueda(valor: string): Event {
+    return { target: { value: valor } } as unknown as Event;
+  }
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [RedactarMensajePage],
+      providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
+    });
+
+    usuariosService = TestBed.inject(UsuariosService);
+    mensajesService = TestBed.inject(MensajesService);
+    archivosService = TestBed.inject(ArchivosService);
+    router = TestBed.inject(Router);
+    vi.spyOn(router, 'navigateByUrl');
+    vi.spyOn(usuariosService, 'listar').mockReturnValue(of(usuariosBusqueda));
+
+    fixture = TestBed.createComponent(RedactarMensajePage);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('sin término de búsqueda, muestra todos los usuarios cargados', () => {
+    expect(component['usuariosFiltrados']()).toEqual(usuariosBusqueda);
+  });
+
+  it('filtra por nombre con coincidencia parcial', () => {
+    component['onBuscarDestinatarios'](eventoBusqueda('Prueba Uno'));
+
+    expect(component['usuariosFiltrados']()).toEqual([usuariosBusqueda[0]]);
+  });
+
+  it('filtra por usuario con coincidencia parcial', () => {
+    component['onBuscarDestinatarios'](eventoBusqueda('usuario.prueba'));
+
+    expect(component['usuariosFiltrados']()).toEqual([usuariosBusqueda[0], usuariosBusqueda[1]]);
+  });
+
+  it('la búsqueda es case-insensitive e ignora espacios accidentales al inicio/final', () => {
+    component['onBuscarDestinatarios'](eventoBusqueda('  PRUEBA UNO  '));
+
+    expect(component['usuariosFiltrados']()).toEqual([usuariosBusqueda[0]]);
+  });
+
+  it('sin coincidencias, la lista filtrada queda vacía y el template lo indica', () => {
+    component['onBuscarDestinatarios'](eventoBusqueda('zzz-inexistente'));
+    fixture.detectChanges();
+
+    expect(component['usuariosFiltrados']()).toEqual([]);
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('No se encontraron destinatarios.');
+  });
+
+  it('aún sin destinatarios seleccionados, el template lo indica', () => {
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('Aún no has seleccionado destinatarios.');
+  });
+
+  it('agregarDestinatario selecciona un usuario', () => {
+    component['agregarDestinatario']('u-1');
+
+    expect(component['form'].controls.destinatarioIds.value).toEqual(['u-1']);
+    expect(component['estaSeleccionado']('u-1')).toBe(true);
+  });
+
+  it('agregarDestinatario no duplica un usuario ya seleccionado', () => {
+    component['agregarDestinatario']('u-1');
+    component['agregarDestinatario']('u-1');
+
+    expect(component['form'].controls.destinatarioIds.value).toEqual(['u-1']);
+  });
+
+  it('quitarDestinatario retira únicamente ese usuario', () => {
+    component['agregarDestinatario']('u-1');
+    component['agregarDestinatario']('u-2');
+
+    component['quitarDestinatario']('u-1');
+
+    expect(component['form'].controls.destinatarioIds.value).toEqual(['u-2']);
+  });
+
+  describe('MICROCORRECCIÓN 15C.2 — sin duplicación visual entre disponibles y seleccionados', () => {
+    it('al seleccionar un usuario, desaparece de la lista de disponibles', () => {
+      expect(component['usuariosDisponibles']()).toEqual(usuariosBusqueda);
+
+      component['agregarDestinatario']('u-1');
+
+      expect(component['usuariosDisponibles']()).toEqual([usuariosBusqueda[1], usuariosBusqueda[2]]);
+    });
+
+    it('al quitar un seleccionado, vuelve a disponibles si coincide con el filtro actual', () => {
+      component['agregarDestinatario']('u-1');
+      component['onBuscarDestinatarios'](eventoBusqueda('prueba uno'));
+      expect(component['usuariosDisponibles']()).toEqual([]);
+
+      component['quitarDestinatario']('u-1');
+
+      expect(component['usuariosDisponibles']()).toEqual([usuariosBusqueda[0]]);
+    });
+
+    it('al quitar un seleccionado que ya no coincide con el filtro actual, no vuelve a aparecer en disponibles', () => {
+      component['agregarDestinatario']('u-1');
+      component['onBuscarDestinatarios'](eventoBusqueda('otra persona'));
+
+      component['quitarDestinatario']('u-1');
+
+      expect(component['usuariosDisponibles']()).toEqual([usuariosBusqueda[2]]);
+    });
+
+    it('seleccionar todos deja la lista de disponibles vacía', () => {
+      component['seleccionarResultadosFiltrados']();
+
+      expect(component['usuariosDisponibles']()).toEqual([]);
+    });
+
+    it('cuando todos los resultados filtrados ya están seleccionados, el template muestra el estado correspondiente', () => {
+      component['seleccionarResultadosFiltrados']();
+      fixture.detectChanges();
+
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.textContent).toContain('Todos los destinatarios visibles están seleccionados.');
+      expect(compiled.textContent).not.toContain('No se encontraron destinatarios.');
+    });
+
+    it('una búsqueda realmente sin coincidencias sigue mostrando su propio estado, distinto del anterior', () => {
+      component['agregarDestinatario']('u-1');
+      component['onBuscarDestinatarios'](eventoBusqueda('zzz-inexistente'));
+      fixture.detectChanges();
+
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.textContent).toContain('No se encontraron destinatarios.');
+      expect(compiled.textContent).not.toContain('Todos los destinatarios visibles están seleccionados.');
+    });
+
+    it('un usuario ya seleccionado no aparece dos veces en el DOM (disponibles + seleccionados)', () => {
+      component['agregarDestinatario']('u-1');
+      fixture.detectChanges();
+
+      const compiled = fixture.nativeElement as HTMLElement;
+      const apariciones = compiled.querySelectorAll('.redactar-mensaje-page__resultado, .redactar-mensaje-page__seleccionado');
+      const nombres = Array.from(apariciones)
+        .map((el) => el.textContent ?? '')
+        .filter((texto) => texto.includes('Usuario de Prueba Uno'));
+
+      expect(nombres.length).toBe(1);
+    });
+  });
+
+  it('destinatariosSeleccionados() refleja los usuarios agregados y el contador se actualiza', () => {
+    expect(component['totalDestinatariosSeleccionados']()).toBe(0);
+
+    component['agregarDestinatario']('u-1');
+    component['agregarDestinatario']('u-2');
+
+    expect(component['totalDestinatariosSeleccionados']()).toBe(2);
+    expect(component['destinatariosSeleccionados']()).toEqual([usuariosBusqueda[0], usuariosBusqueda[1]]);
+  });
+
+  it('seleccionarResultadosFiltrados agrega todos los usuarios cuando no hay término de búsqueda', () => {
+    component['seleccionarResultadosFiltrados']();
+
+    expect(component['form'].controls.destinatarioIds.value).toEqual(['u-1', 'u-2', 'u-3']);
+  });
+
+  it('seleccionarResultadosFiltrados agrega solo los que coinciden con el filtro actual', () => {
+    component['onBuscarDestinatarios'](eventoBusqueda('prueba'));
+
+    component['seleccionarResultadosFiltrados']();
+
+    expect(component['form'].controls.destinatarioIds.value).toEqual(['u-1', 'u-2']);
+  });
+
+  it('seleccionarResultadosFiltrados no duplica a quien ya estaba seleccionado', () => {
+    component['agregarDestinatario']('u-1');
+
+    component['seleccionarResultadosFiltrados']();
+
+    expect(component['form'].controls.destinatarioIds.value).toEqual(['u-1', 'u-2', 'u-3']);
+  });
+
+  it('limpiarSeleccion retira a todos los destinatarios seleccionados', () => {
+    component['seleccionarResultadosFiltrados']();
+
+    component['limpiarSeleccion']();
+
+    expect(component['form'].controls.destinatarioIds.value).toEqual([]);
+    expect(component['totalDestinatariosSeleccionados']()).toBe(0);
+  });
+
+  it('el envío mediante el nuevo selector conserva exactamente los destinatarios seleccionados', async () => {
+    component['form'].controls.titulo.setValue('Asunto');
+    component['form'].controls.descripcion.setValue('Contenido');
+    component['agregarDestinatario']('u-1');
+    component['agregarDestinatario']('u-3');
+    vi.spyOn(mensajesService, 'crear').mockReturnValue(of({} as any));
+
+    await component['onSubmit']();
+
+    expect(mensajesService.crear).toHaveBeenCalledWith(
+      expect.objectContaining({ destinatarioIds: ['u-1', 'u-3'] }),
+    );
+  });
+
+  describe('adjuntos — contador y resumen', () => {
+    function archivoRespuesta(id: string, nombre: string): Archivo {
+      return { id, nombreOriginal: nombre, mimeType: 'application/pdf', tamano: 10, fechaSubida: '' };
+    }
+
+    function eventoConArchivos(files: File[]): Event {
+      return { target: { files, value: '' } } as unknown as Event;
+    }
+
+    it('sin archivos seleccionados, el contador no se muestra y el resumen indica 0', () => {
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.textContent).toContain('Ningún archivo seleccionado.');
+      expect(component['resumenEnvio']()).toBe('0 destinatarios · 0 archivos adjuntos');
+    });
+
+    it('muestra el nombre y el tamaño legible de cada archivo seleccionado', () => {
+      const archivo = new File(['contenido'], 'documento.pdf', { type: 'application/pdf' });
+      component['onArchivosSeleccionados'](eventoConArchivos([archivo]));
+      fixture.detectChanges();
+
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.textContent).toContain('documento.pdf');
+      expect(compiled.textContent).toContain(component['tamanoLegible'](archivo.size));
+    });
+
+    it('el contador de archivos usa singular/plural correctamente', () => {
+      const archivo1 = new File(['a'], 'uno.pdf', { type: 'application/pdf' });
+      component['onArchivosSeleccionados'](eventoConArchivos([archivo1]));
+      expect(component['textoContadorArchivos']()).toBe('1 archivo seleccionado');
+
+      const archivo2 = new File(['b'], 'dos.pdf', { type: 'application/pdf' });
+      component['onArchivosSeleccionados'](eventoConArchivos([archivo2]));
+      expect(component['textoContadorArchivos']()).toBe('2 archivos seleccionados');
+    });
+
+    it('quitar un archivo lo elimina de la colección que se enviará', () => {
+      const archivo1 = new File(['a'], 'uno.pdf', { type: 'application/pdf' });
+      const archivo2 = new File(['b'], 'dos.pdf', { type: 'application/pdf' });
+      component['onArchivosSeleccionados'](eventoConArchivos([archivo1, archivo2]));
+
+      component['quitarArchivo'](0);
+
+      expect(component['seleccionArchivos']().map((item) => item.file.name)).toEqual(['dos.pdf']);
+    });
+
+    it('el resumen combina destinatarios y adjuntos con plurales correctos', () => {
+      component['agregarDestinatario']('u-1');
+      const archivo = new File(['a'], 'uno.pdf', { type: 'application/pdf' });
+      component['onArchivosSeleccionados'](eventoConArchivos([archivo]));
+
+      expect(component['resumenEnvio']()).toBe('1 destinatario · 1 archivo adjunto');
+    });
+
+    it('el payload final envía exactamente los archivoIds de lo seleccionado tras subir', async () => {
+      component['form'].controls.titulo.setValue('Asunto');
+      component['form'].controls.descripcion.setValue('Contenido');
+      component['agregarDestinatario']('u-1');
+
+      const archivo1 = new File(['a'], 'uno.pdf', { type: 'application/pdf' });
+      const archivo2 = new File(['b'], 'dos.pdf', { type: 'application/pdf' });
+      component['onArchivosSeleccionados'](eventoConArchivos([archivo1, archivo2]));
+
+      vi.spyOn(archivosService, 'subir').mockImplementation((file) =>
+        of(archivoRespuesta(`id-${file.name}`, file.name)),
+      );
+      vi.spyOn(mensajesService, 'crear').mockReturnValue(of({} as any));
+
+      await component['onSubmit']();
+
+      expect(mensajesService.crear).toHaveBeenCalledWith(
+        expect.objectContaining({ archivoIds: ['id-uno.pdf', 'id-dos.pdf'] }),
+      );
+    });
+  });
+});
+
 describe('RedactarMensajePage — modo respuesta', () => {
   let component: RedactarMensajePage;
   let fixture: ComponentFixture<RedactarMensajePage>;
@@ -529,5 +834,98 @@ describe('RedactarMensajePage — modo respuesta', () => {
     await component['onSubmit']();
 
     expect(spySubir).toHaveBeenCalledTimes(1);
+  });
+
+  describe('selector de destinatarios con búsqueda en modo respuesta', () => {
+    it('el remitente original queda preseleccionado también para el nuevo selector', () => {
+      configurar();
+      vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(of(originalValido));
+      crearFixture();
+      fixture.detectChanges();
+
+      expect(component['destinatariosSeleccionados']().map((u) => u.id)).toEqual(['dev-usuario-1']);
+      expect(component['totalDestinatariosSeleccionados']()).toBe(1);
+    });
+
+    it('el remitente original no aparece en la lista de disponibles, ya preseleccionado', () => {
+      configurar();
+      vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(of(originalValido));
+      crearFixture();
+      fixture.detectChanges();
+
+      expect(component['usuariosDisponibles']().map((u) => u.id)).toEqual(['dev-usuario-2']);
+    });
+
+    it('agregarDestinatario suma otros destinatarios sin perder ni duplicar al remitente original', () => {
+      configurar();
+      vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(of(originalValido));
+      crearFixture();
+      fixture.detectChanges();
+
+      component['agregarDestinatario']('dev-usuario-2');
+
+      expect(component['form'].controls.destinatarioIds.value).toEqual([
+        'dev-usuario-1',
+        'dev-usuario-2',
+      ]);
+    });
+
+    it('quitarDestinatario no puede retirar al remitente original', () => {
+      configurar();
+      vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(of(originalValido));
+      crearFixture();
+      fixture.detectChanges();
+
+      component['quitarDestinatario']('dev-usuario-1');
+
+      expect(component['form'].controls.destinatarioIds.value).toEqual(['dev-usuario-1']);
+    });
+
+    it('limpiarSeleccion conserva al remitente original en vez de vaciar todo', () => {
+      configurar();
+      vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(of(originalValido));
+      crearFixture();
+      fixture.detectChanges();
+
+      component['agregarDestinatario']('dev-usuario-2');
+      component['limpiarSeleccion']();
+
+      expect(component['form'].controls.destinatarioIds.value).toEqual(['dev-usuario-1']);
+    });
+
+    it('seleccionarResultadosFiltrados no duplica al remitente original ya preseleccionado', () => {
+      configurar();
+      vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(of(originalValido));
+      crearFixture();
+      fixture.detectChanges();
+
+      component['seleccionarResultadosFiltrados']();
+
+      expect(component['form'].controls.destinatarioIds.value).toEqual([
+        'dev-usuario-1',
+        'dev-usuario-2',
+      ]);
+    });
+
+    it('el envío en modo respuesta mediante el nuevo selector conserva respuestaAId y destinatarios', async () => {
+      configurar();
+      vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(of(originalValido));
+      crearFixture();
+      fixture.detectChanges();
+
+      component['form'].controls.titulo.setValue('Asunto');
+      component['form'].controls.descripcion.setValue('Contenido');
+      component['agregarDestinatario']('dev-usuario-2');
+      vi.spyOn(mensajesService, 'crear').mockReturnValue(of({} as any));
+
+      await component['onSubmit']();
+
+      expect(mensajesService.crear).toHaveBeenCalledWith(
+        expect.objectContaining({
+          respuestaAId: 'mensaje-original',
+          destinatarioIds: ['dev-usuario-1', 'dev-usuario-2'],
+        }),
+      );
+    });
   });
 });

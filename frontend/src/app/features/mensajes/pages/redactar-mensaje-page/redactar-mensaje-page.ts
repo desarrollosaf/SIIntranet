@@ -95,6 +95,147 @@ export class RedactarMensajePage {
     return this.modoRespuesta() && usuarioId === this.remitenteOriginalId();
   }
 
+  // ===== Selector de destinatarios con búsqueda (ETAPA 15C.2) =====
+  // onDestinatarioToggle/estaSeleccionado/esRemitenteOriginal arriba se
+  // conservan sin cambios: siguen siendo la fuente de verdad del control
+  // reactivo `destinatarioIds` y los tests existentes los invocan
+  // directamente. Los métodos siguientes son la nueva forma en que la UI
+  // (búsqueda + lista) muta ese mismo control — mismo payload, otra
+  // interacción.
+  protected readonly terminoBusqueda = signal('');
+
+  protected readonly usuariosFiltrados = computed<Usuario[]>(() => {
+    const termino = this.normalizarTexto(this.terminoBusqueda());
+
+    if (!termino) {
+      return this.usuarios();
+    }
+
+    return this.usuarios().filter(
+      (usuario) =>
+        this.normalizarTexto(usuario.nombre).includes(termino) ||
+        this.normalizarTexto(usuario.usuario).includes(termino),
+    );
+  });
+
+  protected onBuscarDestinatarios(event: Event): void {
+    this.terminoBusqueda.set((event.target as HTMLInputElement).value);
+  }
+
+  // MICROCORRECCIÓN 15C.2: la lista "disponibles" excluye a quienes ya están
+  // en Seleccionados, para no duplicar la misma persona en dos listas a la
+  // vez. No es un signal (depende de destinatarioIds.value, no reactivo)
+  // — mismo patrón que destinatariosSeleccionados().
+  protected usuariosDisponibles(): Usuario[] {
+    return this.usuariosFiltrados().filter((usuario) => !this.estaSeleccionado(usuario.id));
+  }
+
+  protected textoDisponibles(): string {
+    return this.conCantidad(this.usuariosDisponibles().length, 'disponible', 'disponibles');
+  }
+
+  protected readonly textoAccionSeleccionarTodos = computed(() =>
+    this.terminoBusqueda().trim() ? 'Seleccionar resultados' : 'Seleccionar todos',
+  );
+
+  // Deriva de destinatarioIds (no es un signal) leído en cada ciclo de
+  // detección de cambios — mismo patrón ya usado por estaSeleccionado().
+  protected destinatariosSeleccionados(): Usuario[] {
+    const idsSeleccionados = this.form.controls.destinatarioIds.value;
+    const usuariosPorId = new Map(this.usuarios().map((usuario) => [usuario.id, usuario]));
+
+    return idsSeleccionados
+      .map((id) => usuariosPorId.get(id))
+      .filter((usuario): usuario is Usuario => !!usuario);
+  }
+
+  protected totalDestinatariosSeleccionados(): number {
+    return this.form.controls.destinatarioIds.value.length;
+  }
+
+  protected agregarDestinatario(usuarioId: string): void {
+    if (this.enviando()) {
+      return;
+    }
+
+    const actuales = this.form.controls.destinatarioIds.value;
+
+    if (actuales.includes(usuarioId)) {
+      return;
+    }
+
+    this.form.controls.destinatarioIds.setValue([...actuales, usuarioId]);
+    this.form.controls.destinatarioIds.markAsTouched();
+  }
+
+  protected quitarDestinatario(usuarioId: string): void {
+    if (this.enviando() || this.esRemitenteOriginal(usuarioId)) {
+      return;
+    }
+
+    const actuales = this.form.controls.destinatarioIds.value;
+    this.form.controls.destinatarioIds.setValue(actuales.filter((id) => id !== usuarioId));
+    this.form.controls.destinatarioIds.markAsTouched();
+  }
+
+  protected seleccionarResultadosFiltrados(): void {
+    if (this.enviando()) {
+      return;
+    }
+
+    const actuales = this.form.controls.destinatarioIds.value;
+    const nuevosIds = this.usuariosFiltrados()
+      .map((usuario) => usuario.id)
+      .filter((id) => !actuales.includes(id));
+
+    if (nuevosIds.length === 0) {
+      return;
+    }
+
+    this.form.controls.destinatarioIds.setValue([...actuales, ...nuevosIds]);
+    this.form.controls.destinatarioIds.markAsTouched();
+  }
+
+  protected limpiarSeleccion(): void {
+    if (this.enviando()) {
+      return;
+    }
+
+    // El remitente original (modo respuesta) es obligatorio: limpiar no
+    // debe poder retirarlo, igual que quitarDestinatario() ya lo protege
+    // individualmente.
+    const remitenteId = this.remitenteOriginalId();
+    this.form.controls.destinatarioIds.setValue(remitenteId ? [remitenteId] : []);
+    this.form.controls.destinatarioIds.markAsTouched();
+  }
+
+  protected textoContadorArchivos(): string {
+    return this.conCantidad(this.seleccionArchivos().length, 'archivo seleccionado', 'archivos seleccionados');
+  }
+
+  protected resumenEnvio(): string {
+    const destinatarios = this.conCantidad(
+      this.totalDestinatariosSeleccionados(),
+      'destinatario',
+      'destinatarios',
+    );
+    const archivos = this.conCantidad(
+      this.seleccionArchivos().length,
+      'archivo adjunto',
+      'archivos adjuntos',
+    );
+
+    return `${destinatarios} · ${archivos}`;
+  }
+
+  private normalizarTexto(texto: string): string {
+    return texto.trim().toLowerCase();
+  }
+
+  private conCantidad(cantidad: number, singular: string, plural: string): string {
+    return `${cantidad} ${cantidad === 1 ? singular : plural}`;
+  }
+
   protected puedeResponder(): boolean {
     return !this.cargandoOriginal() && !this.errorOriginal() && this.remitenteOriginalId() !== null;
   }
