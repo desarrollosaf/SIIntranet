@@ -1,51 +1,75 @@
 <section class="formatos-page">
   <app-page-hero titulo="Formatos" icono="bi-folder2-open" />
 
-  <p class="text-muted">Consulta y descarga los documentos institucionales disponibles.</p>
-
-  @if (cargando()) {
-    <p>Cargando formatos…</p>
-  }
-
-  @if (!cargando() && error()) {
-    <p class="text-danger" role="alert">{{ error() }}</p>
-  }
-
-  @if (!cargando() && !error()) {
-    @for (grupo of grupos(); track grupo.categoria) {
-      <section class="formatos-page__categoria">
-        <h2 class="h6">{{ grupo.categoria }}</h2>
-
-        @if (grupo.formatos.length === 0) {
-          <p class="text-muted small">Aún no hay formatos disponibles.</p>
-        } @else {
-          <ul class="list-unstyled formatos-page__lista">
-            @for (formato of grupo.formatos; track formato.id) {
-              <li class="card mb-2 formatos-page__item">
-                <div class="card-body">
-                  <div class="fw-semibold formatos-page__nombre">{{ formato.nombre }}</div>
-                  <p class="formatos-page__descripcion">{{ formato.descripcion }}</p>
-
-                  <div class="text-muted small formatos-page__archivo">
-                    Archivo: {{ formato.archivo.nombreOriginal }}
-                  </div>
-                  <div class="text-muted small">
-                    Tamaño: {{ tamanoLegible(formato.archivo.tamano) }}
-                  </div>
-                  <div class="text-muted small">
-                    {{ formato.fechaCreacion | date: 'mediumDate' }}
-                  </div>
-
-                  <a [href]="urlDescarga(formato.id)" class="btn btn-sm btn-outline-primary mt-2">
-                    <i class="bi bi-download" aria-hidden="true"></i>
-                    Descargar
-                  </a>
-                </div>
-              </li>
-            }
-          </ul>
-        }
-      </section>
+  <div class="formatos-page__wrapper">
+    @if (cargando()) {
+      <p>Cargando formatos…</p>
     }
-  }
+
+    @if (!cargando() && error()) {
+      <p class="text-danger" role="alert">{{ error() }}</p>
+    }
+
+    @if (!cargando() && !error()) {
+      @if (totalFormatos() === 0) {
+        <p class="text-muted">No hay formatos disponibles actualmente.</p>
+      } @else {
+        <div class="formatos-page__herramientas">
+          <div class="formatos-page__buscador">
+            <label for="buscador-formatos" class="visually-hidden">Buscar formatos</label>
+            <input
+              id="buscador-formatos"
+              type="search"
+              class="form-control"
+              placeholder="Buscar formatos..."
+              [value]="terminoBusqueda()"
+              (input)="onBuscar($event)"
+            />
+          </div>
+          <p class="formatos-page__resumen">{{ resumenGlobal() }}</p>
+        </div>
+
+        @if (grupos().length === 0) {
+          <p class="text-muted">No se encontraron formatos que coincidan con tu búsqueda.</p>
+        } @else {
+          @for (grupo of grupos(); track grupo.categoria; let i = $index) {
+            <section class="formatos-page__categoria" [attr.aria-labelledby]="'formatos-categoria-' + i">
+              <div class="formatos-page__categoria-encabezado">
+                <h2 [id]="'formatos-categoria-' + i" class="formatos-page__categoria-titulo">
+                  {{ grupo.categoria }}
+                </h2>
+                <span class="formatos-page__categoria-contador">
+                  {{ contadorCategoria(grupo.formatos.length) }}
+                </span>
+              </div>
+
+              <ul class="list-unstyled formatos-page__lista">
+                @for (formato of grupo.formatos; track formato.id) {
+                  <li class="formatos-page__fila">
+                    <div class="formatos-page__fila-info">
+                      <span class="formatos-page__fila-nombre">{{ formato.nombre }}</span>
+
+                      @if (formato.descripcion) {
+                        <span class="formatos-page__fila-descripcion">{{ formato.descripcion }}</span>
+                      }
+
+                      <span class="formatos-page__fila-meta">
+                        {{ formato.archivo.nombreOriginal }} · {{ tamanoLegible(formato.archivo.tamano) }} ·
+                        {{ formato.fechaCreacion | date: 'mediumDate' }}
+                      </span>
+                    </div>
+
+                    <a [href]="urlDescarga(formato.id)" class="formatos-page__descarga">
+                      <i class="bi bi-download" aria-hidden="true"></i>
+                      Descargar
+                    </a>
+                  </li>
+                }
+              </ul>
+            </section>
+          }
+        }
+      }
+    }
+  </div>
 </section>
