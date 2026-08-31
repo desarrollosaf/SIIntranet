@@ -201,6 +201,41 @@ describe('BandejaMensajesPage', () => {
     expect(textos).not.toContain('Redactar');
   });
 
+  // MICROCORRECCIÓN 15C.3B: Detalle no puede confiar solo en el tipo de
+  // mensaje devuelto por el backend para decidir a dónde "volver" (un
+  // mensaje enviado a uno mismo se resuelve como MensajeEnviado aunque se
+  // abra desde Recibidos) — Bandeja debe propagar el origen real de la
+  // navegación como query param en el RouterLink de cada fila. Se verifica
+  // el href real calculado por Angular Router tras change detection, no el
+  // marcado `[queryParams]` del template.
+  describe('propagación de origen a Detalle (MICROCORRECCIÓN 15C.3B)', () => {
+    it('en Recibidos, la fila navega al detalle del mensaje con ?origen=recibidos', () => {
+      configurar('recibidos');
+      vi.spyOn(mensajesService, 'recibidos').mockReturnValue(of([recibido]));
+      crearFixture();
+
+      fixture.detectChanges();
+
+      const compiled = fixture.nativeElement as HTMLElement;
+      const fila = compiled.querySelector<HTMLAnchorElement>('a.bandeja-page__fila[href*="mensaje-1"]');
+      expect(fila).not.toBeNull();
+      expect(fila!.getAttribute('href')).toBe('/mensajes/mensaje-1?origen=recibidos');
+    });
+
+    it('en Enviados, la fila navega al detalle del mensaje con ?origen=enviados', () => {
+      configurar('enviados');
+      vi.spyOn(mensajesService, 'enviados').mockReturnValue(of([enviado]));
+      crearFixture();
+
+      fixture.detectChanges();
+
+      const compiled = fixture.nativeElement as HTMLElement;
+      const fila = compiled.querySelector<HTMLAnchorElement>('a.bandeja-page__fila[href*="mensaje-2"]');
+      expect(fila).not.toBeNull();
+      expect(fila!.getAttribute('href')).toBe('/mensajes/mensaje-2?origen=enviados');
+    });
+  });
+
   describe('orden local por fecha', () => {
     function mensaje(id: string, fechaCreacion: string): MensajeRecibido {
       return {

@@ -52,7 +52,11 @@
         <ul class="list-unstyled bandeja-page__lista">
           @for (mensaje of recibidosFiltrados(); track mensaje.id) {
             <li>
-              <a [routerLink]="['/mensajes', mensaje.id]" class="bandeja-page__fila">
+              <a
+                [routerLink]="['/mensajes', mensaje.id]"
+                [queryParams]="{ origen: tipo() }"
+                class="bandeja-page__fila"
+              >
                 <span class="bandeja-page__fila-info">
                   @if (mensaje.contenidoDisponible) {
                     <span
@@ -96,7 +100,11 @@
         <ul class="list-unstyled bandeja-page__lista">
           @for (mensaje of enviadosFiltrados(); track mensaje.id) {
             <li>
-              <a [routerLink]="['/mensajes', mensaje.id]" class="bandeja-page__fila">
+              <a
+                [routerLink]="['/mensajes', mensaje.id]"
+                [queryParams]="{ origen: tipo() }"
+                class="bandeja-page__fila"
+              >
                 <span class="bandeja-page__fila-info">
                   @if (mensaje.contenidoDisponible) {
                     <span class="bandeja-page__fila-titulo">{{ mensaje.titulo }}</span>

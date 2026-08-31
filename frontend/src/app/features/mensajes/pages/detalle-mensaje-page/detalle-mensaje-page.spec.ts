@@ -29,7 +29,10 @@ describe('DetalleMensajePage', () => {
   // Configura el módulo de test e inyecta MensajesService SIN instanciar
   // todavía el componente — su constructor dispara la carga inicial de
   // inmediato, así que los spies deben existir antes de crear el fixture.
-  function configurar(): void {
+  // `origen` simula el query param `?origen=recibidos|enviados` que Bandeja
+  // agrega al enlace de cada fila (MICROCORRECCIÓN 15C.3B); sin argumento,
+  // se comporta como una entrada directa sin query param.
+  function configurar(origen?: string): void {
     TestBed.configureTestingModule({
       imports: [DetalleMensajePage],
       providers: [
@@ -38,7 +41,10 @@ describe('DetalleMensajePage', () => {
         provideHttpClientTesting(),
         {
           provide: ActivatedRoute,
-          useValue: { paramMap: of(convertToParamMap({ id: 'mensaje-1' })) },
+          useValue: {
+            paramMap: of(convertToParamMap({ id: 'mensaje-1' })),
+            snapshot: { queryParamMap: convertToParamMap(origen ? { origen } : {}) },
+          },
         },
       ],
     });
@@ -367,6 +373,222 @@ describe('DetalleMensajePage', () => {
       const detalleFinal = fixture.componentInstance['detalle']();
       expect(detalleFinal?.estado).toBe('Eliminado');
       expect(detalleFinal?.contenidoDisponible).toBe(false);
+    });
+  });
+
+  describe('ETAPA 15C.3B — PageHero, regreso contextual, remitente, destinatarios y tombstone', () => {
+    const enviadoConDosDestinatarios: MensajeEnviado = {
+      id: 'mensaje-1',
+      fechaCreacion: new Date().toISOString(),
+      estado: 'Enviado',
+      contenidoDisponible: true,
+      destinatarios: [
+        { usuarioId: 'dev-usuario-2', nombre: 'Dos', usuario: 'dos', estadoLectura: 'Visto', estadoRespuesta: 'Respondido' },
+        { usuarioId: 'dev-usuario-3', nombre: 'Tres', usuario: 'tres', estadoLectura: 'Nuevo', estadoRespuesta: 'Pendiente' },
+      ],
+      titulo: 'Asunto',
+      descripcion: 'Contenido',
+      archivoIds: [],
+    };
+
+    it('PageHero muestra "Detalle del mensaje" como único h1', () => {
+      configurar();
+      vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(of(recibidoNuevo));
+      vi.spyOn(mensajesService, 'marcarVisto').mockReturnValue(of({}));
+      crearFixture();
+
+      fixture.detectChanges();
+
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.querySelectorAll('h1').length).toBe(1);
+      expect(compiled.querySelector('h1')?.textContent?.trim()).toBe('Detalle del mensaje');
+    });
+
+    it('el regreso contextual apunta a Recibidos cuando el mensaje es un recibido', () => {
+      configurar();
+      vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(of(recibidoNuevo));
+      vi.spyOn(mensajesService, 'marcarVisto').mockReturnValue(of({}));
+      crearFixture();
+
+      fixture.detectChanges();
+
+      const compiled = fixture.nativeElement as HTMLElement;
+      const enlace = Array.from(compiled.querySelectorAll('a')).find((a) =>
+        a.textContent?.includes('Volver a recibidos'),
+      );
+      expect(enlace).toBeTruthy();
+      expect(enlace!.getAttribute('href')).toBe('/mensajes/recibidos');
+    });
+
+    it('el regreso contextual apunta a Enviados cuando el mensaje es un enviado', () => {
+      configurar();
+      vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(of(enviadoConDosDestinatarios));
+      crearFixture();
+
+      fixture.detectChanges();
+
+      const compiled = fixture.nativeElement as HTMLElement;
+      const enlace = Array.from(compiled.querySelectorAll('a')).find((a) =>
+        a.textContent?.includes('Volver a enviados'),
+      );
+      expect(enlace).toBeTruthy();
+      expect(enlace!.getAttribute('href')).toBe('/mensajes/enviados');
+    });
+
+    it('mientras carga, el regreso por defecto sigue apuntando a Recibidos', () => {
+      configurar();
+      vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(of(recibidoNuevo));
+      vi.spyOn(mensajesService, 'marcarVisto').mockReturnValue(of({}));
+      crearFixture();
+
+      // Sin detectChanges todavía: el signal `detalle` sigue en null.
+      expect(fixture.componentInstance['volver']()).toEqual({
+        texto: 'Volver a recibidos',
+        ruta: '/mensajes/recibidos',
+      });
+    });
+
+    describe('MICROCORRECCIÓN 15C.3B — origen de navegación tiene prioridad sobre el tipo devuelto', () => {
+      it('un mensaje enviado a sí mismo (backend devuelve MensajeEnviado) abierto con ?origen=recibidos vuelve a Recibidos', () => {
+        configurar('recibidos');
+        // El backend resuelve como "enviado" porque remitenteId===actorId,
+        // sin importar que el usuario lo haya abierto desde Recibidos.
+        vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(of(enviadoConDosDestinatarios));
+        crearFixture();
+
+        fixture.detectChanges();
+
+        expect(fixture.componentInstance['volver']()).toEqual({
+          texto: 'Volver a recibidos',
+          ruta: '/mensajes/recibidos',
+        });
+        const compiled = fixture.nativeElement as HTMLElement;
+        const enlace = Array.from(compiled.querySelectorAll('a')).find((a) =>
+          a.textContent?.includes('Volver a recibidos'),
+        );
+        expect(enlace).toBeTruthy();
+        expect(enlace!.getAttribute('href')).toBe('/mensajes/recibidos');
+      });
+
+      it('un detalle enviado abierto con ?origen=enviados vuelve a Enviados', () => {
+        configurar('enviados');
+        vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(of(enviadoConDosDestinatarios));
+        crearFixture();
+
+        fixture.detectChanges();
+
+        expect(fixture.componentInstance['volver']()).toEqual({
+          texto: 'Volver a enviados',
+          ruta: '/mensajes/enviados',
+        });
+      });
+
+      it('sin query param (entrada directa) conserva el fallback actual basado en el tipo del mensaje', () => {
+        configurar();
+        vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(of(enviadoConDosDestinatarios));
+        crearFixture();
+
+        fixture.detectChanges();
+
+        expect(fixture.componentInstance['volver']()).toEqual({
+          texto: 'Volver a enviados',
+          ruta: '/mensajes/enviados',
+        });
+      });
+
+      it('un valor de origen inválido conserva el fallback actual basado en el tipo del mensaje', () => {
+        configurar('otra-cosa');
+        vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(of(recibidoNuevo));
+        vi.spyOn(mensajesService, 'marcarVisto').mockReturnValue(of({}));
+        crearFixture();
+
+        fixture.detectChanges();
+
+        expect(fixture.componentInstance['volver']()).toEqual({
+          texto: 'Volver a recibidos',
+          ruta: '/mensajes/recibidos',
+        });
+      });
+    });
+
+    it('muestra nombre y usuario del remitente para un recibido', () => {
+      configurar();
+      vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(of(recibidoNuevo));
+      vi.spyOn(mensajesService, 'marcarVisto').mockReturnValue(of({}));
+      crearFixture();
+
+      fixture.detectChanges();
+
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.textContent).toContain('Usuario Uno');
+      expect(compiled.textContent).toContain('usuario.uno');
+    });
+
+    it('muestra cada destinatario con su nombre, usuario, estadoLectura y estadoRespuesta individuales', () => {
+      configurar();
+      vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(of(enviadoConDosDestinatarios));
+      crearFixture();
+
+      fixture.detectChanges();
+
+      const compiled = fixture.nativeElement as HTMLElement;
+      const filas = compiled.querySelectorAll('.detalle-mensaje-page__destinatario');
+      expect(filas.length).toBe(2);
+      expect(filas[0].textContent).toContain('Dos');
+      expect(filas[0].textContent).toContain('dos');
+      expect(filas[0].textContent).toContain('Visto');
+      expect(filas[0].textContent).toContain('Respondido');
+      expect(filas[1].textContent).toContain('Tres');
+      expect(filas[1].textContent).toContain('Nuevo');
+      expect(filas[1].textContent).toContain('Pendiente');
+    });
+
+    it('tombstone recibido: muestra el aviso seguro y conserva visible el panel de información', () => {
+      configurar();
+      const eliminado: MensajeRecibido = {
+        id: 'mensaje-1',
+        remitente: recibidoNuevo.remitente,
+        fechaCreacion: new Date().toISOString(),
+        estado: 'Eliminado',
+        contenidoDisponible: false,
+        estadoLectura: 'Visto',
+        estadoRespuesta: 'Pendiente',
+      };
+      vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(of(eliminado));
+      crearFixture();
+
+      fixture.detectChanges();
+
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.textContent).toContain('Mensaje eliminado por el remitente.');
+      expect(compiled.textContent).not.toContain('undefined');
+      // El remitente sigue expuesto por el contrato incluso con
+      // contenidoDisponible=false — el panel de información no se oculta.
+      expect(compiled.textContent).toContain('Usuario Uno');
+      expect(compiled.textContent).toContain('Lectura: Visto');
+    });
+
+    it('tombstone enviado: muestra el aviso seguro y conserva visibles estado y destinatarios', () => {
+      configurar();
+      const eliminado: MensajeEnviado = {
+        id: 'mensaje-1',
+        fechaCreacion: new Date().toISOString(),
+        estado: 'Eliminado',
+        contenidoDisponible: false,
+        destinatarios: [
+          { usuarioId: 'dev-usuario-2', nombre: 'Dos', usuario: 'dos', estadoLectura: 'Visto', estadoRespuesta: 'Pendiente' },
+        ],
+      };
+      vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(of(eliminado));
+      crearFixture();
+
+      fixture.detectChanges();
+
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.textContent).toContain('Mensaje eliminado.');
+      expect(compiled.textContent).not.toContain('undefined');
+      expect(compiled.textContent).toContain('Eliminado');
+      expect(compiled.textContent).toContain('Dos');
     });
   });
 });

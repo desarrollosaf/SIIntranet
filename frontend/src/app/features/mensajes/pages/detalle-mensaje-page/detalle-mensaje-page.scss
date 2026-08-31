@@ -1,8 +1,191 @@
+// Color institucional PROVISIONAL de desarrollo — mismo valor usado en el
+// resto del proyecto (AppShell/PageHero/Inicio/Mensaje nuevo/Bandeja), sin
+// manual de identidad confirmado todavía. Declarado aquí de forma local e
+// independiente, sin crear dependencia entre componentes.
+$color-vino: #6d1a35;
+$color-vino-oscuro: #551528;
+$color-borde: #e9ecef;
+
 .detalle-mensaje-page {
   padding: 1.5rem;
-  max-width: 40rem;
+}
+
+.detalle-mensaje-page__wrapper {
+  max-width: 62.5rem; // ~1000px, mismo criterio que Mensaje nuevo/Bandeja
+  margin-inline: auto;
+}
+
+.detalle-mensaje-page__volver {
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: $color-vino;
+  text-decoration: none;
+}
+
+.detalle-mensaje-page__volver:hover {
+  text-decoration: underline;
+}
+
+.detalle-mensaje-page__volver:focus-visible {
+  outline: 2px solid $color-vino;
+  outline-offset: 2px;
+}
+
+// Dos superficies: contenido principal (2fr) e información (1fr) — una sola
+// columna en móvil, en ese mismo orden de documento.
+.detalle-mensaje-page__layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 992px) {
+  .detalle-mensaje-page__layout {
+    grid-template-columns: 2fr 1fr;
+    align-items: start;
+  }
+}
+
+.detalle-mensaje-page__panel {
+  padding: 1.25rem 1.375rem;
+  background: #ffffff;
+  border: 1px solid $color-borde;
+  border-radius: 0.875rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.detalle-mensaje-page__titulo {
+  margin: 0 0 0.375rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #212529;
+  overflow-wrap: anywhere;
+}
+
+.detalle-mensaje-page__fecha {
+  margin: 0 0 1rem;
+  font-size: 0.8125rem;
+  color: #868e96;
 }
 
 .detalle-mensaje-page__descripcion {
+  margin: 0;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.detalle-mensaje-page__subtitulo {
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #212529;
+}
+
+.detalle-mensaje-page__adjuntos {
+  margin-top: 1.5rem;
+}
+
+.detalle-mensaje-page__lista-adjuntos,
+.detalle-mensaje-page__lista-destinatarios {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.detalle-mensaje-page__adjunto {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid $color-borde;
+  border-radius: 0.5rem;
+  overflow-wrap: anywhere;
+}
+
+.detalle-mensaje-page__destinatario {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid $color-borde;
+  border-radius: 0.5rem;
+}
+
+.detalle-mensaje-page__destinatario-nombre {
+  overflow-wrap: anywhere;
+}
+
+// Texto discreto para "Descargar", en vez de un botón outline-primary
+// genérico por cada adjunto.
+.detalle-mensaje-page__accion-discreta {
+  flex-shrink: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: $color-vino;
+  text-decoration: none;
+}
+
+.detalle-mensaje-page__accion-discreta:hover {
+  text-decoration: underline;
+}
+
+.detalle-mensaje-page__accion-discreta:focus-visible {
+  outline: 2px solid $color-vino;
+  outline-offset: 2px;
+}
+
+.detalle-mensaje-page__remitente {
+  margin: 0 0 1rem;
+  overflow-wrap: anywhere;
+}
+
+.detalle-mensaje-page__etiqueta {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #868e96;
+}
+
+.detalle-mensaje-page__estados {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-bottom: 1rem;
+}
+
+.detalle-mensaje-page__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid $color-borde;
+}
+
+// ===== Única acción vino: Responder. Editar/Cancelar quedan neutrales
+// (btn-outline-secondary de Bootstrap) y Eliminar es la única destructiva
+// (btn-outline-danger) — ver ETAPA 15C.3B §9. =====
+.btn-vino {
+  background-color: $color-vino;
+  border-color: $color-vino;
+  color: #ffffff;
+}
+
+.btn-vino:hover,
+.btn-vino:focus-visible {
+  background-color: $color-vino-oscuro;
+  border-color: $color-vino-oscuro;
+  color: #ffffff;
+}
+
+@media (max-width: 576px) {
+  .detalle-mensaje-page {
+    padding: 1.125rem;
+  }
 }

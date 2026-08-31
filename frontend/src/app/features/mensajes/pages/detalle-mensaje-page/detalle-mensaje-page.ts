@@ -1,13 +1,19 @@
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { MensajesService } from '../../services/mensajes.service';
 import { esMensajeRecibido, MensajeDetalle, MensajeEnviado } from '../../models/mensaje.model';
+import { PageHero } from '../../../../shared/components/page-hero/page-hero';
+
+interface InfoVolver {
+  readonly texto: string;
+  readonly ruta: string;
+}
 
 @Component({
   selector: 'app-detalle-mensaje-page',
-  imports: [RouterLink, DatePipe],
+  imports: [RouterLink, DatePipe, PageHero],
   templateUrl: './detalle-mensaje-page.html',
   styleUrl: './detalle-mensaje-page.scss',
 })
@@ -25,6 +31,37 @@ export class DetalleMensajePage {
   protected readonly errorAccion = signal<string | null>(null);
 
   protected readonly esRecibido = esMensajeRecibido;
+
+  // MICROCORRECCIÓN 15C.3B: un mensaje enviado por el propio usuario a sí
+  // mismo puede abrirse desde Recibidos, pero el backend siempre lo
+  // resuelve como MensajeEnviado (decide por remitenteId===actorId, no por
+  // bandeja de origen) — inferir el regreso solo por el tipo devuelto
+  // mostraba "Volver a enviados" aunque se haya abierto desde Recibidos.
+  // Bandeja ahora propaga `?origen=recibidos|enviados` en el enlace de cada
+  // fila; ese origen manda cuando existe y es válido.
+  private readonly origen = this.route.snapshot.queryParamMap.get('origen');
+
+  // Navegación de regreso contextual (ETAPA 15C.3B). Sin `origen` válido en
+  // la URL (entrada directa, enlace externo, valor inesperado), conserva el
+  // fallback anterior: inferir por el tipo real del mensaje devuelto por el
+  // backend, con Recibidos como destino por defecto mientras carga/hay error.
+  protected readonly volver = computed<InfoVolver>(() => {
+    if (this.origen === 'recibidos') {
+      return { texto: 'Volver a recibidos', ruta: '/mensajes/recibidos' };
+    }
+
+    if (this.origen === 'enviados') {
+      return { texto: 'Volver a enviados', ruta: '/mensajes/enviados' };
+    }
+
+    const mensaje = this.detalle();
+
+    if (mensaje && !this.esRecibido(mensaje)) {
+      return { texto: 'Volver a enviados', ruta: '/mensajes/enviados' };
+    }
+
+    return { texto: 'Volver a recibidos', ruta: '/mensajes/recibidos' };
+  });
 
   constructor() {
     this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
