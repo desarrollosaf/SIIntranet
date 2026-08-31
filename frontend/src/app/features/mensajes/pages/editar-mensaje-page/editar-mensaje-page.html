@@ -1,151 +1,260 @@
 <section class="editar-mensaje-page">
-  <a routerLink="/mensajes/enviados" class="btn btn-sm btn-outline-secondary mb-3">Volver a mensajes</a>
+  <app-page-hero titulo="Editar mensaje" icono="bi-pencil-square" />
 
-  <h1 class="h4">Editar mensaje</h1>
+  <div class="editar-mensaje-page__wrapper">
+    <a
+      [routerLink]="['/mensajes', mensajeId]"
+      [queryParams]="{ origen: 'enviados' }"
+      class="editar-mensaje-page__volver"
+    >← Volver al mensaje</a>
 
-  @if (cargando()) {
-    <p>Cargando mensaje…</p>
-  }
-
-  @if (!cargando() && error()) {
-    <p class="text-danger" role="alert">{{ error() }}</p>
-  }
-
-  @if (!cargando() && !error() && editable()) {
-    @if (errorUsuarios()) {
-      <p class="text-danger" role="alert">{{ errorUsuarios() }}</p>
+    @if (cargando()) {
+      <p>Cargando mensaje…</p>
     }
 
-    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
-      <div class="mb-3">
-        <label for="titulo" class="form-label">Título</label>
-        <input
-          id="titulo"
-          type="text"
-          class="form-control"
-          [class.is-invalid]="form.controls.titulo.invalid && form.controls.titulo.touched"
-          [readonly]="guardando()"
-          formControlName="titulo"
-        />
-        @if (form.controls.titulo.invalid && form.controls.titulo.touched) {
-          <p class="invalid-feedback d-block" role="alert">El título es obligatorio.</p>
-        }
-      </div>
+    @if (!cargando() && error()) {
+      <p class="text-danger" role="alert">{{ error() }}</p>
+    }
 
-      <div class="mb-3">
-        <label for="descripcion" class="form-label">Descripción</label>
-        <textarea
-          id="descripcion"
-          class="form-control"
-          rows="4"
-          [class.is-invalid]="form.controls.descripcion.invalid && form.controls.descripcion.touched"
-          [readonly]="guardando()"
-          formControlName="descripcion"
-        ></textarea>
-        @if (form.controls.descripcion.invalid && form.controls.descripcion.touched) {
-          <p class="invalid-feedback d-block" role="alert">La descripción es obligatoria.</p>
-        }
-      </div>
+    @if (!cargando() && !error() && editable()) {
+      @if (errorUsuarios()) {
+        <p class="text-danger" role="alert">{{ errorUsuarios() }}</p>
+      }
 
-      <div class="mb-3">
-        <fieldset class="editar-mensaje-page__destinatarios-fieldset">
-          <legend class="form-label h6">Destinatarios</legend>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="editar-mensaje-page__layout">
+        <section
+          class="editar-mensaje-page__panel editar-mensaje-page__panel--contenido"
+          aria-labelledby="contenido-titulo"
+        >
+          <h2 id="contenido-titulo" class="editar-mensaje-page__panel-titulo">Contenido del mensaje</h2>
+
+          <div class="mb-3">
+            <label for="titulo" class="form-label">Título</label>
+            <input
+              id="titulo"
+              type="text"
+              class="form-control"
+              [class.is-invalid]="form.controls.titulo.invalid && form.controls.titulo.touched"
+              [readonly]="guardando()"
+              formControlName="titulo"
+            />
+            @if (form.controls.titulo.invalid && form.controls.titulo.touched) {
+              <p class="invalid-feedback d-block" role="alert">El título es obligatorio.</p>
+            }
+          </div>
+
+          <div class="mb-0">
+            <label for="descripcion" class="form-label">Descripción</label>
+            <textarea
+              id="descripcion"
+              class="form-control"
+              rows="6"
+              [class.is-invalid]="form.controls.descripcion.invalid && form.controls.descripcion.touched"
+              [readonly]="guardando()"
+              formControlName="descripcion"
+            ></textarea>
+            @if (form.controls.descripcion.invalid && form.controls.descripcion.touched) {
+              <p class="invalid-feedback d-block" role="alert">La descripción es obligatoria.</p>
+            }
+          </div>
+        </section>
+
+        <section
+          class="editar-mensaje-page__destinatarios-panel"
+          aria-labelledby="destinatarios-titulo"
+        >
+          <h2 id="destinatarios-titulo" class="editar-mensaje-page__panel-titulo">Destinatarios</h2>
+
+          <div class="editar-mensaje-page__buscador">
+            <i class="bi bi-search" aria-hidden="true"></i>
+            <label for="buscador-destinatarios" class="visually-hidden">Buscar por nombre o usuario</label>
+            <input
+              id="buscador-destinatarios"
+              type="search"
+              class="form-control"
+              placeholder="Buscar por nombre o usuario…"
+              [disabled]="guardando() || cargandoUsuarios()"
+              [value]="terminoBusqueda()"
+              (input)="onBuscarDestinatarios($event)"
+            />
+          </div>
 
           @if (cargandoUsuarios()) {
             <p>Cargando usuarios…</p>
           } @else {
-            <div class="editar-mensaje-page__destinatarios">
-              @for (usuario of usuarios(); track usuario.id) {
-                <div class="form-check editar-mensaje-page__destinatario">
-                  <input
-                    type="checkbox"
-                    class="form-check-input"
-                    [id]="'destinatario-' + usuario.id"
-                    [checked]="estaSeleccionado(usuario.id)"
+            <div class="editar-mensaje-page__resultados-header">
+              <span class="editar-mensaje-page__contador-disponibles">{{ textoDisponibles() }}</span>
+              <button
+                type="button"
+                class="editar-mensaje-page__accion-discreta"
+                [disabled]="guardando() || usuariosDisponibles().length === 0"
+                (click)="seleccionarResultadosFiltrados()"
+              >
+                {{ textoAccionSeleccionarTodos() }}
+              </button>
+            </div>
+
+            @if (usuariosFiltrados().length === 0) {
+              <p class="text-muted mb-0">No se encontraron destinatarios.</p>
+            } @else if (usuariosDisponibles().length === 0) {
+              <p class="text-muted mb-0">Todos los destinatarios visibles están seleccionados.</p>
+            } @else {
+              <ul class="list-unstyled editar-mensaje-page__resultados-lista">
+                @for (usuario of usuariosDisponibles(); track usuario.id) {
+                  <li class="editar-mensaje-page__resultado">
+                    <span class="editar-mensaje-page__resultado-info">
+                      <span class="editar-mensaje-page__resultado-nombre">{{ usuario.nombre }}</span>
+                      <span class="editar-mensaje-page__resultado-usuario">{{ usuario.usuario }}</span>
+                    </span>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-vino"
+                      [disabled]="guardando()"
+                      (click)="agregarDestinatario(usuario.id)"
+                      [attr.aria-label]="'Seleccionar a ' + usuario.nombre"
+                    >
+                      Seleccionar
+                    </button>
+                  </li>
+                }
+              </ul>
+            }
+
+            <div class="editar-mensaje-page__seleccionados">
+              <div class="editar-mensaje-page__seleccionados-header">
+                <h3 class="editar-mensaje-page__seleccionados-titulo">
+                  Seleccionados ({{ totalDestinatariosSeleccionados() }})
+                </h3>
+                @if (totalDestinatariosSeleccionados() > 0) {
+                  <button
+                    type="button"
+                    class="editar-mensaje-page__accion-discreta"
                     [disabled]="guardando()"
-                    (change)="onDestinatarioToggle(usuario.id, $event)"
-                  />
-                  <label class="form-check-label" [for]="'destinatario-' + usuario.id">
-                    <span class="d-block">{{ usuario.nombre }}</span>
-                    <span class="d-block text-muted small">{{ usuario.usuario }}</span>
-                  </label>
-                </div>
+                    (click)="limpiarSeleccion()"
+                  >
+                    Limpiar
+                  </button>
+                }
+              </div>
+
+              @if (totalDestinatariosSeleccionados() === 0) {
+                <p class="text-muted mb-0">Aún no has seleccionado destinatarios.</p>
+              } @else {
+                <ul class="list-unstyled editar-mensaje-page__seleccionados-lista">
+                  @for (usuario of destinatariosSeleccionados(); track usuario.id) {
+                    <li class="editar-mensaje-page__seleccionado">
+                      <span class="editar-mensaje-page__seleccionado-info">
+                        <span class="editar-mensaje-page__seleccionado-nombre">{{ usuario.nombre }}</span>
+                        <span class="editar-mensaje-page__seleccionado-usuario">{{ usuario.usuario }}</span>
+                      </span>
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-danger"
+                        [disabled]="guardando()"
+                        (click)="quitarDestinatario(usuario.id)"
+                        [attr.aria-label]="'Quitar ' + usuario.nombre + ' de destinatarios'"
+                      >
+                        Quitar
+                      </button>
+                    </li>
+                  }
+                </ul>
               }
             </div>
           }
-        </fieldset>
-        @if (form.controls.destinatarioIds.invalid && form.controls.destinatarioIds.touched) {
-          <p class="invalid-feedback d-block" role="alert">Selecciona al menos un destinatario.</p>
-        }
-      </div>
 
-      @if (archivoIdsExistentes().length > 0) {
-        <div class="mb-3">
-          <span class="form-label d-block">Adjuntos existentes</span>
-          <ul class="list-unstyled editar-mensaje-page__archivos">
-            @for (archivoId of archivoIdsExistentes(); track archivoId; let i = $index) {
-              <li class="d-flex justify-content-between align-items-center">
-                <span>Adjunto existente {{ i + 1 }}</span>
-                <button
-                  type="button"
-                  class="btn btn-sm btn-outline-danger"
-                  [disabled]="guardando()"
-                  (click)="quitarArchivoExistente(archivoId)"
-                  [attr.aria-label]="'Quitar adjunto existente ' + (i + 1)"
-                >
-                  Quitar
-                </button>
-              </li>
+          @if (form.controls.destinatarioIds.invalid && form.controls.destinatarioIds.touched) {
+            <p class="invalid-feedback d-block mb-0" role="alert">Selecciona al menos un destinatario.</p>
+          }
+        </section>
+
+        <section
+          class="editar-mensaje-page__panel editar-mensaje-page__panel--adjuntos"
+          aria-labelledby="adjuntos-titulo"
+        >
+          <h2 id="adjuntos-titulo" class="editar-mensaje-page__panel-titulo">Adjuntos</h2>
+
+          @if (archivoIdsExistentes().length > 0) {
+            <div class="editar-mensaje-page__adjuntos-existentes">
+              <h3 class="editar-mensaje-page__subtitulo">Adjuntos existentes</h3>
+              <ul class="list-unstyled editar-mensaje-page__archivos-existentes">
+                @for (archivoId of archivoIdsExistentes(); track archivoId; let i = $index) {
+                  <li class="editar-mensaje-page__archivo-existente">
+                    <span>Adjunto existente {{ i + 1 }}</span>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-danger"
+                      [disabled]="guardando()"
+                      (click)="quitarArchivoExistente(archivoId)"
+                      [attr.aria-label]="'Quitar adjunto existente ' + (i + 1)"
+                    >
+                      Quitar
+                    </button>
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+
+          <h3 class="editar-mensaje-page__subtitulo">Nuevos adjuntos</h3>
+
+          <label for="archivos" class="btn btn-outline-vino editar-mensaje-page__adjuntos-boton">
+            <i class="bi bi-paperclip" aria-hidden="true"></i>
+            Seleccionar archivos
+          </label>
+          <input
+            id="archivos"
+            type="file"
+            class="visually-hidden"
+            multiple
+            accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png"
+            [disabled]="guardando()"
+            (change)="onArchivosSeleccionados($event)"
+          />
+
+          @if (seleccionArchivos().length === 0) {
+            <p class="text-muted editar-mensaje-page__adjuntos-vacio">Ningún archivo nuevo seleccionado.</p>
+          } @else {
+            <p class="editar-mensaje-page__contador">{{ textoContadorArchivosNuevos() }}</p>
+            <ul class="list-unstyled editar-mensaje-page__archivos">
+              @for (item of seleccionArchivos(); track item.file.name + '-' + $index; let i = $index) {
+                <li class="editar-mensaje-page__archivo">
+                  <span class="editar-mensaje-page__archivo-nombre">{{ item.file.name }}</span>
+                  <div class="editar-mensaje-page__archivo-pie">
+                    <span class="editar-mensaje-page__archivo-meta">
+                      <span class="editar-mensaje-page__archivo-tamano">{{ tamanoLegible(item.file.size) }}</span>
+                      @if (item.archivoSubido) {
+                        <span class="badge text-bg-success">Subido</span>
+                      }
+                    </span>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-danger"
+                      [disabled]="guardando()"
+                      (click)="quitarArchivoNuevo(i)"
+                      [attr.aria-label]="'Quitar ' + item.file.name"
+                    >
+                      Quitar
+                    </button>
+                  </div>
+                </li>
+              }
+            </ul>
+          }
+
+          <div class="editar-mensaje-page__envio">
+            @if (errorGuardar()) {
+              <p class="text-danger" role="alert">{{ errorGuardar() }}</p>
             }
-          </ul>
-        </div>
-      }
 
-      <div class="mb-3">
-        <label for="archivos" class="form-label">Nuevos adjuntos</label>
-        <input
-          id="archivos"
-          type="file"
-          class="form-control"
-          multiple
-          accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png"
-          [disabled]="guardando()"
-          (change)="onArchivosSeleccionados($event)"
-        />
+            <p class="editar-mensaje-page__resumen">{{ textoResumen() }}</p>
 
-        @if (seleccionArchivos().length > 0) {
-          <ul class="list-unstyled mt-2 editar-mensaje-page__archivos">
-            @for (item of seleccionArchivos(); track item.file.name + '-' + $index; let i = $index) {
-              <li class="d-flex justify-content-between align-items-center">
-                <span>
-                  {{ item.file.name }}
-                  <span class="text-muted small">({{ tamanoLegible(item.file.size) }})</span>
-                  @if (item.archivoSubido) {
-                    <span class="badge text-bg-success ms-1">Subido</span>
-                  }
-                </span>
-                <button
-                  type="button"
-                  class="btn btn-sm btn-outline-danger"
-                  [disabled]="guardando()"
-                  (click)="quitarArchivoNuevo(i)"
-                  [attr.aria-label]="'Quitar ' + item.file.name"
-                >
-                  Quitar
-                </button>
-              </li>
-            }
-          </ul>
-        }
-      </div>
-
-      @if (errorGuardar()) {
-        <p class="text-danger" role="alert">{{ errorGuardar() }}</p>
-      }
-
-      <button type="submit" class="btn btn-primary" [disabled]="guardando()">
-        {{ guardando() ? 'Guardando…' : 'Guardar cambios' }}
-      </button>
-    </form>
-  }
+            <button type="submit" class="btn btn-vino editar-mensaje-page__guardar" [disabled]="guardando()">
+              {{ guardando() ? 'Guardando…' : 'Guardar cambios' }}
+            </button>
+          </div>
+        </section>
+      </form>
+    }
+  </div>
 </section>

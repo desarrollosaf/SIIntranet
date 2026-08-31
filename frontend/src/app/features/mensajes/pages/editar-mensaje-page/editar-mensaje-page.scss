@@ -1,26 +1,370 @@
+// Color institucional PROVISIONAL de desarrollo — mismo valor usado en el
+// resto del proyecto (AppShell/PageHero/Inicio/Mensaje nuevo/Bandeja/
+// Detalle), sin manual de identidad confirmado todavía. Declarado aquí de
+// forma local e independiente, sin crear dependencia entre componentes.
+$color-vino: #6d1a35;
+$color-vino-oscuro: #551528;
+$color-vino-tint: #fbf3f5;
+$color-borde: #e9ecef;
+
 .editar-mensaje-page {
   padding: 1.5rem;
-  max-width: 32rem;
 }
 
-.editar-mensaje-page__archivos li {
-  padding: 0.375rem 0;
-  border-bottom: 1px solid #eee;
+.editar-mensaje-page__wrapper {
+  max-width: 62.5rem; // ~1000px, mismo criterio que Mensaje nuevo/Bandeja/Detalle
+  margin-inline: auto;
 }
 
-.editar-mensaje-page__destinatarios-fieldset {
-  border: 1px solid #dee2e6;
-  border-radius: 0.375rem;
-  padding: 0.75rem 1rem;
+.editar-mensaje-page__volver {
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: $color-vino;
+  text-decoration: none;
 }
 
-.editar-mensaje-page__destinatarios {
+.editar-mensaje-page__volver:hover {
+  text-decoration: underline;
+}
+
+.editar-mensaje-page__volver:focus-visible {
+  outline: 2px solid $color-vino;
+  outline-offset: 2px;
+}
+
+// Dos superficies principales: columna de composición (contenido + adjuntos,
+// que también integra el resumen/guardado como su footer) y columna de
+// destinatarios — mismo criterio ya aprobado en Mensaje nuevo.
+.editar-mensaje-page__layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    'contenido'
+    'destinatarios'
+    'adjuntos';
+  gap: 1.5rem;
+}
+
+@media (min-width: 992px) {
+  .editar-mensaje-page__layout {
+    grid-template-columns: 2fr 1fr;
+    grid-template-areas:
+      'contenido destinatarios'
+      'adjuntos destinatarios';
+    align-items: start;
+  }
+}
+
+.editar-mensaje-page__panel,
+.editar-mensaje-page__destinatarios-panel {
+  padding: 1.25rem 1.375rem;
+  background: #ffffff;
+  border: 1px solid $color-borde;
+  border-radius: 0.875rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.editar-mensaje-page__panel--contenido {
+  grid-area: contenido;
+}
+
+.editar-mensaje-page__panel--adjuntos {
+  grid-area: adjuntos;
+}
+
+.editar-mensaje-page__destinatarios-panel {
+  grid-area: destinatarios;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.editar-mensaje-page__panel-titulo {
+  margin: 0 0 1rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #212529;
+}
+
+.editar-mensaje-page__destinatarios-panel > .editar-mensaje-page__panel-titulo {
+  margin-bottom: 0;
+}
+
+.editar-mensaje-page__subtitulo {
+  margin: 0 0 0.625rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #495057;
+}
+
+// ===== Buscador =====
+.editar-mensaje-page__buscador {
+  position: relative;
+}
+
+.editar-mensaje-page__buscador i {
+  position: absolute;
+  top: 50%;
+  left: 0.75rem;
+  transform: translateY(-50%);
+  color: #868e96;
+  pointer-events: none;
+}
+
+.editar-mensaje-page__buscador input {
+  padding-left: 2.25rem;
+}
+
+// ===== Cabeceras compactas: contador/acción a la izquierda y derecha =====
+.editar-mensaje-page__resultados-header,
+.editar-mensaje-page__seleccionados-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.editar-mensaje-page__contador-disponibles,
+.editar-mensaje-page__contador,
+.editar-mensaje-page__archivo-tamano {
+  font-size: 0.8125rem;
+  color: #868e96;
+}
+
+// Botón de texto discreto, sin icono, para acciones secundarias del panel
+// (Seleccionar todos/resultados, Limpiar) — menor peso visual que las
+// acciones "Seleccionar"/"Quitar" por fila.
+.editar-mensaje-page__accion-discreta {
+  padding: 0;
+  border: none;
+  background: none;
+  color: $color-vino;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.editar-mensaje-page__accion-discreta:hover,
+.editar-mensaje-page__accion-discreta:focus-visible {
+  text-decoration: underline;
+}
+
+.editar-mensaje-page__accion-discreta:disabled {
+  color: #adb5bd;
+  cursor: default;
+  text-decoration: none;
+}
+
+// ===== Resultados y seleccionados: filas compactas, no cards apiladas =====
+.editar-mensaje-page__resultados-lista,
+.editar-mensaje-page__seleccionados-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+  overflow-y: auto;
+}
+
+.editar-mensaje-page__resultados-lista {
+  max-height: 22rem;
+}
+
+.editar-mensaje-page__seleccionados-lista {
+  max-height: 14rem;
+}
+
+.editar-mensaje-page__resultado,
+.editar-mensaje-page__seleccionado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 0.625rem;
+  border: 1px solid $color-borde;
+  border-radius: 0.5rem;
+}
+
+.editar-mensaje-page__resultado-info,
+.editar-mensaje-page__seleccionado-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.editar-mensaje-page__resultado-nombre,
+.editar-mensaje-page__seleccionado-nombre {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.editar-mensaje-page__resultado-usuario,
+.editar-mensaje-page__seleccionado-usuario {
+  font-size: 0.8125rem;
+  color: #868e96;
+  overflow-wrap: anywhere;
+}
+
+.editar-mensaje-page__seleccionados {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.editar-mensaje-page__destinatario {
-  padding-block: 0.25rem;
+.editar-mensaje-page__seleccionados-titulo {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #495057;
+}
+
+// ===== Adjuntos existentes =====
+.editar-mensaje-page__adjuntos-existentes {
+  margin-bottom: 1.25rem;
+}
+
+.editar-mensaje-page__archivos-existentes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.editar-mensaje-page__archivo-existente {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid $color-borde;
+  border-radius: 0.5rem;
   overflow-wrap: anywhere;
+}
+
+// ===== Nuevos adjuntos =====
+.editar-mensaje-page__adjuntos-boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  margin-bottom: 0.75rem;
+}
+
+.editar-mensaje-page__adjuntos-vacio {
+  margin: 0;
+}
+
+.editar-mensaje-page__contador {
+  margin: 0 0 0.625rem;
+}
+
+.editar-mensaje-page__archivos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+// Fila en dos líneas SIEMPRE (no solo en mobile): nombre arriba (envuelve
+// libremente), tamaño + Quitar abajo. Evita que el tamaño se corte carácter
+// por carácter y que "Quitar" comprima el nombre.
+.editar-mensaje-page__archivo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid $color-borde;
+  border-radius: 0.5rem;
+}
+
+.editar-mensaje-page__archivo-nombre {
+  overflow-wrap: anywhere;
+  font-weight: 500;
+}
+
+.editar-mensaje-page__archivo-pie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.editar-mensaje-page__archivo-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.editar-mensaje-page__archivo-tamano {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+// ===== Resumen + guardado: footer del bloque Adjuntos, no una card aparte =====
+.editar-mensaje-page__envio {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid $color-borde;
+}
+
+.editar-mensaje-page__resumen {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #495057;
+}
+
+.editar-mensaje-page__guardar {
+  align-self: flex-start;
+}
+
+// ===== Acento vino institucional en botones, en vez del azul genérico =====
+.btn-vino {
+  background-color: $color-vino;
+  border-color: $color-vino;
+  color: #ffffff;
+}
+
+.btn-vino:hover,
+.btn-vino:focus-visible {
+  background-color: $color-vino-oscuro;
+  border-color: $color-vino-oscuro;
+  color: #ffffff;
+}
+
+.btn-vino:disabled {
+  background-color: $color-vino;
+  border-color: $color-vino;
+  opacity: 0.65;
+}
+
+.btn-outline-vino {
+  background-color: transparent;
+  border: 1px solid $color-vino;
+  color: $color-vino;
+}
+
+.btn-outline-vino:hover,
+.btn-outline-vino:focus-visible {
+  background-color: $color-vino-tint;
+  color: $color-vino-oscuro;
+}
+
+.btn-outline-vino:disabled {
+  color: $color-vino;
+  opacity: 0.5;
+}
+
+@media (max-width: 576px) {
+  .editar-mensaje-page {
+    padding: 1.125rem;
+  }
 }
