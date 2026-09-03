@@ -76,9 +76,8 @@
                 </span>
                 <span class="bandeja-page__fila-estados">
                   <span
-                    class="badge"
-                    [class.text-bg-primary]="mensaje.estadoLectura === 'Nuevo'"
-                    [class.text-bg-light]="mensaje.estadoLectura !== 'Nuevo'"
+                    class="bandeja-page__badge-lectura"
+                    [class.bandeja-page__badge-lectura--nuevo]="mensaje.estadoLectura === 'Nuevo'"
                   >
                     {{ mensaje.estadoLectura }}
                   </span>

@@ -3,6 +3,7 @@
 // identidad confirmado todavía. Declarado aquí de forma local e
 // independiente, sin crear dependencia entre componentes.
 $color-vino: #6d1a35;
+$color-vino-tint: #fbf3f5;
 $color-borde: #e9ecef;
 
 .bandeja-page {
@@ -127,6 +128,29 @@ $color-borde: #e9ecef;
 // tipográfico + el badge de texto ya presente en la fila.
 .bandeja-page__fila-titulo--nuevo {
   font-weight: 700;
+}
+
+// Badge de estado de lectura propio (ETAPA 15C.7): reemplaza el
+// `badge text-bg-primary` de Bootstrap (azul) por un tratamiento vino
+// sobrio para "Nuevo". "Visto" conserva un tratamiento neutro equivalente
+// al `text-bg-light` anterior — nunca depende solo del color, el texto
+// del estado siempre está presente.
+.bandeja-page__badge-lectura {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3em 0.65em;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  background-color: #f1f3f5;
+  color: #495057;
+}
+
+.bandeja-page__badge-lectura--nuevo {
+  background-color: $color-vino-tint;
+  color: $color-vino;
 }
 
 .bandeja-page__fila-meta {

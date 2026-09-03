@@ -137,6 +137,23 @@ describe('BandejaMensajesPage', () => {
     expect(compiled.querySelector('.bandeja-page__fila-titulo--nuevo')).not.toBeNull();
   });
 
+  // ETAPA 15C.7 — el badge de estado de lectura dejó de ser
+  // `badge text-bg-primary` de Bootstrap (azul) y pasó a una clase propia.
+  it('el badge de "Nuevo" ya no utiliza la clase de Bootstrap text-bg-primary', () => {
+    configurar('recibidos');
+    vi.spyOn(mensajesService, 'recibidos').mockReturnValue(of([recibido]));
+    crearFixture();
+
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('.text-bg-primary')).toBeNull();
+
+    const badge = compiled.querySelector('.bandeja-page__badge-lectura--nuevo');
+    expect(badge).not.toBeNull();
+    expect(badge?.textContent).toContain('Nuevo');
+  });
+
   it('un mensaje Eliminado no intenta mostrar título/descripción', () => {
     configurar('recibidos');
     const eliminado: MensajeRecibido = {

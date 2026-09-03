@@ -86,6 +86,20 @@ describe('InicioPage', () => {
     expect(compiled.textContent).toContain('Bienvenido, sergio.');
   });
 
+  // ETAPA 15C.7 — el contenido se envolvió en un contenedor de ancho
+  // limitado; confirma que ninguna sección se perdió ni cambió de orden.
+  it('conserva las tres secciones (Accesos rápidos, Mensajes recientes, Enlaces institucionales) en orden', () => {
+    configurar();
+    vi.spyOn(mensajesService, 'recibidos').mockReturnValue(of([]));
+    crearFixture();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const titulos = Array.from(compiled.querySelectorAll('h2')).map((h) => h.textContent?.trim());
+
+    expect(titulos).toEqual(['Accesos rápidos', 'Mensajes recientes', 'Enlaces institucionales']);
+  });
+
   describe('Accesos rápidos', () => {
     it('Usuario ve Mensaje nuevo, Bandeja de entrada y Formatos con sus rutas reales', () => {
       configurar('Usuario');
@@ -242,6 +256,24 @@ describe('InicioPage', () => {
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.querySelector('.inicio__fila-mensaje--nuevo')).toBeNull();
       expect(compiled.querySelector('.inicio__fila-mensaje')?.textContent).toContain('Visto');
+    });
+
+    // ETAPA 15C.7 — el badge de estado de lectura dejó de ser
+    // `badge text-bg-primary` de Bootstrap (azul) y pasó a una clase propia.
+    it('el badge de "Nuevo" ya no utiliza la clase de Bootstrap text-bg-primary', () => {
+      configurar();
+      vi.spyOn(mensajesService, 'recibidos').mockReturnValue(
+        of([mensaje({ id: 'mensaje-1', estadoLectura: 'Nuevo' })]),
+      );
+      crearFixture();
+      fixture.detectChanges();
+
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.querySelector('.text-bg-primary')).toBeNull();
+
+      const badge = compiled.querySelector('.inicio__badge-lectura--nuevo');
+      expect(badge).not.toBeNull();
+      expect(badge?.textContent).toContain('Nuevo');
     });
 
     it('un mensaje Eliminado no intenta mostrar título/descripción inexistentes', () => {
