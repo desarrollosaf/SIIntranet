@@ -1,8 +1,243 @@
+// Color institucional PROVISIONAL de desarrollo — mismo valor usado en el
+// resto del proyecto (AppShell/PageHero/Inicio/Mensajes/Formatos), sin
+// manual de identidad confirmado todavía. Declarado aquí de forma local e
+// independiente, sin crear dependencia entre componentes.
+$color-vino: #6d1a35;
+$color-vino-oscuro: #551528;
+$color-vino-tint: #fbf3f5;
+$color-borde: #e9ecef;
+
 .usuarios-page {
   padding: 1.5rem;
 }
 
+.usuarios-page__wrapper {
+  max-width: 62.5rem; // ~1000px, mismo criterio que Inicio/Bandeja/Formatos
+  margin-inline: auto;
+}
+
+// ===== Barra de herramientas: buscador + filtros + resumen =====
+.usuarios-page__herramientas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.usuarios-page__buscador {
+  flex: 1 1 16rem;
+  max-width: 20rem;
+}
+
+// Ancho intrínseco (auto): los navegadores dimensionan un <select> nativo
+// al contenido de su opción más ancha, no solo la seleccionada — evita
+// truncamiento ("Todos los estados") sin fijar un ancho rígido ni saltos
+// de tamaño al cambiar de opción.
+.usuarios-page__filtro {
+  flex: 0 0 auto;
+}
+
+.usuarios-page__filtro .form-select {
+  width: auto;
+}
+
+.usuarios-page__resumen {
+  flex-shrink: 0;
+  margin: 0 0 0 auto;
+  font-size: 0.8125rem;
+  color: #868e96;
+}
+
+// ===== Lista: UNA superficie agrupada, filas separadas por divisor
+// horizontal — mismo patrón aprobado en Bandeja/Formatos, no tabla rayada =====
+.usuarios-page__lista {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border: 1px solid $color-borde;
+  border-radius: 0.875rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+.usuarios-page__item {
+  border-bottom: 1px solid $color-borde;
+}
+
+.usuarios-page__item:last-child {
+  border-bottom: none;
+}
+
+.usuarios-page__fila {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  padding: 0.875rem 1.125rem;
+}
+
+.usuarios-page__info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.usuarios-page__nombre {
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.usuarios-page__usuario {
+  font-size: 0.8125rem;
+  color: #868e96;
+  overflow-wrap: anywhere;
+}
+
+// Rol y Estado forman un mismo grupo visual — en mobile intentan permanecer
+// en la misma línea; si algún texto fuera más largo, envuelve naturalmente.
+.usuarios-page__badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+// ===== Badges discretos: neutros por defecto, un único acento por
+// dimensión (vino para Administrador, verde sobrio para Activo) — sin
+// explosión de colores =====
+.usuarios-page__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  background: #f1f3f5;
+  color: #495057;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.usuarios-page__badge--admin {
+  background: $color-vino-tint;
+  color: $color-vino;
+}
+
+.usuarios-page__badge--activo {
+  background: #e6f4ea;
+  color: #2b7a41;
+}
+
+.usuarios-page__acciones {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-self: end;
+}
+
+// Botones de texto discretos, sin icono ni chrome — el texto ya es
+// suficientemente claro (Editar/Activar/Desactivar).
+.usuarios-page__accion {
+  padding: 0;
+  border: none;
+  background: none;
+  color: $color-vino;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.usuarios-page__accion:hover,
+.usuarios-page__accion:focus-visible {
+  text-decoration: underline;
+}
+
+.usuarios-page__accion:focus-visible {
+  outline: 2px solid $color-vino;
+  outline-offset: 2px;
+}
+
+.usuarios-page__accion:disabled {
+  color: #adb5bd;
+  cursor: default;
+  text-decoration: none;
+}
+
+// ===== Edición inline: asociada visualmente a la fila, no una card aparte
+// al final de la lista =====
 .usuarios-page__edicion {
-  max-width: 28rem;
-  margin-top: 1.5rem;
+  padding: 1rem 1.125rem 1.25rem;
+  border-top: 1px dashed $color-borde;
+  background: #fafafa;
+}
+
+.usuarios-page__edicion-acciones {
+  display: flex;
+  gap: 0.5rem;
+}
+
+// ===== Acento vino institucional en botones, en vez del azul genérico =====
+.btn-vino {
+  background-color: $color-vino;
+  border-color: $color-vino;
+  color: #ffffff;
+}
+
+.btn-vino:hover,
+.btn-vino:focus-visible {
+  background-color: $color-vino-oscuro;
+  border-color: $color-vino-oscuro;
+  color: #ffffff;
+}
+
+.btn-vino:disabled {
+  background-color: $color-vino;
+  border-color: $color-vino;
+  opacity: 0.65;
+}
+
+.btn-outline-vino {
+  background-color: transparent;
+  border: 1px solid $color-vino;
+  color: $color-vino;
+}
+
+.btn-outline-vino:hover,
+.btn-outline-vino:focus-visible {
+  background-color: $color-vino-tint;
+  color: $color-vino-oscuro;
+}
+
+.btn-outline-vino:disabled {
+  color: $color-vino;
+  opacity: 0.5;
+}
+
+@media (max-width: 768px) {
+  .usuarios-page__resumen {
+    flex-basis: 100%;
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 576px) {
+  .usuarios-page {
+    padding: 1.125rem;
+  }
+
+  .usuarios-page__buscador {
+    flex-basis: 100%;
+    max-width: none;
+  }
+
+  .usuarios-page__fila {
+    grid-template-columns: 1fr;
+    justify-items: start;
+    row-gap: 0.625rem;
+  }
+
+  .usuarios-page__acciones {
+    justify-self: start;
+  }
 }
