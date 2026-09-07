@@ -55,11 +55,10 @@ export class EditarMensajePage {
     this.cargarUsuarios();
   }
 
-  // ===== Selector de destinatarios con búsqueda (ETAPA 15C.3C) =====
-  // Misma filosofía UX ya aprobada en Mensaje nuevo: buscador local +
-  // disponibles/seleccionados, sin llamadas nuevas al backend por tecla.
-  // A diferencia de Redactar (modo respuesta), Editar no tiene un
-  // destinatario obligatorio que proteger de quitarDestinatario/
+  // Selector de destinatarios: misma filosofía UX que en Mensaje nuevo
+  // (buscador local + disponibles/seleccionados, sin llamadas nuevas al
+  // backend por tecla). A diferencia de Redactar (modo respuesta), aquí no
+  // hay un destinatario obligatorio que proteger de quitarDestinatario/
   // limpiarSeleccion.
   protected readonly terminoBusqueda = signal('');
 

@@ -60,7 +60,6 @@ describe('FormatosPage', () => {
     fixture.detectChanges();
   }
 
-  // 1. creación
   it('crea el componente', () => {
     configurar();
     vi.spyOn(formatosService, 'listar').mockReturnValue(of([]));
@@ -71,7 +70,6 @@ describe('FormatosPage', () => {
     expect(fixture.componentInstance).toBeTruthy();
   });
 
-  // 2. listar()
   it('llama a FormatosService.listar() al cargar', () => {
     configurar();
     const spy = vi.spyOn(formatosService, 'listar').mockReturnValue(of([]));
@@ -82,7 +80,6 @@ describe('FormatosPage', () => {
     expect(spy).toHaveBeenCalled();
   });
 
-  // 3. PageHero/único h1
   it('el hero muestra "Formatos" como único h1', () => {
     configurar();
     vi.spyOn(formatosService, 'listar').mockReturnValue(of([]));
@@ -95,7 +92,6 @@ describe('FormatosPage', () => {
     expect(compiled.querySelector('h1')?.textContent?.trim()).toBe('Formatos');
   });
 
-  // 4. loading
   it('muestra un estado de carga mientras la petición está pendiente', () => {
     configurar();
     vi.spyOn(formatosService, 'listar').mockReturnValue(new Subject<Formato[]>());
@@ -107,7 +103,6 @@ describe('FormatosPage', () => {
     expect(compiled.textContent).toContain('Cargando formatos');
   });
 
-  // 5. error role=alert
   it('muestra un error accesible si la carga falla', () => {
     configurar();
     vi.spyOn(formatosService, 'listar').mockReturnValue(throwError(() => new Error('falla')));
@@ -138,7 +133,6 @@ describe('FormatosPage', () => {
     expect(compiled.textContent).not.toContain('Aún no hay formatos disponibles.');
   });
 
-  // 8. categoría con contenido visible
   it('una categoría con documentos se muestra con su nombre', () => {
     configurar();
     vi.spyOn(formatosService, 'listar').mockReturnValue(
@@ -152,7 +146,6 @@ describe('FormatosPage', () => {
     expect(compiled.textContent).toContain('Dirección de Finanzas');
   });
 
-  // 9. categoría vacía oculta
   it('una categoría del catálogo sin documentos no se renderiza', () => {
     configurar();
     vi.spyOn(formatosService, 'listar').mockReturnValue(
@@ -169,7 +162,6 @@ describe('FormatosPage', () => {
     expect(compiled.textContent).not.toContain('Coordinación de Normatividad');
   });
 
-  // 10. múltiples categorías con contenido mantienen orden oficial
   it('varias categorías con contenido conservan el orden oficial de APARTADOS_FORMATOS', () => {
     configurar();
     const formatos = [
@@ -194,7 +186,6 @@ describe('FormatosPage', () => {
     ]);
   });
 
-  // 11. desconocida con contenido aparece al final
   it('una categoría desconocida del backend aparece al final con su nombre real', () => {
     configurar();
     const formatos = [
@@ -231,7 +222,6 @@ describe('FormatosPage', () => {
       ];
     }
 
-    // 12. búsqueda por nombre
     it('filtra por nombre', () => {
       configurar();
       vi.spyOn(formatosService, 'listar').mockReturnValue(of(formatosDeMuestra()));
@@ -245,7 +235,6 @@ describe('FormatosPage', () => {
       expect(ids).toEqual(['f-1']);
     });
 
-    // 13. búsqueda por descripción
     it('filtra por descripción', () => {
       configurar();
       vi.spyOn(formatosService, 'listar').mockReturnValue(of(formatosDeMuestra()));
@@ -259,7 +248,6 @@ describe('FormatosPage', () => {
       expect(ids).toEqual(['f-2']);
     });
 
-    // 14. búsqueda por nombreOriginal
     it('filtra por nombre original del archivo', () => {
       configurar();
       vi.spyOn(formatosService, 'listar').mockReturnValue(of(formatosDeMuestra()));
@@ -273,7 +261,6 @@ describe('FormatosPage', () => {
       expect(ids).toEqual(['f-1']);
     });
 
-    // 15. búsqueda por categoria
     it('filtra por categoría', () => {
       configurar();
       vi.spyOn(formatosService, 'listar').mockReturnValue(of(formatosDeMuestra()));
@@ -287,7 +274,6 @@ describe('FormatosPage', () => {
       expect(ids).toEqual(['f-2']);
     });
 
-    // 16. case-insensitive
     it('la búsqueda es insensible a mayúsculas/minúsculas', () => {
       configurar();
       vi.spyOn(formatosService, 'listar').mockReturnValue(of(formatosDeMuestra()));
@@ -301,7 +287,6 @@ describe('FormatosPage', () => {
       expect(ids).toEqual(['f-1']);
     });
 
-    // 17. trim
     it('ignora espacios al inicio/final del término de búsqueda', () => {
       configurar();
       vi.spyOn(formatosService, 'listar').mockReturnValue(of(formatosDeMuestra()));
@@ -315,7 +300,6 @@ describe('FormatosPage', () => {
       expect(ids).toEqual(['f-1']);
     });
 
-    // 18. sin resultados
     it('muestra un mensaje específico cuando la búsqueda no tiene resultados', () => {
       configurar();
       vi.spyOn(formatosService, 'listar').mockReturnValue(of(formatosDeMuestra()));
@@ -329,7 +313,6 @@ describe('FormatosPage', () => {
       expect(fixture.componentInstance['grupos']()).toHaveLength(0);
     });
 
-    // 19. no muta la fuente original
     it('la búsqueda no muta los formatos originales', () => {
       configurar();
       const originales = formatosDeMuestra();
@@ -360,7 +343,6 @@ describe('FormatosPage', () => {
     expect(compiled.textContent).not.toContain('1 formatos');
   });
 
-  // 22. contador por categoría — plural
   it('muestra "N formatos" cuando la categoría tiene varios documentos', () => {
     configurar();
     vi.spyOn(formatosService, 'listar').mockReturnValue(
@@ -377,7 +359,6 @@ describe('FormatosPage', () => {
     expect(compiled.textContent).toContain('2 formatos');
   });
 
-  // 23. contador global
   it('muestra un resumen global con el total de formatos disponibles', () => {
     configurar();
     vi.spyOn(formatosService, 'listar').mockReturnValue(
@@ -414,7 +395,6 @@ describe('FormatosPage', () => {
     expect(fixture.componentInstance['resumenGlobal']()).toBe('1 formato encontrado');
   });
 
-  // 24. contenido del formato
   it('muestra nombre, descripción, nombre original del archivo, tamaño y fecha', () => {
     configurar();
     vi.spyOn(formatosService, 'listar').mockReturnValue(of([formato()]));
@@ -429,7 +409,6 @@ describe('FormatosPage', () => {
     expect(compiled.textContent).toContain('1.0 KB');
   });
 
-  // 25. tamanoLegible
   describe('tamanoLegible', () => {
     beforeEach(() => {
       configurar();
@@ -467,7 +446,6 @@ describe('FormatosPage', () => {
     expect(enlace!.getAttribute('href')).toBe(formatosService.urlDescarga('formato-1'));
   });
 
-  // 28. aria-labelledby en secciones
   it('cada sección de categoría está enlazada a su h2 mediante aria-labelledby', () => {
     configurar();
     vi.spyOn(formatosService, 'listar').mockReturnValue(

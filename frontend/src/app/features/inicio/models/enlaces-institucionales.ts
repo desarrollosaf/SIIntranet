@@ -4,9 +4,8 @@ export interface EnlaceInstitucional {
 }
 
 /**
- * Catálogo estático de V1. Las URL oficiales todavía no fueron entregadas
- * (ver ETAPA 15C.1) — mientras `url` sea `null`, el template no debe
- * renderizar un enlace real.
+ * Catálogo estático de V1. Las URL oficiales todavía no fueron entregadas —
+ * mientras `url` sea `null`, el template no debe renderizar un enlace real.
  */
 export const ENLACES_INSTITUCIONALES: readonly EnlaceInstitucional[] = [
   { nombre: 'Cámara de Diputados del Estado de México', url: null },

@@ -1,6 +1,4 @@
-// Colores institucionales PROVISIONALES de desarrollo — sin manual de marca
-// confirmado todavía (ver ETAPA 15A/15B/15B-R). Validar visualmente y
-// sustituir por el valor oficial cuando se confirme.
+// Colores provisionales hasta recibir el manual de identidad institucional.
 $color-vino: #6d1a35;
 $color-vino-oscuro: #551528;
 $color-vino-tint: rgba(109, 26, 53, 0.08);
@@ -16,8 +14,7 @@ $sidebar-ancho: 16rem;
 
 // Altura real de la topbar (padding vertical 0.875rem × 2 + botón de cuenta
 // de 2.5rem = 4.25rem) — reutilizada por drawer/backdrop para comenzar
-// exactamente debajo de ella en <992px, sin cubrirla (ver MICROCORRECCIÓN
-// FINAL 15B.1).
+// exactamente debajo de ella en <992px, sin cubrirla.
 $header-altura: 4.25rem;
 
 // Equivalente al breakpoint `lg` de Bootstrap (992px). No se importa el
@@ -29,8 +26,7 @@ $breakpoint-desktop: 992px;
 
 // ===== Shell raíz — header global arriba, cuerpo (sidebar + main) abajo.
 // El header NUNCA vive dentro del área que empuja/colapsa el sidebar, así
-// no se desplaza horizontalmente al abrir/cerrarlo (ver MICROCORRECCIÓN
-// 15B.1). =====
+// no se desplaza horizontalmente al abrir/cerrarlo. =====
 .app-shell {
   display: flex;
   flex-direction: column;

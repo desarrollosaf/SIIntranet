@@ -30,8 +30,8 @@ describe('DetalleMensajePage', () => {
   // todavía el componente — su constructor dispara la carga inicial de
   // inmediato, así que los spies deben existir antes de crear el fixture.
   // `origen` simula el query param `?origen=recibidos|enviados` que Bandeja
-  // agrega al enlace de cada fila (MICROCORRECCIÓN 15C.3B); sin argumento,
-  // se comporta como una entrada directa sin query param.
+  // agrega al enlace de cada fila; sin argumento, se comporta como una
+  // entrada directa sin query param.
   function configurar(origen?: string): void {
     TestBed.configureTestingModule({
       imports: [DetalleMensajePage],
@@ -376,7 +376,7 @@ describe('DetalleMensajePage', () => {
     });
   });
 
-  describe('ETAPA 15C.3B — PageHero, regreso contextual, remitente, destinatarios y tombstone', () => {
+  describe('PageHero, regreso contextual, remitente, destinatarios y tombstone', () => {
     const enviadoConDosDestinatarios: MensajeEnviado = {
       id: 'mensaje-1',
       fechaCreacion: new Date().toISOString(),
@@ -448,7 +448,7 @@ describe('DetalleMensajePage', () => {
       });
     });
 
-    describe('MICROCORRECCIÓN 15C.3B — origen de navegación tiene prioridad sobre el tipo devuelto', () => {
+    describe('origen de navegación tiene prioridad sobre el tipo devuelto', () => {
       it('un mensaje enviado a sí mismo (backend devuelve MensajeEnviado) abierto con ?origen=recibidos vuelve a Recibidos', () => {
         configurar('recibidos');
         // El backend resuelve como "enviado" porque remitenteId===actorId,

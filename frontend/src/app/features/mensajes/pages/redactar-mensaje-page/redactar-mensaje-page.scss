@@ -17,9 +17,8 @@ $color-borde: #e9ecef;
 }
 
 // Dos superficies principales: columna de composición (contenido + adjuntos,
-// que ahora también integra el resumen/envío como su footer — MICROCORRECCIÓN
-// 15C.2 §5/6) y columna de destinatarios. Nunca más de dos cards, sin
-// dashboard de paneles decorativos.
+// que integra el resumen/envío como su footer) y columna de destinatarios.
+// Nunca más de dos cards, sin dashboard de paneles decorativos.
 .redactar-mensaje-page__layout {
   display: grid;
   grid-template-columns: 1fr;
@@ -94,8 +93,7 @@ $color-borde: #e9ecef;
 }
 
 // ===== Cabeceras compactas: contador/acción a la izquierda y derecha,
-// en vez de dos botones completos ocupando todo el ancho (MICROCORRECCIÓN
-// 15C.2 §2) =====
+// en vez de dos botones completos ocupando todo el ancho =====
 .redactar-mensaje-page__resultados-header,
 .redactar-mensaje-page__seleccionados-header {
   display: flex;
@@ -146,7 +144,7 @@ $color-borde: #e9ecef;
 
 // 22rem alcanza para los 3 usuarios actuales (3 filas × 87.5px + gaps ≈
 // 279px de contenido real) sin scrollbar interno, y sigue acotando la
-// lista cuando en el futuro haya muchos más (MICROCORRECCIÓN FINAL 15C.2).
+// lista cuando en el futuro haya muchos más.
 .redactar-mensaje-page__resultados-lista {
   max-height: 22rem;
 }
@@ -228,7 +226,7 @@ $color-borde: #e9ecef;
 
 // Fila en dos líneas SIEMPRE (no solo en mobile): nombre arriba (envuelve
 // libremente), tamaño + Quitar abajo. Evita que el tamaño se corte carácter
-// por carácter y que "Quitar" comprima el nombre (MICROCORRECCIÓN 15C.2 §4).
+// por carácter y que "Quitar" comprima el nombre.
 .redactar-mensaje-page__archivo {
   display: flex;
   flex-direction: column;
@@ -262,8 +260,7 @@ $color-borde: #e9ecef;
   white-space: nowrap;
 }
 
-// ===== Resumen + envío: footer del bloque Adjuntos, no una card aparte
-// (MICROCORRECCIÓN 15C.2 §5) =====
+// ===== Resumen + envío: footer del bloque Adjuntos, no una card aparte =====
 .redactar-mensaje-page__envio {
   display: flex;
   flex-direction: column;

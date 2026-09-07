@@ -86,8 +86,6 @@ describe('InicioPage', () => {
     expect(compiled.textContent).toContain('Bienvenido, sergio.');
   });
 
-  // ETAPA 15C.7 — el contenido se envolvió en un contenedor de ancho
-  // limitado; confirma que ninguna sección se perdió ni cambió de orden.
   it('conserva las tres secciones (Accesos rápidos, Mensajes recientes, Enlaces institucionales) en orden', () => {
     configurar();
     vi.spyOn(mensajesService, 'recibidos').mockReturnValue(of([]));
@@ -258,8 +256,6 @@ describe('InicioPage', () => {
       expect(compiled.querySelector('.inicio__fila-mensaje')?.textContent).toContain('Visto');
     });
 
-    // ETAPA 15C.7 — el badge de estado de lectura dejó de ser
-    // `badge text-bg-primary` de Bootstrap (azul) y pasó a una clase propia.
     it('el badge de "Nuevo" ya no utiliza la clase de Bootstrap text-bg-primary', () => {
       configurar();
       vi.spyOn(mensajesService, 'recibidos').mockReturnValue(

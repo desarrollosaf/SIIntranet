@@ -130,11 +130,10 @@ $color-borde: #e9ecef;
   font-weight: 700;
 }
 
-// Badge de estado de lectura propio (ETAPA 15C.7): reemplaza el
-// `badge text-bg-primary` de Bootstrap (azul) por un tratamiento vino
-// sobrio para "Nuevo". "Visto" conserva un tratamiento neutro equivalente
-// al `text-bg-light` anterior — nunca depende solo del color, el texto
-// del estado siempre está presente.
+// Badge de estado de lectura propio: reemplaza el `badge text-bg-primary`
+// de Bootstrap (azul) por un tratamiento vino sobrio para "Nuevo". "Visto"
+// conserva un tratamiento neutro equivalente al `text-bg-light` anterior —
+// nunca depende solo del color, el texto del estado siempre está presente.
 .bandeja-page__badge-lectura {
   display: inline-flex;
   align-items: center;

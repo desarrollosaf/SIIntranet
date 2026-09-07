@@ -86,7 +86,6 @@ describe('UsuariosPage', () => {
     ) as HTMLButtonElement[];
   }
 
-  // 1. componente creado
   it('crea el componente', () => {
     configurar();
     vi.spyOn(usuariosService, 'listar').mockReturnValue(of([]));
@@ -97,7 +96,6 @@ describe('UsuariosPage', () => {
     expect(fixture.componentInstance).toBeTruthy();
   });
 
-  // 2. único h1
   it('el hero muestra "Administración" como único h1', () => {
     configurar();
     vi.spyOn(usuariosService, 'listar').mockReturnValue(of([]));
@@ -110,7 +108,6 @@ describe('UsuariosPage', () => {
     expect(compiled.querySelector('h1')?.textContent?.trim()).toBe('Administración');
   });
 
-  // 3. llama una vez a listar()
   it('llama a UsuariosService.listar() exactamente una vez al iniciar', () => {
     configurar();
     const spy = vi.spyOn(usuariosService, 'listar').mockReturnValue(of([]));
@@ -121,7 +118,6 @@ describe('UsuariosPage', () => {
     expect(spy).toHaveBeenCalledTimes(1);
   });
 
-  // 4. loading
   it('muestra un estado de carga mientras la petición está pendiente', () => {
     configurar();
     vi.spyOn(usuariosService, 'listar').mockReturnValue(new Subject<Usuario[]>());
@@ -133,7 +129,6 @@ describe('UsuariosPage', () => {
     expect(compiled.textContent).toContain('Cargando usuarios');
   });
 
-  // 5. error accesible
   it('muestra un error accesible si la carga falla', () => {
     configurar();
     vi.spyOn(usuariosService, 'listar').mockReturnValue(throwError(() => new Error('falla')));
@@ -146,7 +141,6 @@ describe('UsuariosPage', () => {
     expect(compiled.querySelector('[role="alert"]')).toBeTruthy();
   });
 
-  // 6. vacío global
   it('con backend [] muestra "No hay usuarios disponibles." y ningún buscador', () => {
     configurar();
     vi.spyOn(usuariosService, 'listar').mockReturnValue(of([]));
@@ -159,7 +153,6 @@ describe('UsuariosPage', () => {
     expect(compiled.querySelector('#buscador-usuarios')).toBeNull();
   });
 
-  // 7. render de múltiples usuarios
   it('renderiza una fila por cada usuario recibido', () => {
     configurar();
     const usuarios = [
@@ -204,7 +197,6 @@ describe('UsuariosPage', () => {
       ];
     }
 
-    // 8. buscador por nombre
     it('filtra por nombre', () => {
       configurar();
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of(usuariosDeMuestra()));
@@ -217,7 +209,6 @@ describe('UsuariosPage', () => {
       expect(ids).toEqual(['u2']);
     });
 
-    // 9. buscador por usuario
     it('filtra por nombre de usuario', () => {
       configurar();
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of(usuariosDeMuestra()));
@@ -230,7 +221,6 @@ describe('UsuariosPage', () => {
       expect(ids).toEqual(['u3']);
     });
 
-    // 10. case-insensitive
     it('la búsqueda es insensible a mayúsculas/minúsculas', () => {
       configurar();
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of(usuariosDeMuestra()));
@@ -243,7 +233,6 @@ describe('UsuariosPage', () => {
       expect(ids).toEqual(['u1']);
     });
 
-    // 11. trim
     it('ignora espacios al inicio/final del término de búsqueda', () => {
       configurar();
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of(usuariosDeMuestra()));
@@ -256,7 +245,6 @@ describe('UsuariosPage', () => {
       expect(ids).toEqual(['u1']);
     });
 
-    // 12. filtro Usuario
     it('filtra por rol Usuario', () => {
       configurar();
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of(usuariosDeMuestra()));
@@ -269,7 +257,6 @@ describe('UsuariosPage', () => {
       expect(ids).toEqual(['u2', 'u3']);
     });
 
-    // 13. filtro Administrador
     it('filtra por rol Administrador', () => {
       configurar();
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of(usuariosDeMuestra()));
@@ -282,7 +269,6 @@ describe('UsuariosPage', () => {
       expect(ids).toEqual(['u1']);
     });
 
-    // 14. filtro Activo
     it('filtra por estado Activo', () => {
       configurar();
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of(usuariosDeMuestra()));
@@ -295,7 +281,6 @@ describe('UsuariosPage', () => {
       expect(ids).toEqual(['u1', 'u3']);
     });
 
-    // 15. filtro Inactivo
     it('filtra por estado Inactivo', () => {
       configurar();
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of(usuariosDeMuestra()));
@@ -308,7 +293,6 @@ describe('UsuariosPage', () => {
       expect(ids).toEqual(['u2']);
     });
 
-    // 16. combinación búsqueda + rol + estado
     it('combina búsqueda, rol y estado', () => {
       configurar();
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of(usuariosDeMuestra()));
@@ -323,7 +307,6 @@ describe('UsuariosPage', () => {
       expect(ids).toEqual(['u3']);
     });
 
-    // 17. sin coincidencias
     it('muestra un mensaje específico cuando los filtros no producen coincidencias', () => {
       configurar();
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of(usuariosDeMuestra()));
@@ -337,7 +320,6 @@ describe('UsuariosPage', () => {
       expect(fixture.componentInstance['usuariosFiltrados']()).toHaveLength(0);
     });
 
-    // 18. filtrado no muta array original
     it('el filtrado no muta el arreglo original de usuarios', () => {
       configurar();
       const originales = usuariosDeMuestra();
@@ -357,7 +339,6 @@ describe('UsuariosPage', () => {
     });
   });
 
-  // 19. badges/textos de rol
   it('muestra el rol como texto legible en la fila', () => {
     configurar();
     vi.spyOn(usuariosService, 'listar').mockReturnValue(
@@ -371,7 +352,6 @@ describe('UsuariosPage', () => {
     expect(compiled.textContent).toContain('Administrador');
   });
 
-  // 20. badges/textos de estado
   it('muestra el estado como texto legible en la fila', () => {
     configurar();
     vi.spyOn(usuariosService, 'listar').mockReturnValue(of([crearUsuario({ estado: 'Inactivo' })]));
@@ -391,7 +371,6 @@ describe('UsuariosPage', () => {
       ];
     }
 
-    // 21. Editar abre formulario debajo del usuario correcto
     it('Editar abre el formulario dentro de la fila del usuario correcto', () => {
       configurar();
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of(dosUsuarios()));
@@ -407,7 +386,6 @@ describe('UsuariosPage', () => {
       expect(items[1].querySelector('form')).toBeTruthy();
     });
 
-    // 22. solo un usuario puede estar editándose
     it('abrir la edición de otro usuario cierra la anterior', () => {
       configurar();
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of(dosUsuarios()));
@@ -418,8 +396,8 @@ describe('UsuariosPage', () => {
       fixture.detectChanges();
 
       // Tras abrir la edición del primer usuario, su botón "Editar" se
-      // oculta (MICROCORRECCIÓN FINAL 15C.5 §4) — el único "Editar" restante
-      // en el DOM es el del segundo usuario, ahora en el índice 0.
+      // oculta — el único "Editar" restante en el DOM es el del segundo
+      // usuario, ahora en el índice 0.
       botonesEditar()[0].click();
       fixture.detectChanges();
 
@@ -428,7 +406,6 @@ describe('UsuariosPage', () => {
       expect(fixture.componentInstance['usuarioEnEdicionId']()).toBe('u2');
     });
 
-    // 23. formulario precargado
     it('el formulario se precarga con nombre, usuario y rol del usuario', () => {
       configurar();
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of(dosUsuarios()));
@@ -444,7 +421,6 @@ describe('UsuariosPage', () => {
       });
     });
 
-    // 24. formulario inválido no guarda
     it('no guarda si el formulario es inválido', () => {
       configurar();
       const spy = vi.spyOn(usuariosService, 'actualizar');
@@ -459,7 +435,6 @@ describe('UsuariosPage', () => {
       expect(spy).not.toHaveBeenCalled();
     });
 
-    // 25. Guardar llama actualizar() con payload correcto
     it('Guardar llama a UsuariosService.actualizar() con el id y los datos del formulario', () => {
       configurar();
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of(dosUsuarios()));
@@ -480,7 +455,6 @@ describe('UsuariosPage', () => {
       });
     });
 
-    // 26. actualización exitosa actualiza fila
     it('una actualización exitosa refleja los nuevos datos en la fila y cierra la edición', () => {
       configurar();
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of(dosUsuarios()));
@@ -501,7 +475,6 @@ describe('UsuariosPage', () => {
       expect(compiled.textContent).toContain('Nuevo nombre');
     });
 
-    // 27. error al guardar muestra errorEdicion
     it('un error al guardar muestra errorEdicion de forma accesible', () => {
       configurar();
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of(dosUsuarios()));
@@ -520,7 +493,6 @@ describe('UsuariosPage', () => {
       );
     });
 
-    // 28. Cancelar no realiza petición
     it('Cancelar cierra la edición sin llamar al backend ni modificar datos', () => {
       configurar();
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of(dosUsuarios()));
@@ -538,7 +510,6 @@ describe('UsuariosPage', () => {
       expect(fixture.componentInstance['usuarios']()[0].nombre).toBe('Ana Pérez');
     });
 
-    // 34. guardado pendiente impide doble petición
     it('una segunda llamada a guardarEdicion() mientras hay una pendiente no dispara otra petición', () => {
       configurar();
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of(dosUsuarios()));
@@ -580,7 +551,6 @@ describe('UsuariosPage', () => {
       expect(fixture.componentInstance['usuarios']()[0].estado).toBe('Activo');
     });
 
-    // 31. confirmar desactivación llama cambiarEstado(..., 'Inactivo')
     it('confirmar la desactivación llama a cambiarEstado con "Inactivo"', () => {
       configurar();
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of([usuarioActivo()]));
@@ -596,7 +566,6 @@ describe('UsuariosPage', () => {
       expect(spy).toHaveBeenCalledWith('u1', 'Inactivo');
     });
 
-    // 32. Activar llama cambiarEstado(..., 'Activo') sin confirmación
     it('Activar llama a cambiarEstado con "Activo" sin pedir confirmación', () => {
       configurar();
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of([usuarioInactivo()]));
@@ -613,8 +582,6 @@ describe('UsuariosPage', () => {
       expect(spy).toHaveBeenCalledWith('u2', 'Activo');
     });
 
-    // 33. error al cambiar estado muestra error LOCAL asociado a la fila
-    // (ETAPA 16C.1) — nunca activa `error` general ni oculta el listado.
     it('un error al cambiar estado muestra un error local sin ocultar el listado ni activar el error general', () => {
       configurar();
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of([usuarioInactivo()]));
@@ -641,7 +608,6 @@ describe('UsuariosPage', () => {
       expect(compiled.querySelectorAll('.usuarios-page__item')).toHaveLength(1);
     });
 
-    // 35. cambio de estado pendiente impide doble petición
     it('una segunda llamada a alternarEstado() mientras hay una pendiente no dispara otra petición', () => {
       configurar();
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of([usuarioInactivo()]));
@@ -657,7 +623,7 @@ describe('UsuariosPage', () => {
     });
   });
 
-  describe('error local de cambio de estado (ETAPA 16C.1)', () => {
+  describe('error local de cambio de estado', () => {
     function usuarioActivo(): Usuario {
       return crearUsuario({ id: 'u1', nombre: 'Ana Pérez', estado: 'Activo' });
     }
@@ -673,8 +639,8 @@ describe('UsuariosPage', () => {
       ];
     }
 
-    // Backend rechaza la operación (p. ej. la Regla 1/2 de ETAPA 16A: auto-
-    // desactivación o último Administrador) — el usuario debe permanecer
+    // Backend rechaza la operación (p. ej. auto-desactivación o dejar el
+    // sistema sin Administradores activos) — el usuario debe permanecer
     // visualmente en su estado anterior, sin actualización local optimista.
     it('si el backend rechaza el cambio de estado, el usuario permanece visualmente en su estado anterior', () => {
       configurar();
@@ -789,7 +755,7 @@ describe('UsuariosPage', () => {
     });
   });
 
-  describe('pulido visual — acciones y badges (MICROCORRECCIÓN FINAL 15C.5)', () => {
+  describe('pulido visual — acciones y badges', () => {
     function dosUsuarios(): Usuario[] {
       return [
         crearUsuario({

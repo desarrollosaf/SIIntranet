@@ -76,7 +76,7 @@ describe('EditarMensajePage', () => {
     component = fixture.componentInstance;
   }
 
-  // ===== PageHero / navegación (ETAPA 15C.3C) =====
+  // ===== PageHero / navegación =====
 
   it('PageHero muestra "Editar mensaje" como único h1', () => {
     configurar();

@@ -136,7 +136,7 @@ describe('Usuarios + identidad de desarrollo (e2e)', () => {
     });
   });
 
-  describe('integridad de Administración (ETAPA 16A)', () => {
+  describe('integridad de Administración', () => {
     let app: INestApplication<App>;
 
     beforeEach(async () => {

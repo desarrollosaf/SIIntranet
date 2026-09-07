@@ -100,9 +100,9 @@ export class AppShell implements OnDestroy {
 
   protected readonly currentUser = this.authService.currentUser;
 
-  // Tres capas de UI independientes entre sí (ver MICROCORRECCIÓN 15B.1):
-  // sidebar de escritorio (layout push/collapse, no modal), drawer móvil
-  // (overlay modal) y menú de cuenta (dropdown anclado, no modal).
+  // Tres capas de UI independientes entre sí: sidebar de escritorio (layout
+  // push/collapse, no modal), drawer móvil (overlay modal) y menú de cuenta
+  // (dropdown anclado, no modal).
   protected readonly menuAbierto = signal(false);
   protected readonly sidebarColapsado = signal(false);
   protected readonly menuUsuarioAbierto = signal(false);
@@ -125,9 +125,9 @@ export class AppShell implements OnDestroy {
     return NAV_ITEMS.filter((item) => !item.adminOnly || esAdministrador);
   });
 
-  // Agrupación puramente visual (ver ETAPA 15B-R) sobre la misma lista ya
-  // filtrada por rol — navItemsVisibles() no cambia de significado ni de uso
-  // en el resto del componente/tests.
+  // Agrupación puramente visual sobre la misma lista ya filtrada por rol —
+  // navItemsVisibles() no cambia de significado ni de uso en el resto del
+  // componente/tests.
   protected readonly navPrincipal = computed<NavItem[]>(() =>
     this.navItemsVisibles().filter((item) => !item.adminOnly),
   );

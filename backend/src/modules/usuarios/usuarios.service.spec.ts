@@ -74,8 +74,7 @@ describe('UsuariosService', () => {
     expect(() => service.obtenerPorId('dev-usuario-intruso')).toThrow(NotFoundException);
   });
 
-  describe('integridad de Administración (ETAPA 16A)', () => {
-    // 1. Administrador intenta desactivarse a sí mismo → rechazado.
+  describe('integridad de Administración', () => {
     it('cambiarEstado() rechaza que un Administrador se desactive a sí mismo', () => {
       expect(() => service.cambiarEstado('dev-usuario-1', 'Inactivo', 'dev-usuario-1')).toThrow(
         ConflictException,
@@ -84,7 +83,6 @@ describe('UsuariosService', () => {
       expect(service.obtenerPorId('dev-usuario-1').estado).toBe('Activo');
     });
 
-    // 2. Último Administrador activo intenta pasar a Inactivo → rechazado.
     it('cambiarEstado() rechaza desactivar al último Administrador activo', () => {
       expect(() => service.cambiarEstado('dev-usuario-1', 'Inactivo', 'dev-usuario-2')).toThrow(
         ConflictException,
@@ -93,14 +91,12 @@ describe('UsuariosService', () => {
       expect(service.obtenerPorId('dev-usuario-1').estado).toBe('Activo');
     });
 
-    // 3. Último Administrador activo intenta cambiar rol a Usuario → rechazado.
     it('actualizar() rechaza cambiar el rol del último Administrador activo a Usuario', () => {
       expect(() => service.actualizar('dev-usuario-1', { rol: 'Usuario' })).toThrow(ConflictException);
 
       expect(service.obtenerPorId('dev-usuario-1').rol).toBe('Administrador');
     });
 
-    // 4. Con dos Administradores activos, A puede desactivar B.
     it('cambiarEstado() permite que un Administrador desactive a otro si queda al menos uno activo', () => {
       service.actualizar('dev-usuario-2', { rol: 'Administrador' });
 
@@ -109,7 +105,6 @@ describe('UsuariosService', () => {
       expect(actualizado.estado).toBe('Inactivo');
     });
 
-    // 5. Con dos Administradores activos, A puede cambiar B a Usuario.
     it('actualizar() permite cambiar el rol de otro Administrador a Usuario si queda otro activo', () => {
       service.actualizar('dev-usuario-2', { rol: 'Administrador' });
 
@@ -118,7 +113,6 @@ describe('UsuariosService', () => {
       expect(actualizado.rol).toBe('Usuario');
     });
 
-    // 6. Administrador puede activar/desactivar un Usuario normal.
     it('cambiarEstado() permite activar/desactivar un Usuario normal sin restricciones', () => {
       const desactivado = service.cambiarEstado('dev-usuario-2', 'Inactivo', 'dev-usuario-1');
       expect(desactivado.estado).toBe('Inactivo');
@@ -127,10 +121,9 @@ describe('UsuariosService', () => {
       expect(activado.estado).toBe('Activo');
     });
 
-    // 7. Cambiar nombre/usuario sin afectar rol/estado sigue funcionando —
-    // caso ya cubierto por 'actualizar() modifica únicamente los datos
-    // permitidos' arriba; se repite aquí con el único Administrador para
-    // confirmar que no dispara ninguna de las dos reglas nuevas.
+    // Repite el caso ya cubierto por 'actualizar() modifica únicamente los
+    // datos permitidos' arriba, con el único Administrador, para confirmar
+    // que no dispara ninguna de las reglas de integridad.
     it('actualizar() cambia nombre/usuario del único Administrador sin disparar las reglas de integridad', () => {
       const actualizado = service.actualizar('dev-usuario-1', { nombre: 'Nombre actualizado' });
 
@@ -139,9 +132,6 @@ describe('UsuariosService', () => {
       expect(actualizado.estado).toBe('Activo');
     });
 
-    // 8. Cambiarse de Administrador a Usuario se permite si existe otro
-    // Administrador activo (independiente de si el afectado es "uno mismo":
-    // la regla de actualizar() nunca distingue actor de objetivo).
     it('actualizar() permite que un Administrador se cambie a sí mismo a Usuario si existe otro Administrador activo', () => {
       service.actualizar('dev-usuario-2', { rol: 'Administrador' });
 

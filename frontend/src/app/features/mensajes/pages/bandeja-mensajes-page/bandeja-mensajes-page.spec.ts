@@ -137,8 +137,6 @@ describe('BandejaMensajesPage', () => {
     expect(compiled.querySelector('.bandeja-page__fila-titulo--nuevo')).not.toBeNull();
   });
 
-  // ETAPA 15C.7 — el badge de estado de lectura dejó de ser
-  // `badge text-bg-primary` de Bootstrap (azul) y pasó a una clase propia.
   it('el badge de "Nuevo" ya no utiliza la clase de Bootstrap text-bg-primary', () => {
     configurar('recibidos');
     vi.spyOn(mensajesService, 'recibidos').mockReturnValue(of([recibido]));
@@ -218,14 +216,14 @@ describe('BandejaMensajesPage', () => {
     expect(textos).not.toContain('Redactar');
   });
 
-  // MICROCORRECCIÓN 15C.3B: Detalle no puede confiar solo en el tipo de
-  // mensaje devuelto por el backend para decidir a dónde "volver" (un
-  // mensaje enviado a uno mismo se resuelve como MensajeEnviado aunque se
-  // abra desde Recibidos) — Bandeja debe propagar el origen real de la
-  // navegación como query param en el RouterLink de cada fila. Se verifica
-  // el href real calculado por Angular Router tras change detection, no el
-  // marcado `[queryParams]` del template.
-  describe('propagación de origen a Detalle (MICROCORRECCIÓN 15C.3B)', () => {
+  // Detalle no puede confiar solo en el tipo de mensaje devuelto por el
+  // backend para decidir a dónde "volver" (un mensaje enviado a uno mismo se
+  // resuelve como MensajeEnviado aunque se abra desde Recibidos) — Bandeja
+  // debe propagar el origen real de la navegación como query param en el
+  // RouterLink de cada fila. Se verifica el href real calculado por Angular
+  // Router tras change detection, no el marcado `[queryParams]` del
+  // template.
+  describe('propagación de origen a Detalle', () => {
     it('en Recibidos, la fila navega al detalle del mensaje con ?origen=recibidos', () => {
       configurar('recibidos');
       vi.spyOn(mensajesService, 'recibidos').mockReturnValue(of([recibido]));

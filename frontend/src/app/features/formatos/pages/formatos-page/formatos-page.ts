@@ -42,11 +42,10 @@ export class FormatosPage {
 
   // Los 11 apartados oficiales se usan como orden de referencia, pero solo
   // se presentan los que tengan al menos un formato (visible tras la
-  // búsqueda) — ETAPA 15C.4 cambia deliberadamente la presentación de
-  // categorías vacías, no el catálogo (APARTADOS_FORMATOS no se modifica).
-  // Una categoria del backend que no coincida con ninguna de las 11 se
-  // agrupa en una sección adicional al final (con el nombre real recibido),
-  // igual que antes.
+  // búsqueda); el catálogo en sí no cambia (APARTADOS_FORMATOS no se
+  // modifica), solo se ocultan las categorías sin contenido. Una categoría
+  // del backend que no coincida con ninguna de las 11 se agrupa en una
+  // sección adicional al final, con el nombre real recibido.
   protected readonly grupos = computed<GrupoFormatos[]>(() => {
     const porCategoria = new Map<string, Formato[]>();
     const desconocidas: string[] = [];

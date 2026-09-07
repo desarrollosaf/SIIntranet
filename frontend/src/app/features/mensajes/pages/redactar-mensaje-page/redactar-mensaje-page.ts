@@ -95,13 +95,10 @@ export class RedactarMensajePage {
     return this.modoRespuesta() && usuarioId === this.remitenteOriginalId();
   }
 
-  // ===== Selector de destinatarios con búsqueda (ETAPA 15C.2) =====
-  // onDestinatarioToggle/estaSeleccionado/esRemitenteOriginal arriba se
-  // conservan sin cambios: siguen siendo la fuente de verdad del control
-  // reactivo `destinatarioIds` y los tests existentes los invocan
-  // directamente. Los métodos siguientes son la nueva forma en que la UI
-  // (búsqueda + lista) muta ese mismo control — mismo payload, otra
-  // interacción.
+  // Selector de destinatarios: onDestinatarioToggle/estaSeleccionado/
+  // esRemitenteOriginal arriba siguen siendo la fuente de verdad del control
+  // reactivo `destinatarioIds`; los métodos siguientes son otra forma de
+  // mutar ese mismo control (búsqueda + lista), no un mecanismo paralelo.
   protected readonly terminoBusqueda = signal('');
 
   protected readonly usuariosFiltrados = computed<Usuario[]>(() => {
@@ -122,10 +119,10 @@ export class RedactarMensajePage {
     this.terminoBusqueda.set((event.target as HTMLInputElement).value);
   }
 
-  // MICROCORRECCIÓN 15C.2: la lista "disponibles" excluye a quienes ya están
-  // en Seleccionados, para no duplicar la misma persona en dos listas a la
-  // vez. No es un signal (depende de destinatarioIds.value, no reactivo)
-  // — mismo patrón que destinatariosSeleccionados().
+  // La lista "disponibles" excluye a quienes ya están en Seleccionados, para
+  // no duplicar la misma persona en dos listas a la vez. No es un signal
+  // (depende de destinatarioIds.value, no reactivo) — mismo patrón que
+  // destinatariosSeleccionados().
   protected usuariosDisponibles(): Usuario[] {
     return this.usuariosFiltrados().filter((usuario) => !this.estaSeleccionado(usuario.id));
   }

@@ -433,7 +433,7 @@ describe('RedactarMensajePage — selector de destinatarios con búsqueda', () =
     expect(component['form'].controls.destinatarioIds.value).toEqual(['u-2']);
   });
 
-  describe('MICROCORRECCIÓN 15C.2 — sin duplicación visual entre disponibles y seleccionados', () => {
+  describe('sin duplicación visual entre disponibles y seleccionados', () => {
     it('al seleccionar un usuario, desaparece de la lista de disponibles', () => {
       expect(component['usuariosDisponibles']()).toEqual(usuariosBusqueda);
 

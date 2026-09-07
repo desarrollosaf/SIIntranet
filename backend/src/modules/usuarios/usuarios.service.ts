@@ -60,10 +60,10 @@ export class UsuariosService {
   actualizar(id: string, datos: DatosActualizables): Usuario {
     const usuario = this.buscarPorIdInterno(id);
 
-    // ETAPA 16A (D-integridad de Administración): dejar de ser Administrador
-    // no depende de quién lo solicita, solo de que siga existiendo al menos
-    // otro Administrador activo tras el cambio — se permite incluso que un
-    // Administrador se cambie a sí mismo a Usuario si hay otro activo.
+    // Dejar de ser Administrador no depende de quién lo solicita, solo de
+    // que siga existiendo al menos otro Administrador activo tras el cambio
+    // — se permite incluso que un Administrador se cambie a sí mismo a
+    // Usuario si hay otro activo.
     const dejaDeSerAdministrador =
       datos.rol !== undefined && datos.rol !== 'Administrador' && usuario.rol === 'Administrador';
 

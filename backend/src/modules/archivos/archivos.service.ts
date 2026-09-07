@@ -187,14 +187,11 @@ export class ArchivosService {
   }
 
   /**
-   * Regla provisional fail-closed: solo quien subió el archivo puede
-   * consultarlo/descargarlo. Es TEMPORAL y segura mientras Mensajería y
-   * Formatos todavía no existen para aportar su propia regla de
-   * autorización (p. ej. "remitente/destinatarios de este mensaje" o
-   * "cualquier sesión puede leer este recurso institucional publicado").
-   * NO se crea aquí ninguna ACL genérica ni reference counting — cuando
-   * esos dominios existan, decidirán explícitamente cómo ampliar esta
-   * política.
+   * Los endpoints directos de Archivos solo permiten acceso al usuario que
+   * realizó la subida. Mensajes y Formatos resuelven su propia autorización
+   * (remitente/destinatarios de un mensaje, consulta libre de un formato
+   * publicado) y acceden vía obtenerParaUsoInterno(), sin pasar por esta
+   * regla.
    */
   private buscarAutorizado(id: string, actorId: string): Archivo {
     const archivo = this.archivos.get(id);
