@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Usuario, UserStatus } from './models/usuario.model';
 
 type DatosActualizables = Partial<Pick<Usuario, 'nombre' | 'usuario' | 'rol'>>;
@@ -59,13 +59,58 @@ export class UsuariosService {
 
   actualizar(id: string, datos: DatosActualizables): Usuario {
     const usuario = this.buscarPorIdInterno(id);
+
+    // ETAPA 16A (D-integridad de Administración): dejar de ser Administrador
+    // no depende de quién lo solicita, solo de que siga existiendo al menos
+    // otro Administrador activo tras el cambio — se permite incluso que un
+    // Administrador se cambie a sí mismo a Usuario si hay otro activo.
+    const dejaDeSerAdministrador =
+      datos.rol !== undefined && datos.rol !== 'Administrador' && usuario.rol === 'Administrador';
+
+    if (dejaDeSerAdministrador) {
+      this.asegurarQuedanOtrosAdministradoresActivos(usuario.id);
+    }
+
     Object.assign(usuario, datos);
     return { ...usuario };
   }
 
-  cambiarEstado(id: string, estado: UserStatus): Usuario {
+  cambiarEstado(id: string, estado: UserStatus, actorId: string): Usuario {
     const usuario = this.buscarPorIdInterno(id);
+
+    if (estado === 'Inactivo') {
+      // Regla 1: un Administrador no puede desactivar su propia cuenta,
+      // exista o no otro Administrador activo — independiente de la Regla 2.
+      if (usuario.id === actorId) {
+        throw new ConflictException('Un Administrador no puede desactivarse a sí mismo.');
+      }
+
+      // Regla 2: desactivar a un Administrador no puede dejar al sistema sin
+      // ningún Administrador activo.
+      if (usuario.rol === 'Administrador') {
+        this.asegurarQuedanOtrosAdministradoresActivos(usuario.id);
+      }
+    }
+
     usuario.estado = estado;
     return { ...usuario };
+  }
+
+  /**
+   * Regla 2 (último Administrador activo): lanza ConflictException si,
+   * excluyendo al usuario `id` (quien está a punto de dejar de contar como
+   * Administrador activo, ya sea por cambio de rol o de estado), no queda
+   * ningún otro Administrador con estado Activo. No depende de ids semilla
+   * ni de un actor concreto — solo cuenta el estado real de `this.usuarios`,
+   * por lo que sigue siendo válida cuando exista persistencia real.
+   */
+  private asegurarQuedanOtrosAdministradoresActivos(id: string): void {
+    const quedanOtrosAdministradoresActivos = this.usuarios.some(
+      (u) => u.id !== id && u.rol === 'Administrador' && u.estado === 'Activo',
+    );
+
+    if (!quedanOtrosAdministradoresActivos) {
+      throw new ConflictException('Debe existir al menos un Administrador activo.');
+    }
   }
 }

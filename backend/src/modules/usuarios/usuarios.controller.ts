@@ -5,6 +5,8 @@ import { UpdateEstadoUsuarioDto } from './dto/update-estado-usuario.dto';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import type { AuthenticatedUser } from '../../common/interfaces/authenticated-user.interface';
 
 @Controller('usuarios')
 export class UsuariosController {
@@ -32,7 +34,11 @@ export class UsuariosController {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('Administrador')
   @Patch(':id/estado')
-  cambiarEstado(@Param('id') id: string, @Body() datos: UpdateEstadoUsuarioDto) {
-    return this.usuariosService.cambiarEstado(id, datos.estado);
+  cambiarEstado(
+    @Param('id') id: string,
+    @Body() datos: UpdateEstadoUsuarioDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    return this.usuariosService.cambiarEstado(id, datos.estado, actor.id);
   }
 }

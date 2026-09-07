@@ -136,6 +136,87 @@ describe('Usuarios + identidad de desarrollo (e2e)', () => {
     });
   });
 
+  describe('integridad de Administración (ETAPA 16A)', () => {
+    let app: INestApplication<App>;
+
+    beforeEach(async () => {
+      process.env.NODE_ENV = 'development';
+      process.env.AUTH_MODE = 'development';
+      process.env.DEV_USER_ID = 'dev-usuario-1';
+      app = await crearApp();
+    });
+
+    afterEach(async () => {
+      await app.close();
+    });
+
+    it('auto-desactivación: un Administrador no puede desactivarse a sí mismo → 409', () => {
+      return request(app.getHttpServer())
+        .patch('/api/usuarios/dev-usuario-1/estado')
+        .send({ estado: 'Inactivo' })
+        .expect(409);
+    });
+
+    it('último Administrador activo → Usuario se rechaza → 409', () => {
+      return request(app.getHttpServer())
+        .patch('/api/usuarios/dev-usuario-1')
+        .send({ rol: 'Usuario' })
+        .expect(409);
+    });
+
+    it('último Administrador activo → Inactivo se rechaza incluso tras haber tenido más de uno → 409', async () => {
+      const server = app.getHttpServer();
+
+      // Promueve a un segundo Administrador y vuelve a dejarlo Inactivo —
+      // dev-usuario-1 queda otra vez como único Administrador activo.
+      await request(server).patch('/api/usuarios/dev-usuario-2').send({ rol: 'Administrador' }).expect(200);
+      await request(server)
+        .patch('/api/usuarios/dev-usuario-2/estado')
+        .send({ estado: 'Inactivo' })
+        .expect(200);
+
+      return request(server)
+        .patch('/api/usuarios/dev-usuario-1/estado')
+        .send({ estado: 'Inactivo' })
+        .expect(409);
+    });
+
+    it('la modificación sobre otro usuario (no-Administrador) sigue funcionando', async () => {
+      const server = app.getHttpServer();
+
+      await request(server)
+        .patch('/api/usuarios/dev-usuario-2/estado')
+        .send({ estado: 'Inactivo' })
+        .expect(200);
+
+      return request(server)
+        .patch('/api/usuarios/dev-usuario-2/estado')
+        .send({ estado: 'Activo' })
+        .expect(200);
+    });
+
+    it('con más de un Administrador activo, uno puede desactivar y cambiar el rol del otro', async () => {
+      const server = app.getHttpServer();
+
+      await request(server).patch('/api/usuarios/dev-usuario-2').send({ rol: 'Administrador' }).expect(200);
+
+      await request(server)
+        .patch('/api/usuarios/dev-usuario-2/estado')
+        .send({ estado: 'Inactivo' })
+        .expect(200);
+
+      await request(server)
+        .patch('/api/usuarios/dev-usuario-2/estado')
+        .send({ estado: 'Activo' })
+        .expect(200);
+
+      return request(server)
+        .patch('/api/usuarios/dev-usuario-2')
+        .send({ rol: 'Usuario' })
+        .expect(200);
+    });
+  });
+
   describe('NODE_ENV distinto de development con AUTH_MODE=development', () => {
     beforeEach(() => {
       process.env.NODE_ENV = 'production';

@@ -40,9 +40,13 @@ describe('UsuariosController', () => {
     expect(usuariosService.actualizar).toHaveBeenCalledWith('dev-usuario-1', dto);
   });
 
-  it('cambiarEstado() delega el id y el estado del DTO', () => {
-    controller.cambiarEstado('dev-usuario-1', { estado: 'Inactivo' });
+  it('cambiarEstado() delega el id, el estado del DTO y el id del actor autenticado', () => {
+    controller.cambiarEstado(
+      'dev-usuario-1',
+      { estado: 'Inactivo' },
+      { id: 'dev-usuario-9', usuario: 'actor', rol: 'Administrador' },
+    );
 
-    expect(usuariosService.cambiarEstado).toHaveBeenCalledWith('dev-usuario-1', 'Inactivo');
+    expect(usuariosService.cambiarEstado).toHaveBeenCalledWith('dev-usuario-1', 'Inactivo', 'dev-usuario-9');
   });
 });
