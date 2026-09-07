@@ -2,244 +2,74 @@
 
 ## Propósito de esta rama
 
-La rama `reconstruccion/siintranet-v2` contiene la reconstrucción completa de SIIntranet desde cero.
+La rama `reconstruccion/siintranet-v2` contiene la reconstrucción de SIIntranet sobre una arquitectura nueva de frontend (Angular) y backend (NestJS), construida desde cero a partir del comportamiento funcional de la versión anterior del sistema.
 
-El código heredado presente actualmente en esta rama proviene de SIIntranet V1 y existe únicamente como referencia funcional temporal durante la fase de análisis.
-
-La nueva aplicación debe diseñarse y construirse desde una arquitectura nueva.
-
-No asumir que la arquitectura, organización de carpetas, servicios, componentes, estado, routing, frontend o backend actuales deben conservarse.
-
----
+La arquitectura, organización de carpetas, servicios, componentes, estado, routing, frontend y backend de esta reconstrucción son los que se documentan en [`docs/arquitectura-v2.md`](docs/arquitectura-v2.md) — no los de la versión anterior.
 
 ## Estado actual
 
-Estamos en FASE 0: análisis y diseño.
+La fase de análisis y diseño concluyó. La implementación está en curso sobre la arquitectura aprobada, siguiendo el orden de construcción descrito en `docs/arquitectura-v2.md`.
 
-Todavía NO se ha aprobado la arquitectura definitiva de V2.
+Módulos implementados y probados de extremo a extremo: Inicio, Mensajería (redacción, bandeja, detalle, respuesta, edición, cancelación, eliminación, adjuntos reales), Formatos (consulta y descarga) y Administración de usuarios (búsqueda/filtros, edición, activación/desactivación, reglas de integridad de Administradores). El alta de usuarios (creación de cuentas) no está implementada todavía — es un requisito contemplado en D05, pendiente de construcción, no una decisión sin resolver.
 
-Mientras esta fase siga vigente:
+Calendario/recordatorios están **fuera del alcance actual** (decisión confirmada, no debe implementarse). Administración visual de Formatos sigue como decisión pendiente. Un módulo de auditoría está aprobado en `docs/decisiones-funcionales-v2.md` (D14) pero todavía no construido — es un paso de construcción pendiente, no un punto descartado. Ver ese documento para el detalle de cada decisión.
 
-- no eliminar la implementación heredada;
-- no crear todavía un proyecto Angular nuevo;
-- no crear todavía un proyecto NestJS nuevo;
-- no instalar dependencias;
-- no modificar `package.json`;
-- no generar componentes;
-- no implementar funcionalidades;
-- no refactorizar V1;
-- no corregir bugs de V1;
-- no hacer cambios de producción.
+Pendientes de decisión institucional antes de un despliegue productivo: integración con la base de datos MySQL institucional (los datos de Usuarios, Mensajes, Formatos y la metadata de Archivos persisten en memoria del proceso backend; los binarios de archivos adjuntos ya se escriben en disco local, `backend/storage/archivos/`, sin ser una estrategia de persistencia definitiva) y el mecanismo de autenticación definitivo (la sesión actual es una identidad de desarrollo provisional, exclusiva de entornos con `AUTH_MODE=development`).
 
-La tarea actual es comprender el sistema existente como especificación funcional y diseñar correctamente el nuevo sistema antes de escribir código.
+Mientras estas decisiones sigan pendientes:
 
----
+- no reutilizar credenciales hardcodeadas, contraseñas en texto plano ni mecanismos de autenticación mock como si fueran definitivos;
+- no seleccionar ORM, driver ni estrategia de migraciones sin análisis y aprobación explícita;
+- no dar por definitiva ninguna decisión marcada como PENDIENTE o DIFERIDA en `docs/decisiones-funcionales-v2.md`.
 
 ## Relación con SIIntranet V1
 
-V1 debe utilizarse únicamente para descubrir:
+La versión anterior del sistema ya no está presente en el código de esta rama. Su comportamiento, reglas de negocio y aprendizajes de UX quedaron documentados como especificación funcional en [`docs/inventario-funcional-v1.md`](docs/inventario-funcional-v1.md) antes de su retiro, y ese documento es la referencia a consultar — no debe reconstruirse ni copiarse su código.
 
-- funcionalidades existentes;
-- flujos de usuario;
-- campos;
-- roles;
-- módulos;
-- reglas de negocio;
-- comportamiento esperado;
-- estados;
-- validaciones;
-- llamadas requeridas;
-- experiencia visual;
-- responsive;
-- accesibilidad;
-- errores y decisiones que no deben repetirse.
+La paridad buscada respecto a la versión anterior es funcional, no estructural: la arquitectura, estructura de carpetas y patrones de esta reconstrucción son los definidos en `docs/arquitectura-v2.md`, no los heredados.
 
-No copiar automáticamente:
+## Arquitectura vigente
 
-- arquitectura;
-- estructura de carpetas;
-- `app.ts`;
-- `app.html`;
-- `app.scss`;
-- navegación basada en condicionales;
-- servicios actuales;
-- backend actual;
-- mocks;
-- código HTTP;
-- estado global;
-- estilos;
-- hacks o workarounds.
+La arquitectura de referencia para cualquier cambio de código está en [`docs/arquitectura-v2.md`](docs/arquitectura-v2.md) (Parte III — Arquitectura final revisada). Cubre organización de repositorio, frontend (Angular por `core/`/`shared`/`features/`), backend (NestJS por módulos de dominio), routing, servicios, autorización, y la estrategia de persistencia detrás de cada `Service` de dominio.
 
-La paridad buscada es funcional, no estructural.
-
----
-
-## Objetivo arquitectónico
-
-La nueva versión debe diseñarse con separación clara de responsabilidades.
-
-Como mínimo deben estudiarse explícitamente antes de implementar:
-
-- dominios funcionales;
-- frontend;
-- backend;
-- routing;
-- componentes y páginas;
-- servicios;
-- modelos;
-- DTOs;
-- estado;
-- configuración y environments;
-- autenticación;
-- autorización y roles;
-- base de datos;
-- contrato API;
-- manejo de archivos;
-- manejo de errores;
-- notificaciones;
-- modales y confirmaciones;
-- accesibilidad;
-- responsive;
-- testing;
-- seguridad;
-- configuración para desarrollo y producción.
-
-No adoptar una tecnología o patrón adicional únicamente porque sea popular.
-
-Cada decisión arquitectónica importante debe justificarse en función de SIIntranet.
-
----
-
-## Frontend V2
-
-El frontend debe diseñarse desde cero.
-
-Se espera utilizar Angular con una arquitectura por responsabilidades y funcionalidades, no un componente raíz monolítico.
-
-Las pantallas o responsabilidades principales deben evaluarse como páginas/componentes independientes.
-
-Los componentes visuales significativos deben mantener separación de archivos:
-
-- `*.component.ts`
-- `*.component.html`
-- `*.component.scss`
-
-No interpretar esto como “crear un componente por cada if”.
-
-Crear componentes cuando exista una responsabilidad funcional, visual o reutilizable suficientemente clara.
-
-Angular Router debe evaluarse como mecanismo principal de navegación.
-
-Las llamadas HTTP no deben quedar dispersas dentro de componentes si pertenecen a servicios de dominio.
-
-Los servicios deben organizarse según responsabilidades o dominios, evitando tanto un servicio gigante como un servicio artificial por cada componente.
-
----
-
-## Backend V2
-
-El backend también se reconstruirá desde cero.
-
-NestJS puede evaluarse nuevamente como tecnología objetivo, pero no reutilizar automáticamente la implementación actual.
-
-Antes de implementarlo deben definirse:
-
-- dominios;
-- módulos;
-- endpoints;
-- DTOs;
-- entidades;
-- persistencia;
-- autenticación;
-- autorización;
-- archivos;
-- validación;
-- errores;
-- configuración;
-- seguridad;
-- testing.
-
-No utilizar almacenamiento temporal en memoria como arquitectura definitiva.
-
----
+Cada decisión arquitectónica relevante debe ser consistente con ese documento. Un cambio de arquitectura (no una funcionalidad puntual) debe reflejarse primero ahí.
 
 ## Base de datos
 
-La integración de base de datos debe diseñarse antes de implementar funcionalidades que dependan de persistencia.
+Los datos de Usuarios, Mensajes, Formatos y la metadata de Archivos persisten en memoria del proceso backend (se pierden al reiniciar), como implementación provisional documentada en `docs/decisiones-funcionales-v2.md` (D05). Los binarios de los archivos adjuntos (mensajes y formatos) ya se escriben en disco local del servidor (`backend/storage/archivos/`, ver D03/D17) — es almacenamiento de archivos ya aprobado, no una base de datos ni una estrategia de persistencia definitiva para datos estructurados.
 
-No seleccionar ORM, driver o estrategia de migraciones sin análisis y aprobación.
-
-El modelo de datos debe derivarse de los requisitos funcionales y reglas de negocio.
-
----
+No seleccionar ORM, driver ni estrategia de migraciones, ni introducir una base de datos, sin análisis y aprobación explícita.
 
 ## Autenticación y seguridad
 
-La autenticación de V1 es solamente una referencia funcional.
+La sesión actual es una identidad de desarrollo provisional (middleware activo solo con `NODE_ENV=development` y `AUTH_MODE=development`, que fija el usuario autenticado según la variable de entorno `DEV_USER_ID` del servidor) — no hay login real, contraseñas ni tokens todavía (D08, diferida).
 
-No reutilizar credenciales hardcodeadas, contraseñas en texto plano ni mecanismos mock.
+La autorización por rol (`Administrador`/`Usuario`) sí es real: cada endpoint del backend declara explícitamente su nivel de exigencia mediante guards, independientemente del mecanismo de autenticación activo.
 
-La estrategia definitiva de autenticación, contraseñas, sesiones/tokens, roles y autorización debe diseñarse explícitamente antes de implementarse.
-
-Si una decisión depende de información que todavía debe proporcionar el administrador o supervisor, marcarla como decisión pendiente en lugar de inventarla.
-
----
+No reutilizar credenciales hardcodeadas, contraseñas en texto plano ni mecanismos mock como si fueran la implementación definitiva. La estrategia definitiva de autenticación, contraseñas y sesiones/tokens debe diseñarse explícitamente antes de reemplazar la identidad de desarrollo. Si una decisión depende de información que todavía debe proporcionar el administrador o supervisor, marcarla como decisión pendiente en `docs/decisiones-funcionales-v2.md` en lugar de inventarla.
 
 ## UX, responsive y accesibilidad
 
-V1 contiene aprendizajes importantes que deben convertirse en requisitos de V2.
+Cada pantalla y componente nuevo debe considerar desde su implementación: escritorio, tablet y móvil; navegación por teclado; estados `hover`, `active`, `focus-visible`, `disabled` y seleccionado; restauración de foco; Escape y backdrop en diálogos; áreas táctiles; layouts sin overflow accidental; estados vacíos, de carga y de error.
 
-La nueva aplicación debe considerar desde el inicio:
-
-- escritorio;
-- tablet;
-- móvil;
-- 320 px cuando aplique;
-- navegación por teclado;
-- estados `hover`, `active`, `focus-visible`, `disabled` y seleccionado;
-- restauración de foco;
-- focus trapping en diálogos cuando corresponda;
-- Escape y backdrop;
-- áreas táctiles;
-- layouts sin overflow accidental;
-- estados vacíos;
-- carga;
-- errores;
-- notificaciones.
-
-No posponer responsive o accesibilidad hasta el final del proyecto.
-
----
+No posponer responsive ni accesibilidad a una etapa posterior de una funcionalidad.
 
 ## Testing
 
-La estrategia de pruebas debe definirse antes de comenzar la implementación.
+Cada nueva funcionalidad debe incluir pruebas según su responsabilidad: unitarias de servicio/lógica de componente en frontend, unitarias de `Service` y `Guard` en backend, y end-to-end contra el backend real para los flujos multiusuario que dependen de guards y controllers actuando juntos.
 
-Cada nueva funcionalidad debe incluir las pruebas adecuadas según su responsabilidad.
+No construir una funcionalidad completa para agregar pruebas al final.
 
-No construir primero todo el sistema para agregar pruebas al final.
+## Política de cambios
 
----
+Antes de modificar código:
 
-## Política de cambios durante FASE 0
+1. inspeccionar el estado actual de los archivos, servicios y pruebas relacionados con la tarea;
+2. verificar el estado de Git;
+3. identificar la causa del problema o el punto de extensión correcto antes de implementar;
+4. preferir cambios pequeños, localizados y fáciles de revisar, acotados al alcance solicitado.
 
-Durante análisis y arquitectura:
-
-1. inspeccionar V1;
-2. documentar funcionalidad;
-3. detectar reglas de negocio;
-4. identificar decisiones pendientes;
-5. proponer arquitectura;
-6. comparar alternativas;
-7. esperar aprobación antes de implementar.
-
-No modificar la implementación heredada salvo solicitud explícita.
-
-No borrar archivos todavía.
-
-No crear código nuevo de aplicación todavía.
-
----
+No ampliar el alcance de una tarea por iniciativa propia. No hacer refactors grandes como efecto colateral de un cambio puntual. No corregir hallazgos adicionales detectados durante una tarea sin reportarlos por separado primero.
 
 ## Git
 
@@ -260,12 +90,6 @@ No hacer `git add`, commit, push, merge, rebase, reset destructivo ni reescritur
 
 Preservar cualquier cambio local existente.
 
----
-
 ## Principio general
 
-Primero diseñar.
-
-Después implementar.
-
-SIIntranet V2 debe construirse utilizando el conocimiento adquirido con V1, pero sin heredar automáticamente su deuda técnica.
+SIIntranet V2 se construye utilizando el comportamiento funcional validado de la versión anterior como especificación, sobre una arquitectura nueva — sin heredar su deuda técnica ni sus fallas de seguridad conocidas.

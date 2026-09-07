@@ -427,6 +427,30 @@ V1 permanece intacta en esta rama únicamente como referencia de lectura — y y
 
 ---
 
-**Nota final:** esta arquitectura no contiene código, no define tablas de base de datos, no elige ORM ni tecnología de autenticación definitiva. El plan operativo de corte (retiro de V1, generación de proyectos nuevos, comandos exactos de `ng new`/`nest new`, estrategia de commits) es un documento operativo separado, todavía pendiente de ejecución por etapas controladas.
+## PARTE IV — Estado real de implementación (nota de reconciliación)
 
-> Fuente: diseño arquitectónico elaborado a partir de `docs/inventario-funcional-v1.md` y `docs/decisiones-funcionales-v2.md`.
+La Parte III describe la arquitectura *aprobada* antes de construirse. Esta nota registra, sin reescribir el diseño original, los puntos donde la implementación real difiere de lo previsto — porque el punto de extensión resultó innecesario, porque el nombre cambió al construirse, o porque el punto quedó fuera de alcance. Las diferencias no documentadas aquí no existen: el resto de la Parte III sigue describiendo fielmente lo construido.
+
+**Retiro de V1 y generación de proyectos (§7-8 de la Parte III):** completado. `frontend/` y `backend/` son proyectos Angular 22 y NestJS 11 generados desde cero; no queda código de la versión anterior en el árbol de trabajo de esta rama.
+
+**Módulos construidos hasta ahora:** `core/auth` (con identidad de desarrollo provisional), `layout/app-shell`, `login-page`, backend `usuarios` con sus dos niveles de autorización, `features/usuarios` + `features/administracion`, `mensajería` completa con adjuntos reales, y `formatos` (consulta/descarga). Corresponde a los pasos 1-6 y 8 del orden de construcción (§8); auditoría (paso 9) y calendario/recordatorios (paso 7, fuera de alcance) no se han construido.
+
+**Diferencias de estructura frente al árbol previsto (§2-3):**
+
+| Previsto (Parte III) | Real | Motivo |
+|---|---|---|
+| Feature `mensajeria/` con páginas `mensaje-nuevo-page`, `bandeja-page`, `enviados-page` separadas | Feature `features/mensajes/` con `bandeja-mensajes-page` (una sola página, parametrizada por dato de ruta `tipo: 'recibidos'\|'enviados'`), `redactar-mensaje-page` (nuevo y responder, misma página), `editar-mensaje-page` (propia, no prevista) y `detalle-mensaje-page` | Unificación de páginas casi idénticas reveló menos duplicación que la prevista; edición resultó con reglas propias suficientes para una página dedicada |
+| `core/files/archivos.service` | `features/archivos/services/archivos.service` | Al construirse, no se justificó una carpeta `core/` extra para un único servicio consumido hoy solo por mensajería; puede revisarse si `formatos` llega a consumirlo también |
+| `core/notifications`, `core/dialogs`, `core/a11y`, `core/http/api-error.interceptor.ts` | No existen | No se han necesitado todavía: no hay toasts globales, las confirmaciones destructivas usan `window.confirm()` nativo, y el manejo de error HTTP vive localmente en cada página. Punto de extensión aislado, no una decisión de no implementarlos nunca |
+| `shared/components/confirm-dialog`, `toast-container`, `empty-state`, `loading-spinner` | No existen como componentes propios | Mismo motivo que el punto anterior; los estados vacíos/carga se resuelven inline por página |
+| `features/administracion/components/usuario-form-modal`, `usuario-detalle-modal` | No existen; edición inline anclada a la fila en `usuarios-page`, sin modales | Decisión de UX tomada durante la construcción de Administración: lista con edición inline en vez de modales, evaluada como más simple para el volumen de campos actual |
+| `features/perfil`, `features/auditoria`, `features/calendario` | No existen | `perfil` y `auditoria` no se han construido todavía (no están descartados); `calendario` está fuera de alcance actual (ver D18 en `docs/decisiones-funcionales-v2.md`) |
+| Backend `modules/auditoria`, `modules/recordatorios` | No existen | Mismo estado que su contraparte de frontend |
+
+**Autenticación real hoy:** el backend expone únicamente `GET /auth/me`; no existe `POST /auth/login`. La sesión depende enteramente de `DevIdentityMiddleware`, activo solo cuando `NODE_ENV=development` y `AUTH_MODE=development`, que resuelve la identidad desde `DEV_USER_ID` (variable de entorno del servidor, nunca del cliente). `login-page`/`auth.service` conservan el formulario usuario/contraseña como interfaz provisional — no se envían al backend ni deciden el rol — hasta que exista un login real (D08, diferida). La autorización por rol sí es real: cada endpoint declara sus guards (`AuthGuard`, `RolesGuard` + `@Roles()`) independientemente del mecanismo de autenticación.
+
+**Persistencia:** sigue exclusivamente en memoria del proceso backend, como se diseñó en §I de la Parte II — sin cambios frente a lo previsto.
+
+**Nota final (histórica — ver Parte IV para el estado real):** en el momento en que se escribió esta arquitectura, no contenía código, no definía tablas de base de datos, no elegía ORM ni tecnología de autenticación definitiva, y el retiro de V1 más la generación de los proyectos Angular/NestJS nuevos seguían pendientes de ejecución por etapas controladas. Esa afirmación ya no describe el estado actual: como registra la Parte IV, el retiro de V1 y la generación de ambos proyectos están completados y la implementación de V2 está avanzada. Este párrafo se conserva sin reescribir por su valor histórico — para el estado vigente, consultar siempre la Parte IV.
+
+> Fuente: diseño arquitectónico elaborado a partir de `docs/inventario-funcional-v1.md` y `docs/decisiones-funcionales-v2.md`. La Parte IV se elaboró contrastando este documento contra el código real de `frontend/src/app` y `backend/src`.

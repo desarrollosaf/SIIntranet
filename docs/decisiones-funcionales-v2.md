@@ -190,6 +190,15 @@ No se agregaron decisiones nuevas ni se cambiaron requisitos respecto a lo ya ap
 - **Quién debía responder:** Decisión técnica posterior (una vez resueltos D01 y D08).
 - **Prioridad original:** BLOQUEANTE.
 
+### D21 — Envío de mensajes a uno mismo
+- **Pregunta concreta:** ¿Debe permitirse que un usuario se envíe un mensaje a sí mismo (remitente = único destinatario), y qué debe mostrarse en ese caso?
+- **Evidencia:** verificado sobre la implementación actual de Mensajería: nada lo impide — un mensaje autodirigido aparece tanto en Enviados como en Recibidos del mismo usuario, pero al abrirlo desde cualquiera de las dos bandejas siempre resuelve como vista de remitente (la consulta de detalle prioriza la condición "es remitente"), por lo que el estado "Visto" nunca llega a marcarse en ese escenario.
+- **Por qué la implementación actual no basta para decidir:** es un comportamiento emergente de las reglas ya resueltas (D12/D13), no una decisión de negocio tomada explícitamente; no se sabe si autodirigirse un mensaje es un caso de uso real a soportar (por ejemplo, como recordatorio personal) o un caso a bloquear en la validación de destinatarios.
+- **Impacto funcional:** Bajo/medio — no contradice ninguna decisión ya resuelta, pero deja un estado ("Visto" desde la bandeja de recibidos) permanentemente inalcanzable en ese escenario, lo que puede confundir a quien lo espere.
+- **Partes futuras afectadas:** Backend · Frontend · UX.
+- **Quién debía responder:** Administrador / Supervisor.
+- **Prioridad:** Puede decidirse posteriormente.
+
 ---
 
 ## Estado final de las decisiones (post-aclaración del objetivo de la reconstrucción)
@@ -217,7 +226,8 @@ El responsable del proyecto aclaró que el objetivo inmediato de V2 **no** es re
 | D17 | Tipos y límites de archivo | **RESUELTA (provisional)** | Tipos permitidos: PDF, Word, Excel, PowerPoint, JPG/JPEG, PNG. Sin ejecutables ni tipos peligrosos. Tamaño máximo pendiente de infraestructura, debe ser configurable. |
 | D18 | Calendario → detalle de mensaje | **SUPERADA POR ACLARACIÓN DE ALCANCE** | Calendario/Recordatorios quedan FUERA DE ALCANCE ACTUAL de V2 (confirmado por el responsable, ETAPA 14B). No debe diseñarse ni implementarse. Conservada como evidencia histórica. |
 | D19 | Accesibilidad formal | **PENDIENTE** | Se seguirán buenas prácticas ya validadas en V1 mientras se define si hay estándar normativo formal. |
-| D20 | Autorización real en backend | **Tarea de arquitectura** (ya no es decisión de negocio pendiente) | Con D01 resuelto y D08 diferida pero obligada a ser desacoplada, la protección real de endpoints por rol se diseña en la fase de arquitectura, de forma independiente del mecanismo de autenticación concreto que se elija después. |
+| D20 | Autorización real en backend | **RESUELTA** | Implementada: cada endpoint declara explícitamente sus guards (`AuthGuard`, y `RolesGuard` + `@Roles('Administrador')` donde corresponde), de forma independiente del mecanismo de autenticación activo. |
+| D21 | Envío de mensajes a uno mismo | **PENDIENTE** | Comportamiento actual verificado y documentado (§D21), sin decisión de negocio tomada sobre si debe permitirse, bloquearse o tratarse como caso especial. |
 
 ### Orden recomendado con el que se resolvieron las decisiones bloqueantes
 
@@ -234,7 +244,7 @@ El responsable del proyecto aclaró que el objetivo inmediato de V2 **no** es re
 
 ### Decisiones que siguen realmente abiertas (no bloquean el diseño estructural)
 
-D04 (administración de Formatos — no bloquea el frontend actual, ver nota 14B), D06 (ancho mínimo móvil formal), D07 (PDF real de usuario), D08 (autenticación/sesión definitiva — **diferida**, no pendiente ni resuelta), D09 (categorías de Formatos configurables), D15 (recuperación de contraseña), D16 (política definitiva de contraseñas), D19 (estándar de accesibilidad formal), y el esquema físico de la MySQL institucional (parte de D05). Todas se tratan como **puntos de extensión aislados** en la arquitectura de V2, no como diseño cerrado ni como información inventada.
+D04 (administración de Formatos — no bloquea el frontend actual, ver nota 14B), D06 (ancho mínimo móvil formal), D07 (PDF real de usuario), D08 (autenticación/sesión definitiva — **diferida**, no pendiente ni resuelta), D09 (categorías de Formatos configurables), D14 (auditoría — **resuelta como requisito, aún no construida**, ver `docs/arquitectura-v2.md` Parte IV), D15 (recuperación de contraseña), D16 (política definitiva de contraseñas), D19 (estándar de accesibilidad formal), D21 (envío de mensajes a uno mismo), y el esquema físico de la MySQL institucional (parte de D05). Todas se tratan como **puntos de extensión aislados** en la arquitectura de V2, no como diseño cerrado ni como información inventada.
 
 ### Nota de alcance — Calendario/Recordatorios (ETAPA 14B)
 
