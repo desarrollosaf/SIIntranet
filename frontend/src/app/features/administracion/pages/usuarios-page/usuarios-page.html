@@ -102,6 +102,10 @@
                   }
                 </div>
 
+                @if (errorCambioEstadoId() === usuario.id) {
+                  <p class="usuarios-page__error-fila text-danger" role="alert">{{ errorCambioEstado() }}</p>
+                }
+
                 @if (usuarioEnEdicionId() === usuario.id) {
                   <form
                     [formGroup]="form"

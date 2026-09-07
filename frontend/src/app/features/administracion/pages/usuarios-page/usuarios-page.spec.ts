@@ -77,6 +77,15 @@ describe('UsuariosPage', () => {
     return botones.find((b) => b.textContent?.trim() === 'Activar' || b.textContent?.trim() === 'Desactivar')!;
   }
 
+  // Variante que devuelve TODOS los botones Activar/Desactivar en orden de
+  // aparición — necesaria para distinguir filas cuando hay más de un usuario.
+  function botonesAccionSecundaria(): HTMLButtonElement[] {
+    const compiled = fixture.nativeElement as HTMLElement;
+    return Array.from(compiled.querySelectorAll('.usuarios-page__accion')).filter(
+      (b) => b.textContent?.trim() === 'Activar' || b.textContent?.trim() === 'Desactivar',
+    ) as HTMLButtonElement[];
+  }
+
   // 1. componente creado
   it('crea el componente', () => {
     configurar();
@@ -604,8 +613,9 @@ describe('UsuariosPage', () => {
       expect(spy).toHaveBeenCalledWith('u2', 'Activo');
     });
 
-    // 33. error al cambiar estado muestra error
-    it('un error al cambiar estado muestra un mensaje accesible', () => {
+    // 33. error al cambiar estado muestra error LOCAL asociado a la fila
+    // (ETAPA 16C.1) — nunca activa `error` general ni oculta el listado.
+    it('un error al cambiar estado muestra un error local sin ocultar el listado ni activar el error general', () => {
       configurar();
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of([usuarioInactivo()]));
       vi.spyOn(usuariosService, 'cambiarEstado').mockReturnValue(throwError(() => new Error('falla')));
@@ -615,11 +625,20 @@ describe('UsuariosPage', () => {
       botonAccionSecundaria().click();
       fixture.detectChanges();
 
-      expect(fixture.componentInstance['error']()).toBe('No fue posible actualizar el estado del usuario.');
+      expect(fixture.componentInstance['errorCambioEstadoId']()).toBe('u2');
+      expect(fixture.componentInstance['errorCambioEstado']()).toBe(
+        'No fue posible actualizar el estado del usuario.',
+      );
+      expect(fixture.componentInstance['error']()).toBeNull();
+
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.querySelector('[role="alert"]')?.textContent).toContain(
         'No fue posible actualizar el estado del usuario.',
       );
+      expect(compiled.querySelector('#buscador-usuarios')).toBeTruthy();
+      expect(compiled.querySelector('#filtro-rol')).toBeTruthy();
+      expect(compiled.querySelector('#filtro-estado')).toBeTruthy();
+      expect(compiled.querySelectorAll('.usuarios-page__item')).toHaveLength(1);
     });
 
     // 35. cambio de estado pendiente impide doble petición
@@ -635,6 +654,138 @@ describe('UsuariosPage', () => {
       fixture.componentInstance['alternarEstado'](usuario);
 
       expect(spy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('error local de cambio de estado (ETAPA 16C.1)', () => {
+    function usuarioActivo(): Usuario {
+      return crearUsuario({ id: 'u1', nombre: 'Ana Pérez', estado: 'Activo' });
+    }
+
+    function usuarioInactivo(): Usuario {
+      return crearUsuario({ id: 'u2', nombre: 'Bruno Ruiz', estado: 'Inactivo' });
+    }
+
+    function dosUsuariosActivos(): Usuario[] {
+      return [
+        crearUsuario({ id: 'u1', nombre: 'Ana Pérez', estado: 'Activo' }),
+        crearUsuario({ id: 'u2', nombre: 'Bruno Ruiz', estado: 'Activo' }),
+      ];
+    }
+
+    // Backend rechaza la operación (p. ej. la Regla 1/2 de ETAPA 16A: auto-
+    // desactivación o último Administrador) — el usuario debe permanecer
+    // visualmente en su estado anterior, sin actualización local optimista.
+    it('si el backend rechaza el cambio de estado, el usuario permanece visualmente en su estado anterior', () => {
+      configurar();
+      vi.spyOn(usuariosService, 'listar').mockReturnValue(of([usuarioActivo()]));
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+      vi.spyOn(usuariosService, 'cambiarEstado').mockReturnValue(
+        throwError(() => ({ status: 409, message: 'Conflict' })),
+      );
+      crearFixture();
+      fixture.detectChanges();
+
+      botonAccionSecundaria().click();
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance['usuarios']()[0].estado).toBe('Activo');
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.textContent).toContain('Activo');
+    });
+
+    // El error de una fila no debe aparecer bajo otra fila distinta.
+    it('el error de cambio de estado de una fila no aparece en otra', () => {
+      configurar();
+      vi.spyOn(usuariosService, 'listar').mockReturnValue(of(dosUsuariosActivos()));
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+      vi.spyOn(usuariosService, 'cambiarEstado').mockReturnValue(throwError(() => new Error('falla')));
+      crearFixture();
+      fixture.detectChanges();
+
+      botonesAccionSecundaria()[0].click();
+      fixture.detectChanges();
+
+      const compiled = fixture.nativeElement as HTMLElement;
+      const items = compiled.querySelectorAll('.usuarios-page__item');
+      expect(items[0].querySelector('[role="alert"]')).toBeTruthy();
+      expect(items[1].querySelector('[role="alert"]')).toBeNull();
+    });
+
+    // Iniciar una nueva operación (sobre cualquier fila) limpia el error
+    // previo — nunca queda mostrado bajo un usuario que ya no corresponde.
+    it('iniciar una nueva operación de cambio de estado limpia el error de la fila anterior', () => {
+      configurar();
+      vi.spyOn(usuariosService, 'listar').mockReturnValue(of(dosUsuariosActivos()));
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+      const spy = vi.spyOn(usuariosService, 'cambiarEstado');
+      spy.mockReturnValueOnce(throwError(() => new Error('falla')));
+      crearFixture();
+      fixture.detectChanges();
+
+      botonesAccionSecundaria()[0].click();
+      fixture.detectChanges();
+      expect(fixture.componentInstance['errorCambioEstadoId']()).toBe('u1');
+
+      spy.mockReturnValue(new Subject<Usuario>());
+      botonesAccionSecundaria()[1].click();
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance['errorCambioEstadoId']()).toBeNull();
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.querySelectorAll('.usuarios-page__item')[0].querySelector('[role="alert"]')).toBeNull();
+    });
+
+    // Una operación exitosa posterior no deja ningún error visible.
+    it('una operación de cambio de estado exitosa no deja error visible', () => {
+      configurar();
+      vi.spyOn(usuariosService, 'listar').mockReturnValue(of([usuarioInactivo()]));
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+      const spy = vi.spyOn(usuariosService, 'cambiarEstado');
+      spy.mockReturnValueOnce(throwError(() => new Error('falla')));
+      crearFixture();
+      fixture.detectChanges();
+
+      botonAccionSecundaria().click();
+      fixture.detectChanges();
+      expect(fixture.componentInstance['errorCambioEstadoId']()).toBe('u2');
+
+      spy.mockReturnValue(of({ ...usuarioInactivo(), estado: 'Activo' }));
+      botonAccionSecundaria().click();
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance['errorCambioEstadoId']()).toBeNull();
+      expect(fixture.componentInstance['errorCambioEstado']()).toBeNull();
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.querySelectorAll('[role="alert"]')).toHaveLength(0);
+    });
+
+    // errorCambioEstado y errorEdicion nunca se sustituyen entre sí.
+    it('errorCambioEstado y errorEdicion son independientes entre sí', () => {
+      configurar();
+      const usuarios = [crearUsuario({ id: 'u1', nombre: 'Ana Pérez', estado: 'Activo' })];
+      vi.spyOn(usuariosService, 'listar').mockReturnValue(of(usuarios));
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+      vi.spyOn(usuariosService, 'cambiarEstado').mockReturnValue(throwError(() => new Error('falla')));
+      vi.spyOn(usuariosService, 'actualizar').mockReturnValue(throwError(() => new Error('falla')));
+      crearFixture();
+      fixture.detectChanges();
+
+      botonAccionSecundaria().click();
+      fixture.detectChanges();
+      expect(fixture.componentInstance['errorCambioEstado']()).toBe(
+        'No fue posible actualizar el estado del usuario.',
+      );
+      expect(fixture.componentInstance['errorEdicion']()).toBeNull();
+
+      fixture.componentInstance['iniciarEdicion'](usuarios[0]);
+      fixture.componentInstance['guardarEdicion']();
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance['errorEdicion']()).toBe('No fue posible guardar los cambios.');
+      expect(fixture.componentInstance['errorCambioEstado']()).toBe(
+        'No fue posible actualizar el estado del usuario.',
+      );
     });
   });
 

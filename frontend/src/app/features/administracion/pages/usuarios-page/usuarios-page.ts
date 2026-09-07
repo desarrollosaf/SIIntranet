@@ -29,6 +29,15 @@ export class UsuariosPage implements OnInit {
   protected readonly errorEdicion = signal<string | null>(null);
   protected readonly guardando = signal(false);
 
+  // Error de cambiarEstado() asociado a una fila concreta — independiente
+  // de `error` (carga inicial) para que un fallo puntual de Activar/
+  // Desactivar nunca oculte el listado/buscador/filtros. Solo puede haber
+  // un error de este tipo visible a la vez: iniciar cualquier nueva
+  // operación de cambio de estado lo limpia primero, así no queda mostrado
+  // bajo una fila distinta a la de la operación más reciente.
+  protected readonly errorCambioEstadoId = signal<string | null>(null);
+  protected readonly errorCambioEstado = signal<string | null>(null);
+
   // Set de ids con una petición de cambio de estado en curso — permite
   // deshabilitar únicamente el botón de la fila afectada sin bloquear el
   // resto de la página ni el resto de las filas.
@@ -134,7 +143,8 @@ export class UsuariosPage implements OnInit {
     }
 
     this.marcarEnCambioEstado(usuario.id, true);
-    this.error.set(null);
+    this.errorCambioEstadoId.set(null);
+    this.errorCambioEstado.set(null);
 
     this.usuariosService.cambiarEstado(usuario.id, nuevoEstado).subscribe({
       next: (usuarioActualizado) => {
@@ -144,7 +154,8 @@ export class UsuariosPage implements OnInit {
         this.marcarEnCambioEstado(usuario.id, false);
       },
       error: () => {
-        this.error.set('No fue posible actualizar el estado del usuario.');
+        this.errorCambioEstadoId.set(usuario.id);
+        this.errorCambioEstado.set('No fue posible actualizar el estado del usuario.');
         this.marcarEnCambioEstado(usuario.id, false);
       },
     });

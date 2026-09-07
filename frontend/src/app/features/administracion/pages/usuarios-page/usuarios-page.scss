@@ -164,6 +164,14 @@ $color-borde: #e9ecef;
   text-decoration: none;
 }
 
+// Error de Activar/Desactivar: asociado visualmente a su fila (no a la
+// página completa) — el listado/buscador/filtros nunca se ocultan por esto.
+.usuarios-page__error-fila {
+  margin: 0;
+  padding: 0 1.125rem 0.875rem;
+  font-size: 0.8125rem;
+}
+
 // ===== Edición inline: asociada visualmente a la fila, no una card aparte
 // al final de la lista =====
 .usuarios-page__edicion {
