@@ -243,6 +243,15 @@ describe('MensajesService', () => {
       );
     });
 
+    it('rechaza editar un mensaje Cancelado aunque nadie lo haya visto', () => {
+      const mensaje = service.crear(dto(), REMITENTE);
+      service.cancelar(mensaje.id, REMITENTE);
+
+      expect(() => service.actualizar(mensaje.id, { titulo: 'X' }, REMITENTE)).toThrow(
+        ConflictException,
+      );
+    });
+
     it('solo el remitente puede editar', () => {
       const mensaje = service.crear(dto(), REMITENTE);
 
@@ -324,6 +333,13 @@ describe('MensajesService', () => {
     it('rechaza cancelar después de Visto con ConflictException', () => {
       const mensaje = service.crear(dto(), REMITENTE);
       service.marcarVisto(mensaje.id, DESTINATARIO_2);
+
+      expect(() => service.cancelar(mensaje.id, REMITENTE)).toThrow(ConflictException);
+    });
+
+    it('rechaza cancelar un mensaje ya Cancelado aunque nadie lo haya visto', () => {
+      const mensaje = service.crear(dto(), REMITENTE);
+      service.cancelar(mensaje.id, REMITENTE);
 
       expect(() => service.cancelar(mensaje.id, REMITENTE)).toThrow(ConflictException);
     });

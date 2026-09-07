@@ -151,9 +151,7 @@ export class MensajesService {
       throw new ForbiddenException('Solo el remitente puede editar este mensaje.');
     }
 
-    const hayVisto = this.destinatariosDeInterno(id).some((d) => d.estadoLectura !== 'Nuevo');
-
-    if (mensaje.estado !== 'Enviado' || hayVisto) {
+    if (this.estaBloqueadoParaModificar(mensaje)) {
       throw new ConflictException('El mensaje ya no puede editarse.');
     }
 
@@ -198,9 +196,7 @@ export class MensajesService {
       throw new ForbiddenException('Solo el remitente puede cancelar este mensaje.');
     }
 
-    const hayVisto = this.destinatariosDeInterno(id).some((d) => d.estadoLectura !== 'Nuevo');
-
-    if (mensaje.estado !== 'Enviado' || hayVisto) {
+    if (this.estaBloqueadoParaModificar(mensaje)) {
       throw new ConflictException('El mensaje ya no puede cancelarse.');
     }
 
@@ -268,6 +264,11 @@ export class MensajesService {
 
   private destinatariosDeInterno(mensajeId: string): DestinatarioMensaje[] {
     return this.destinatarios.filter((d) => d.mensajeId === mensajeId);
+  }
+
+  private estaBloqueadoParaModificar(mensaje: Mensaje): boolean {
+    const hayVisto = this.destinatariosDeInterno(mensaje.id).some((d) => d.estadoLectura !== 'Nuevo');
+    return mensaje.estado !== 'Enviado' || hayVisto;
   }
 
   private sincronizarDestinatarios(mensajeId: string, nuevosIds: string[]): void {
