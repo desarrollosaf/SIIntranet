@@ -1,6 +1,15 @@
 @import 'bootstrap/scss/bootstrap';
 @import 'bootstrap-icons/font/bootstrap-icons.css';
 
+// Colores provisionales hasta recibir el manual de identidad institucional.
+:root {
+  --color-institucional: #6d1a35;
+  --color-institucional-hover: #551528;
+  --color-institucional-tint: #fbf3f5;
+  --color-borde: #e9ecef;
+  --sombra-superficie: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
 * {
   box-sizing: border-box;
 }

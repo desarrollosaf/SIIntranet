@@ -1,11 +1,7 @@
-// Color institucional PROVISIONAL de desarrollo — mismo valor usado en el
-// resto del proyecto (AppShell/PageHero/Inicio), sin manual de identidad
-// confirmado todavía. Declarado aquí de forma local e independiente, sin
-// crear dependencia entre componentes (mismo criterio ya establecido).
-$color-vino: #6d1a35;
-$color-vino-oscuro: #551528;
-$color-vino-tint: #fbf3f5;
-$color-borde: #e9ecef;
+$color-vino: var(--color-institucional);
+$color-vino-oscuro: var(--color-institucional-hover);
+$color-vino-tint: var(--color-institucional-tint);
+$color-borde: var(--color-borde);
 
 .redactar-mensaje-page {
   padding: 1.5rem;
@@ -45,7 +41,7 @@ $color-borde: #e9ecef;
   background: #ffffff;
   border: 1px solid $color-borde;
   border-radius: 0.875rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--sombra-superficie);
 }
 
 .redactar-mensaje-page__panel--contenido {
