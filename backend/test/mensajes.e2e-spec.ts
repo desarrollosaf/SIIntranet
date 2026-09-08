@@ -77,21 +77,27 @@ describe('Mensajería (e2e)', () => {
 
     it('recibidos de Usuario 2 incluye el mensaje', async () => {
       comoActor(USUARIO_2);
-      const respuesta = await request(app.getHttpServer()).get('/api/mensajes/recibidos').expect(200);
+      const respuesta = await request(app.getHttpServer())
+        .get('/api/mensajes/recibidos')
+        .expect(200);
 
       expect(respuesta.body.some((m: any) => m.id === mensajeId)).toBe(true);
     });
 
     it('recibidos de Usuario 3 incluye el mensaje', async () => {
       comoActor(USUARIO_3);
-      const respuesta = await request(app.getHttpServer()).get('/api/mensajes/recibidos').expect(200);
+      const respuesta = await request(app.getHttpServer())
+        .get('/api/mensajes/recibidos')
+        .expect(200);
 
       expect(respuesta.body.some((m: any) => m.id === mensajeId)).toBe(true);
     });
 
     it('enviados de Usuario 1 incluye el mensaje', async () => {
       comoActor(USUARIO_1);
-      const respuesta = await request(app.getHttpServer()).get('/api/mensajes/enviados').expect(200);
+      const respuesta = await request(app.getHttpServer())
+        .get('/api/mensajes/enviados')
+        .expect(200);
 
       expect(respuesta.body.some((m: any) => m.id === mensajeId)).toBe(true);
     });
@@ -100,7 +106,9 @@ describe('Mensajería (e2e)', () => {
       comoActor(USUARIO_2);
       await request(app.getHttpServer()).get(`/api/mensajes/${mensajeId}`).expect(200);
 
-      const recibidos = await request(app.getHttpServer()).get('/api/mensajes/recibidos').expect(200);
+      const recibidos = await request(app.getHttpServer())
+        .get('/api/mensajes/recibidos')
+        .expect(200);
       const propio = recibidos.body.find((m: any) => m.id === mensajeId);
       expect(propio.estadoLectura).toBe('Nuevo');
     });
@@ -109,11 +117,15 @@ describe('Mensajería (e2e)', () => {
       comoActor(USUARIO_2);
       await request(app.getHttpServer()).patch(`/api/mensajes/${mensajeId}/visto`).expect(200);
 
-      const recibidosDos = await request(app.getHttpServer()).get('/api/mensajes/recibidos').expect(200);
+      const recibidosDos = await request(app.getHttpServer())
+        .get('/api/mensajes/recibidos')
+        .expect(200);
       expect(recibidosDos.body.find((m: any) => m.id === mensajeId).estadoLectura).toBe('Visto');
 
       comoActor(USUARIO_3);
-      const recibidosTres = await request(app.getHttpServer()).get('/api/mensajes/recibidos').expect(200);
+      const recibidosTres = await request(app.getHttpServer())
+        .get('/api/mensajes/recibidos')
+        .expect(200);
       expect(recibidosTres.body.find((m: any) => m.id === mensajeId).estadoLectura).toBe('Nuevo');
     });
 
@@ -142,11 +154,15 @@ describe('Mensajería (e2e)', () => {
         })
         .expect(201);
 
-      const detalleDos = await request(app.getHttpServer()).get(`/api/mensajes/${mensajeId}`).expect(200);
+      const detalleDos = await request(app.getHttpServer())
+        .get(`/api/mensajes/${mensajeId}`)
+        .expect(200);
       expect(detalleDos.body.estadoRespuesta).toBe('Respondido');
 
       comoActor(USUARIO_3);
-      const detalleTres = await request(app.getHttpServer()).get(`/api/mensajes/${mensajeId}`).expect(200);
+      const detalleTres = await request(app.getHttpServer())
+        .get(`/api/mensajes/${mensajeId}`)
+        .expect(200);
       expect(detalleTres.body.estadoRespuesta).toBe('Pendiente');
     });
 
@@ -270,7 +286,9 @@ describe('Mensajería (e2e)', () => {
       await request(app.getHttpServer()).patch(`/api/mensajes/${id}/cancelar`).expect(200);
 
       comoActor(USUARIO_2);
-      const recibidos = await request(app.getHttpServer()).get('/api/mensajes/recibidos').expect(200);
+      const recibidos = await request(app.getHttpServer())
+        .get('/api/mensajes/recibidos')
+        .expect(200);
       expect(recibidos.body.some((m: any) => m.id === id)).toBe(false);
 
       comoActor(USUARIO_1);
@@ -295,7 +313,9 @@ describe('Mensajería (e2e)', () => {
       await request(app.getHttpServer()).patch(`/api/mensajes/${id}/eliminar`).expect(200);
 
       comoActor(USUARIO_2);
-      const recibidos = await request(app.getHttpServer()).get('/api/mensajes/recibidos').expect(200);
+      const recibidos = await request(app.getHttpServer())
+        .get('/api/mensajes/recibidos')
+        .expect(200);
       const propio = recibidos.body.find((m: any) => m.id === id);
 
       expect(propio.estado).toBe('Eliminado');

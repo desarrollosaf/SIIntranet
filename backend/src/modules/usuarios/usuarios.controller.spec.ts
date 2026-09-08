@@ -4,7 +4,12 @@ import { UsuariosService } from './usuarios.service';
 
 describe('UsuariosController', () => {
   let controller: UsuariosController;
-  let usuariosService: { listar: jest.Mock; obtenerPorId: jest.Mock; actualizar: jest.Mock; cambiarEstado: jest.Mock };
+  let usuariosService: {
+    listar: jest.Mock;
+    obtenerPorId: jest.Mock;
+    actualizar: jest.Mock;
+    cambiarEstado: jest.Mock;
+  };
 
   beforeEach(async () => {
     usuariosService = {
@@ -47,6 +52,10 @@ describe('UsuariosController', () => {
       { id: 'dev-usuario-9', usuario: 'actor', rol: 'Administrador' },
     );
 
-    expect(usuariosService.cambiarEstado).toHaveBeenCalledWith('dev-usuario-1', 'Inactivo', 'dev-usuario-9');
+    expect(usuariosService.cambiarEstado).toHaveBeenCalledWith(
+      'dev-usuario-1',
+      'Inactivo',
+      'dev-usuario-9',
+    );
   });
 });

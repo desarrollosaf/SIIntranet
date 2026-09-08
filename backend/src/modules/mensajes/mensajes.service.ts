@@ -258,7 +258,10 @@ export class MensajesService {
     return mensaje;
   }
 
-  private destinatarioInterno(mensajeId: string, usuarioId: string): DestinatarioMensaje | undefined {
+  private destinatarioInterno(
+    mensajeId: string,
+    usuarioId: string,
+  ): DestinatarioMensaje | undefined {
     return this.destinatarios.find((d) => d.mensajeId === mensajeId && d.usuarioId === usuarioId);
   }
 
@@ -267,7 +270,9 @@ export class MensajesService {
   }
 
   private estaBloqueadoParaModificar(mensaje: Mensaje): boolean {
-    const hayVisto = this.destinatariosDeInterno(mensaje.id).some((d) => d.estadoLectura !== 'Nuevo');
+    const hayVisto = this.destinatariosDeInterno(mensaje.id).some(
+      (d) => d.estadoLectura !== 'Nuevo',
+    );
     return mensaje.estado !== 'Enviado' || hayVisto;
   }
 

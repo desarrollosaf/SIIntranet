@@ -67,15 +67,12 @@ describe('Usuarios + identidad de desarrollo (e2e)', () => {
     });
 
     it('GET /api/auth/me devuelve el actor configurado por el servidor', () => {
-      return request(app.getHttpServer())
-        .get('/api/auth/me')
-        .expect(200)
-        .expect({
-          id: 'dev-usuario-2',
-          nombre: 'Usuario de Prueba Dos',
-          usuario: 'usuario.prueba.dos',
-          rol: 'Usuario',
-        });
+      return request(app.getHttpServer()).get('/api/auth/me').expect(200).expect({
+        id: 'dev-usuario-2',
+        nombre: 'Usuario de Prueba Dos',
+        usuario: 'usuario.prueba.dos',
+        rol: 'Usuario',
+      });
     });
 
     it('PATCH /api/usuarios/:id → 403', () => {
@@ -169,7 +166,10 @@ describe('Usuarios + identidad de desarrollo (e2e)', () => {
 
       // Promueve a un segundo Administrador y vuelve a dejarlo Inactivo —
       // dev-usuario-1 queda otra vez como único Administrador activo.
-      await request(server).patch('/api/usuarios/dev-usuario-2').send({ rol: 'Administrador' }).expect(200);
+      await request(server)
+        .patch('/api/usuarios/dev-usuario-2')
+        .send({ rol: 'Administrador' })
+        .expect(200);
       await request(server)
         .patch('/api/usuarios/dev-usuario-2/estado')
         .send({ estado: 'Inactivo' })
@@ -198,7 +198,10 @@ describe('Usuarios + identidad de desarrollo (e2e)', () => {
     it('con más de un Administrador activo, uno puede desactivar y cambiar el rol del otro', async () => {
       const server = app.getHttpServer();
 
-      await request(server).patch('/api/usuarios/dev-usuario-2').send({ rol: 'Administrador' }).expect(200);
+      await request(server)
+        .patch('/api/usuarios/dev-usuario-2')
+        .send({ rol: 'Administrador' })
+        .expect(200);
 
       await request(server)
         .patch('/api/usuarios/dev-usuario-2/estado')

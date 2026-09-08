@@ -18,10 +18,7 @@ describe('HealthController (e2e)', () => {
   });
 
   it('/api/health (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/api/health')
-      .expect(200)
-      .expect({ status: 'ok' });
+    return request(app.getHttpServer()).get('/api/health').expect(200).expect({ status: 'ok' });
   });
 
   afterEach(async () => {

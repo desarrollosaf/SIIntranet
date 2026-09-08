@@ -1,4 +1,9 @@
-import { BadRequestException, ConflictException, ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -23,7 +28,7 @@ describe('MensajesService', () => {
       descripcion: 'Contenido del mensaje',
       destinatarioIds: [DESTINATARIO_2],
       ...overrides,
-    } as CreateMensajeDto;
+    };
   }
 
   beforeEach(() => {
@@ -47,7 +52,10 @@ describe('MensajesService', () => {
     });
 
     it('acepta múltiples destinatarios', () => {
-      const mensaje = service.crear(dto({ destinatarioIds: [DESTINATARIO_2, DESTINATARIO_3] }), REMITENTE);
+      const mensaje = service.crear(
+        dto({ destinatarioIds: [DESTINATARIO_2, DESTINATARIO_3] }),
+        REMITENTE,
+      );
 
       const recibidosDos = service.obtenerRecibidos(DESTINATARIO_2);
       const recibidosTres = service.obtenerRecibidos(DESTINATARIO_3);
@@ -186,7 +194,10 @@ describe('MensajesService', () => {
     });
 
     it('visto es independiente por destinatario', () => {
-      const mensaje = service.crear(dto({ destinatarioIds: [DESTINATARIO_2, DESTINATARIO_3] }), REMITENTE);
+      const mensaje = service.crear(
+        dto({ destinatarioIds: [DESTINATARIO_2, DESTINATARIO_3] }),
+        REMITENTE,
+      );
 
       service.marcarVisto(mensaje.id, DESTINATARIO_2);
 
@@ -261,7 +272,10 @@ describe('MensajesService', () => {
     });
 
     it('sincroniza destinatarios: mantiene, agrega y retira', () => {
-      const mensaje = service.crear(dto({ destinatarioIds: [DESTINATARIO_2, DESTINATARIO_3] }), REMITENTE);
+      const mensaje = service.crear(
+        dto({ destinatarioIds: [DESTINATARIO_2, DESTINATARIO_3] }),
+        REMITENTE,
+      );
 
       service.actualizar(mensaje.id, { destinatarioIds: [DESTINATARIO_2, REMITENTE] }, REMITENTE);
 
@@ -271,7 +285,10 @@ describe('MensajesService', () => {
     });
 
     it('un destinatario inexistente junto a un campo válido no aplica ningún cambio', () => {
-      const mensaje = service.crear(dto({ destinatarioIds: [DESTINATARIO_2, DESTINATARIO_3] }), REMITENTE);
+      const mensaje = service.crear(
+        dto({ destinatarioIds: [DESTINATARIO_2, DESTINATARIO_3] }),
+        REMITENTE,
+      );
 
       expect(() =>
         service.actualizar(
@@ -369,7 +386,10 @@ describe('MensajesService', () => {
 
   describe('responder', () => {
     it('una respuesta válida crea el mensaje y marca Respondido solo al actor', () => {
-      const original = service.crear(dto({ destinatarioIds: [DESTINATARIO_2, DESTINATARIO_3] }), REMITENTE);
+      const original = service.crear(
+        dto({ destinatarioIds: [DESTINATARIO_2, DESTINATARIO_3] }),
+        REMITENTE,
+      );
 
       service.crear(
         dto({
@@ -459,7 +479,11 @@ describe('MensajesService', () => {
       const archivo = await crearArchivo(REMITENTE);
       const mensaje = service.crear(dto({ archivoIds: [archivo.id] }), REMITENTE);
 
-      const resultado = await service.obtenerAdjuntoParaDescarga(mensaje.id, archivo.id, DESTINATARIO_2);
+      const resultado = await service.obtenerAdjuntoParaDescarga(
+        mensaje.id,
+        archivo.id,
+        DESTINATARIO_2,
+      );
 
       expect(resultado.archivo.id).toBe(archivo.id);
     });

@@ -68,19 +68,35 @@ const TIPOS_PERMITIDOS: Record<string, TipoPermitido> = {
     mimeCanonico: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   },
   '.pptx': {
-    mimeContenido: /^application\/vnd\.openxmlformats-officedocument\.presentationml\.presentation$/,
-    mimeDeclarado: /^application\/vnd\.openxmlformats-officedocument\.presentationml\.presentation$/,
+    mimeContenido:
+      /^application\/vnd\.openxmlformats-officedocument\.presentationml\.presentation$/,
+    mimeDeclarado:
+      /^application\/vnd\.openxmlformats-officedocument\.presentationml\.presentation$/,
     mimeCanonico: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
   },
-  '.jpg': { mimeContenido: /^image\/jpeg$/, mimeDeclarado: /^image\/jpeg$/, mimeCanonico: 'image/jpeg' },
-  '.jpeg': { mimeContenido: /^image\/jpeg$/, mimeDeclarado: /^image\/jpeg$/, mimeCanonico: 'image/jpeg' },
-  '.png': { mimeContenido: /^image\/png$/, mimeDeclarado: /^image\/png$/, mimeCanonico: 'image/png' },
+  '.jpg': {
+    mimeContenido: /^image\/jpeg$/,
+    mimeDeclarado: /^image\/jpeg$/,
+    mimeCanonico: 'image/jpeg',
+  },
+  '.jpeg': {
+    mimeContenido: /^image\/jpeg$/,
+    mimeDeclarado: /^image\/jpeg$/,
+    mimeCanonico: 'image/jpeg',
+  },
+  '.png': {
+    mimeContenido: /^image\/png$/,
+    mimeDeclarado: /^image\/png$/,
+    mimeCanonico: 'image/png',
+  },
 };
 
 export function sanearNombreParaDescarga(nombreOriginal: string): string {
   const saneado = nombreOriginal
     .replace(/[\\/]/g, '_')
     .replace(/[\r\n]/g, '')
+    // Intencional: elimina caracteres de control antes de usarlo en Content-Disposition.
+    // eslint-disable-next-line no-control-regex
     .replace(/[\x00-\x1f]/g, '')
     .trim();
 
@@ -148,7 +164,12 @@ export class ArchivosService {
     return { ...this.buscarAutorizado(id, actorId) };
   }
 
-  async obtenerParaDescarga(id: string, actorId: string): Promise<{ archivo: Archivo; rutaFisica: string }> {
+  // Promise por consistencia con guardar()/obtenerParaUsoInterno(); se consume con await.
+  // eslint-disable-next-line @typescript-eslint/require-await
+  async obtenerParaDescarga(
+    id: string,
+    actorId: string,
+  ): Promise<{ archivo: Archivo; rutaFisica: string }> {
     const archivo = this.buscarAutorizado(id, actorId);
     const rutaFisica = this.resolverRutaFisica(archivo);
 
@@ -164,6 +185,8 @@ export class ArchivosService {
    * que el actor es remitente/destinatario del mensaje que referencia este
    * archivo antes de llamar aquí).
    */
+  // Misma razón que obtenerParaDescarga(): Promise por consistencia, se consume con await.
+  // eslint-disable-next-line @typescript-eslint/require-await
   async obtenerParaUsoInterno(id: string): Promise<{ archivo: Archivo; rutaFisica: string }> {
     const archivo = this.archivos.get(id);
 

@@ -18,7 +18,11 @@ describe('AuthGuard', () => {
   });
 
   it('permite el acceso si request.user existe', () => {
-    const contexto = crearContexto({ id: 'dev-usuario-1', usuario: 'usuario.prueba', rol: 'Usuario' });
+    const contexto = crearContexto({
+      id: 'dev-usuario-1',
+      usuario: 'usuario.prueba',
+      rol: 'Usuario',
+    });
 
     expect(guard.canActivate(contexto)).toBe(true);
   });

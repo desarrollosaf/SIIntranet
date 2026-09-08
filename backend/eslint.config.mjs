@@ -32,4 +32,17 @@ export default tseslint.config(
       "prettier/prettier": ["error", { endOfLine: "auto" }],
     },
   },
+  {
+    // supertest tipa `Response.body` como `any` y los mocks de NestJS/Jest
+    // construyen objetos vía casts `as any` — ninguno de los dos es un error
+    // real de tipado. Confirmado: cero ocurrencias de estas reglas en
+    // backend/src fuera de este patrón de tests.
+    files: ['**/*.spec.ts', 'test/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+    },
+  },
 );

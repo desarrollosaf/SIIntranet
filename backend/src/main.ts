@@ -22,4 +22,4 @@ async function bootstrap() {
   const port = configService.get<string>('PORT') ?? 3000;
   await app.listen(port);
 }
-bootstrap();
+void bootstrap();

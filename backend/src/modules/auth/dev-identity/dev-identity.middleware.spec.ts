@@ -2,6 +2,10 @@ import { NotFoundException } from '@nestjs/common';
 import { DevIdentityMiddleware } from './dev-identity.middleware';
 import { UsuariosService } from '../../usuarios/usuarios.service';
 import { ConfigService } from '@nestjs/config';
+import { Request, Response } from 'express';
+import { AuthenticatedUser } from '../../../common/interfaces/authenticated-user.interface';
+
+type RequestWithUser = Request & { user?: AuthenticatedUser };
 
 describe('DevIdentityMiddleware', () => {
   let usuariosService: UsuariosService;
@@ -17,11 +21,14 @@ describe('DevIdentityMiddleware', () => {
   }
 
   it('con DEV_USER_ID válido, construye request.user con id/usuario/rol y llama next()', () => {
-    const middleware = new DevIdentityMiddleware(crearConfigService('dev-usuario-1'), usuariosService);
-    const req: any = {};
+    const middleware = new DevIdentityMiddleware(
+      crearConfigService('dev-usuario-1'),
+      usuariosService,
+    );
+    const req = {} as unknown as RequestWithUser;
     const next = jest.fn();
 
-    middleware.use(req, {} as any, next);
+    middleware.use(req, {} as unknown as Response, next);
 
     expect(req.user).toEqual({
       id: 'dev-usuario-1',
@@ -32,11 +39,16 @@ describe('DevIdentityMiddleware', () => {
   });
 
   it('el cliente no puede influir en la identidad: req.user se sobrescribe con el actor del servidor', () => {
-    const middleware = new DevIdentityMiddleware(crearConfigService('dev-usuario-2'), usuariosService);
-    const req: any = { user: { id: 'lo-que-sea', usuario: 'atacante', rol: 'Administrador' } };
+    const middleware = new DevIdentityMiddleware(
+      crearConfigService('dev-usuario-2'),
+      usuariosService,
+    );
+    const req = {
+      user: { id: 'lo-que-sea', usuario: 'atacante', rol: 'Administrador' },
+    } as unknown as RequestWithUser;
     const next = jest.fn();
 
-    middleware.use(req, {} as any, next);
+    middleware.use(req, {} as unknown as Response, next);
 
     expect(req.user).toEqual({
       id: 'dev-usuario-2',
@@ -47,10 +59,10 @@ describe('DevIdentityMiddleware', () => {
 
   it('sin DEV_USER_ID configurado, falla explícitamente vía next(error)', () => {
     const middleware = new DevIdentityMiddleware(crearConfigService(undefined), usuariosService);
-    const req: any = {};
+    const req = {} as unknown as RequestWithUser;
     const next = jest.fn();
 
-    middleware.use(req, {} as any, next);
+    middleware.use(req, {} as unknown as Response, next);
 
     expect(next).toHaveBeenCalledWith(expect.any(Error));
     expect(req.user).toBeUndefined();
@@ -58,10 +70,10 @@ describe('DevIdentityMiddleware', () => {
 
   it('con DEV_USER_ID que no corresponde a ningún usuario, falla explícitamente', () => {
     const middleware = new DevIdentityMiddleware(crearConfigService('no-existe'), usuariosService);
-    const req: any = {};
+    const req = {} as unknown as RequestWithUser;
     const next = jest.fn();
 
-    middleware.use(req, {} as any, next);
+    middleware.use(req, {} as unknown as Response, next);
 
     expect(next).toHaveBeenCalledWith(expect.any(NotFoundException));
     expect(req.user).toBeUndefined();

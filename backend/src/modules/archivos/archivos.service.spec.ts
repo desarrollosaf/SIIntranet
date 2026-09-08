@@ -138,8 +138,9 @@ const CFB_BUFFER = Buffer.concat([
 const JPEG_BUFFER = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0, 0x10, 0x4a, 0x46, 0x49, 0x46, 0]);
 
 const PNG_BUFFER = Buffer.from([
-  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52, 0x00,
-  0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x02, 0x00, 0x00, 0x00, 0x90, 0x77, 0x53, 0xde,
+  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
+  0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x02, 0x00, 0x00, 0x00, 0x90, 0x77, 0x53,
+  0xde,
 ]);
 
 function archivoMulter(overrides: Partial<Express.Multer.File> = {}): Express.Multer.File {
@@ -191,7 +192,9 @@ describe('ArchivosService', () => {
       buffer: Buffer.from('esto no es un pdf'),
     });
 
-    await expect(service.guardar(archivoFalso, 'dev-usuario-1')).rejects.toThrow(BadRequestException);
+    await expect(service.guardar(archivoFalso, 'dev-usuario-1')).rejects.toThrow(
+      BadRequestException,
+    );
   });
 
   it('acepta un DOCX real (OOXML) por contenido', async () => {
@@ -287,7 +290,8 @@ describe('ArchivosService', () => {
         originalname: 'documento.docx',
         mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         buffer: DOCX_BUFFER,
-        mimeCanonicoEsperado: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        mimeCanonicoEsperado:
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       },
       {
         nombre: 'XLS',
@@ -315,7 +319,8 @@ describe('ArchivosService', () => {
         originalname: 'presentacion.pptx',
         mimetype: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
         buffer: PPTX_BUFFER,
-        mimeCanonicoEsperado: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        mimeCanonicoEsperado:
+          'application/vnd.openxmlformats-officedocument.presentationml.presentation',
       },
       {
         nombre: 'JPG',
@@ -422,7 +427,9 @@ describe('sanearNombreParaDescarga', () => {
   });
 
   it('conserva comillas y punto y coma (los codifica de forma segura el propio Content-Disposition, no el saneador)', () => {
-    expect(sanearNombreParaDescarga('archivo "raro"; nombre.pdf')).toBe('archivo "raro"; nombre.pdf');
+    expect(sanearNombreParaDescarga('archivo "raro"; nombre.pdf')).toBe(
+      'archivo "raro"; nombre.pdf',
+    );
   });
 
   it('nunca devuelve una cadena vacía', () => {

@@ -191,7 +191,11 @@ describe('FormatosService', () => {
       const creado = await service.crear(dto(), 'dev-usuario-1');
       await service.cambiarEstado(creado.id, 'Inactivo');
 
-      const actualizado = await service.actualizar(creado.id, { nombre: 'Nombre nuevo' }, 'dev-usuario-1');
+      const actualizado = await service.actualizar(
+        creado.id,
+        { nombre: 'Nombre nuevo' },
+        'dev-usuario-1',
+      );
 
       expect(actualizado.nombre).toBe('Nombre nuevo');
       expect(actualizado.estado).toBe('Inactivo');

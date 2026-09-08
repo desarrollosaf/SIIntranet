@@ -143,7 +143,9 @@ describe('Archivos (e2e)', () => {
       expect(cabecera.startsWith('attachment')).toBe(true);
       // Debe seguir siendo exactamente una cabecera Content-Disposition, sin
       // que el nombre haya podido inyectar una segunda cabecera HTTP.
-      expect(Object.keys(descarga.headers).filter((h) => h === 'content-disposition')).toHaveLength(1);
+      expect(Object.keys(descarga.headers).filter((h) => h === 'content-disposition')).toHaveLength(
+        1,
+      );
     });
 
     it('un tipo de archivo no permitido es rechazado', () => {

@@ -92,7 +92,9 @@ describe('UsuariosService', () => {
     });
 
     it('actualizar() rechaza cambiar el rol del último Administrador activo a Usuario', () => {
-      expect(() => service.actualizar('dev-usuario-1', { rol: 'Usuario' })).toThrow(ConflictException);
+      expect(() => service.actualizar('dev-usuario-1', { rol: 'Usuario' })).toThrow(
+        ConflictException,
+      );
 
       expect(service.obtenerPorId('dev-usuario-1').rol).toBe('Administrador');
     });
