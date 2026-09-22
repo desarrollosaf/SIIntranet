@@ -4,12 +4,6 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
 
-interface HealthResponse {
-  status: string;
-  app: string;
-  timestamp: string;
-}
-
 describe('HealthController (e2e)', () => {
   let app: INestApplication<App>;
 
@@ -19,24 +13,12 @@ describe('HealthController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api');
     await app.init();
   });
 
-  it('/health (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/health')
-      .expect(200)
-      .expect((response) => {
-        const body = response.body as HealthResponse;
-
-        expect(body).toEqual(
-          expect.objectContaining({
-            status: 'ok',
-            app: 'SIIntranet API',
-          }),
-        );
-        expect(body.timestamp).toEqual(expect.any(String));
-      });
+  it('/api/health (GET)', () => {
+    return request(app.getHttpServer()).get('/api/health').expect(200).expect({ status: 'ok' });
   });
 
   afterEach(async () => {

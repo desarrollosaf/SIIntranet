@@ -1,45 +1,44 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, ParseIntPipe } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, UseGuards } from '@nestjs/common';
 import { UsuariosService } from './usuarios.service';
-import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
-import { ChangePasswordDto } from './dto/change-password.dto';
+import { UpdateEstadoUsuarioDto } from './dto/update-estado-usuario.dto';
+import { AuthGuard } from '../auth/guards/auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import type { AuthenticatedUser } from '../../common/interfaces/authenticated-user.interface';
 
 @Controller('usuarios')
 export class UsuariosController {
   constructor(private readonly usuariosService: UsuariosService) {}
 
-  @Get('status')
-  getStatus() {
-    return this.usuariosService.getStatus();
-  }
-
+  @UseGuards(AuthGuard)
   @Get()
-  findAll() {
-    return this.usuariosService.findAll();
+  listar() {
+    return this.usuariosService.listar();
   }
 
+  @UseGuards(AuthGuard)
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.usuariosService.findOne(id);
+  obtenerPorId(@Param('id') id: string) {
+    return this.usuariosService.obtenerPorId(id);
   }
 
-  @Post()
-  create(@Body() createUsuarioDto: CreateUsuarioDto) {
-    return this.usuariosService.create(createUsuarioDto);
-  }
-
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('Administrador')
   @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateUsuarioDto: UpdateUsuarioDto) {
-    return this.usuariosService.update(id, updateUsuarioDto);
+  actualizar(@Param('id') id: string, @Body() datos: UpdateUsuarioDto) {
+    return this.usuariosService.actualizar(id, datos);
   }
 
-  @Patch(':id/password')
-  changePassword(@Param('id', ParseIntPipe) id: number, @Body() changePasswordDto: ChangePasswordDto) {
-    return this.usuariosService.changePassword(id, changePasswordDto.passwordNueva);
-  }
-
-  @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.usuariosService.remove(id);
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('Administrador')
+  @Patch(':id/estado')
+  cambiarEstado(
+    @Param('id') id: string,
+    @Body() datos: UpdateEstadoUsuarioDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    return this.usuariosService.cambiarEstado(id, datos.estado, actor.id);
   }
 }

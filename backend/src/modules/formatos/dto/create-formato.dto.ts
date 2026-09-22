@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsOptional, IsIn } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateFormatoDto {
   @IsString()
@@ -15,14 +15,5 @@ export class CreateFormatoDto {
 
   @IsString()
   @IsNotEmpty()
-  readonly archivo: string;
-
-  @IsString()
-  @IsNotEmpty()
-  readonly tipoArchivo: string;
-
-  @IsString()
-  @IsIn(['Activo', 'Inactivo'])
-  @IsOptional()
-  readonly estado?: 'Activo' | 'Inactivo';
+  readonly archivoId: string;
 }

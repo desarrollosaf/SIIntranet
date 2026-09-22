@@ -1,0 +1,141 @@
+<section class="detalle-mensaje-page">
+  <app-page-hero titulo="Detalle del mensaje" icono="bi-envelope-open" />
+
+  <div class="detalle-mensaje-page__wrapper">
+    <a [routerLink]="volver().ruta" class="detalle-mensaje-page__volver">← {{ volver().texto }}</a>
+
+    @if (cargando()) {
+      <p>Cargando mensaje…</p>
+    }
+
+    @if (error()) {
+      <p class="text-danger" role="alert">{{ error() }}</p>
+    }
+
+    @if (!cargando() && !error() && detalle(); as mensaje) {
+      <div class="detalle-mensaje-page__layout">
+        <section
+          class="detalle-mensaje-page__panel detalle-mensaje-page__panel--contenido"
+          aria-label="Contenido del mensaje"
+        >
+          @if (!mensaje.contenidoDisponible) {
+            <p class="fst-italic text-muted mb-0">
+              @if (esRecibido(mensaje)) {
+                Mensaje eliminado por el remitente.
+              } @else {
+                Mensaje eliminado.
+              }
+            </p>
+          } @else {
+            <h2 class="detalle-mensaje-page__titulo">{{ mensaje.titulo }}</h2>
+            <p class="detalle-mensaje-page__fecha">{{ mensaje.fechaCreacion | date: 'medium' }}</p>
+            <p class="detalle-mensaje-page__descripcion">{{ mensaje.descripcion }}</p>
+
+            @if (mensaje.archivoIds && mensaje.archivoIds.length > 0) {
+              <div class="detalle-mensaje-page__adjuntos">
+                <h3 class="detalle-mensaje-page__subtitulo">Adjuntos</h3>
+                <ul class="list-unstyled detalle-mensaje-page__lista-adjuntos">
+                  @for (archivoId of mensaje.archivoIds; track archivoId; let i = $index) {
+                    <li class="detalle-mensaje-page__adjunto">
+                      <span>Adjunto {{ i + 1 }}</span>
+                      <a
+                        [href]="urlDescarga(mensaje.id, archivoId)"
+                        class="detalle-mensaje-page__accion-discreta"
+                      >
+                        Descargar
+                      </a>
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
+          }
+        </section>
+
+        <aside
+          class="detalle-mensaje-page__panel detalle-mensaje-page__panel--info"
+          aria-label="Información del mensaje"
+        >
+          <h2 class="detalle-mensaje-page__subtitulo">Información</h2>
+
+          @if (esRecibido(mensaje)) {
+            <p class="detalle-mensaje-page__remitente">
+              <span class="detalle-mensaje-page__etiqueta">Remitente</span>
+              {{ mensaje.remitente.nombre }}
+              <span class="text-muted">({{ mensaje.remitente.usuario }})</span>
+            </p>
+
+            <div class="detalle-mensaje-page__estados">
+              <span class="badge text-bg-secondary">Lectura: {{ mensaje.estadoLectura }}</span>
+              <span class="badge text-bg-light">Respuesta: {{ mensaje.estadoRespuesta }}</span>
+            </div>
+          } @else {
+            <div class="detalle-mensaje-page__estados">
+              <span class="badge text-bg-secondary">{{ mensaje.estado }}</span>
+            </div>
+
+            <h3 class="detalle-mensaje-page__subtitulo">Destinatarios</h3>
+            <ul class="list-unstyled detalle-mensaje-page__lista-destinatarios">
+              @for (destinatario of mensaje.destinatarios; track destinatario.usuarioId) {
+                <li class="detalle-mensaje-page__destinatario">
+                  <span class="detalle-mensaje-page__destinatario-nombre">
+                    {{ destinatario.nombre }}
+                    <span class="text-muted small">({{ destinatario.usuario }})</span>
+                  </span>
+                  <span class="detalle-mensaje-page__estados">
+                    <span class="badge text-bg-secondary">{{ destinatario.estadoLectura }}</span>
+                    <span class="badge text-bg-light">{{ destinatario.estadoRespuesta }}</span>
+                  </span>
+                </li>
+              }
+            </ul>
+          }
+
+          <div class="detalle-mensaje-page__acciones">
+            @if (esRecibido(mensaje)) {
+              @if (mensaje.estado === 'Enviado' && mensaje.contenidoDisponible) {
+                <a [routerLink]="['/mensajes', mensaje.id, 'responder']" class="btn btn-vino"
+                  >Responder</a
+                >
+              }
+            } @else {
+              @if (esEditable(mensaje)) {
+                <a
+                  [routerLink]="['/mensajes', mensaje.id, 'editar']"
+                  class="btn btn-outline-secondary"
+                  >Editar</a
+                >
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  [disabled]="procesandoAccion()"
+                  (click)="onCancelar(mensaje.id)"
+                >
+                  Cancelar
+                </button>
+              }
+              @if (mensaje.estado !== 'Eliminado') {
+                <button
+                  type="button"
+                  class="btn btn-outline-danger"
+                  [disabled]="procesandoAccion()"
+                  (click)="onEliminar(mensaje.id)"
+                >
+                  Eliminar
+                </button>
+              }
+            }
+          </div>
+
+          @if (errorAccion()) {
+            <p class="text-danger small" role="alert">{{ errorAccion() }}</p>
+          }
+
+          @if (avisoVisto()) {
+            <p class="text-warning small" role="alert">{{ avisoVisto() }}</p>
+          }
+        </aside>
+      </div>
+    }
+  </div>
+</section>

@@ -1,0 +1,24 @@
+.login-page {
+  min-height: 100dvh;
+  background-color: var(--color-fondo);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 22rem;
+  border: 1px solid var(--color-borde);
+  border-top: 4px solid var(--color-institucional);
+  background-color: var(--color-superficie);
+  box-shadow: 0 1rem 2.5rem rgba(31, 41, 55, 0.1);
+}
+
+.login-card__logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+}

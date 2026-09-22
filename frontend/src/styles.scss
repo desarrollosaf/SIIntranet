@@ -1,0 +1,73 @@
+@use 'bootstrap/scss/bootstrap';
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+
+:root {
+  --color-institucional: #6d1a35;
+  --color-institucional-hover: #551528;
+  --color-institucional-claro: #8c3150;
+  --color-institucional-tint: #f8eef1;
+  --color-superficie: #ffffff;
+  --color-fondo: #f4f6f8;
+  --color-borde: #e1e5ea;
+  --sombra-superficie: 0 0.25rem 0.75rem rgba(31, 41, 55, 0.06);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+  color: #252a31;
+  background: var(--color-fondo);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-institucional-claro);
+  outline-offset: 2px;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--color-institucional-claro);
+  box-shadow: 0 0 0 0.2rem rgba(109, 26, 53, 0.14);
+}
+
+.btn-vino {
+  background-color: var(--color-institucional);
+  border-color: var(--color-institucional);
+  color: #fff;
+}
+.btn-vino:hover,
+.btn-vino:focus-visible {
+  background-color: var(--color-institucional-hover);
+  border-color: var(--color-institucional-hover);
+  color: #fff;
+}
+.btn-vino:disabled {
+  background-color: var(--color-institucional);
+  border-color: var(--color-institucional);
+  opacity: 0.65;
+}
+.btn-outline-vino {
+  background-color: transparent;
+  border: 1px solid var(--color-institucional);
+  color: var(--color-institucional);
+}
+.btn-outline-vino:hover,
+.btn-outline-vino:focus-visible {
+  background-color: var(--color-institucional-tint);
+  color: var(--color-institucional-hover);
+}
+.btn-outline-vino:disabled {
+  color: var(--color-institucional);
+  opacity: 0.5;
+}

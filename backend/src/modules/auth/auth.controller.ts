@@ -1,18 +1,23 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { LoginDto } from './dto/login.dto';
+import { Controller, Get, UseGuards } from '@nestjs/common';
+import { AuthGuard } from './guards/auth.guard';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import type { AuthenticatedUser } from '../../common/interfaces/authenticated-user.interface';
+import { UsuariosService } from '../usuarios/usuarios.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly usuariosService: UsuariosService) {}
 
-  @Get('status')
-  getStatus() {
-    return this.authService.getStatus();
-  }
+  @UseGuards(AuthGuard)
+  @Get('me')
+  me(@CurrentUser() actor: AuthenticatedUser) {
+    const usuario = this.usuariosService.obtenerPorId(actor.id);
 
-  @Post('login')
-  login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto);
+    return {
+      id: usuario.id,
+      nombre: usuario.nombre,
+      usuario: usuario.usuario,
+      rol: usuario.rol,
+    };
   }
 }

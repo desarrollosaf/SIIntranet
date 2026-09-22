@@ -1,0 +1,363 @@
+$color-vino: var(--color-institucional);
+$color-vino-oscuro: var(--color-institucional-hover);
+
+$color-vino-tint: var(--color-institucional-tint);
+
+$color-superficie: var(--color-superficie);
+$color-borde: var(--color-borde);
+$color-texto-nav: #495057;
+$color-icono-nav: #868e96;
+$color-heading-grupo: #8b929c;
+$color-workspace: var(--color-fondo);
+
+$sidebar-ancho: 16rem;
+
+$header-altura: 4.25rem;
+
+$breakpoint-desktop: 992px;
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.app-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-shrink: 0;
+  min-height: $header-altura;
+  padding: 0.875rem 1.75rem;
+  background-color: $color-superficie;
+  border-bottom: 2px solid $color-vino;
+  box-shadow: 0 1px 4px rgba(31, 41, 55, 0.06);
+}
+
+.app-header__start {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  min-width: 0;
+}
+
+.app-header__toggle-mobile {
+  display: none;
+}
+
+.app-header__toggle-desktop,
+.app-header__toggle-mobile {
+  border-color: rgba(109, 26, 53, 0.35);
+  color: $color-vino;
+
+  &:hover,
+  &:focus-visible {
+    background-color: var(--color-institucional-tint);
+    border-color: $color-vino;
+    color: $color-vino-oscuro;
+  }
+}
+
+.app-header__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.app-header__logo {
+  height: 32px;
+  width: auto;
+  flex-shrink: 0;
+}
+
+.app-header__title {
+  font-weight: 700;
+  color: $color-vino;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-header__account {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.app-header__account-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: none;
+  background-color: $color-vino;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.875rem;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background-color: $color-vino-oscuro;
+  }
+}
+
+.app-header__account-panel {
+  display: none;
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  min-width: 14rem;
+  background-color: $color-superficie;
+  border: 1px solid $color-borde;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.15);
+  z-index: 1060;
+  overflow: hidden;
+}
+
+.app-header__account-panel--abierto {
+  display: block;
+}
+
+.app-header__account-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid $color-borde;
+}
+
+.app-header__account-nombre {
+  font-weight: 600;
+  color: $color-texto-nav;
+  overflow-wrap: anywhere;
+}
+
+.app-header__account-usuario,
+.app-header__account-rol {
+  font-size: 0.8125rem;
+  color: $color-icono-nav;
+  overflow-wrap: anywhere;
+}
+
+.app-header__account-logout {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: none;
+  color: $color-texto-nav;
+  font-size: 0.9375rem;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+}
+
+.app-sidebar {
+  width: $sidebar-ancho;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  padding: 0.75rem;
+  background-color: #f8f9fb;
+  border-right: 1px solid $color-borde;
+  overflow: hidden;
+  white-space: nowrap;
+  transition:
+    width 0.22s ease,
+    padding 0.22s ease,
+    border-color 0.22s ease;
+}
+
+.app-sidebar--colapsado {
+  width: 0;
+  padding-left: 0;
+  padding-right: 0;
+  border-right-color: transparent;
+}
+
+.app-nav__heading {
+  display: block;
+  padding: 0.75rem 0.75rem 0.375rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: $color-heading-grupo;
+}
+
+.app-sidebar__link,
+.app-drawer__link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.75rem;
+  border-radius: 0.5rem;
+  border-left: 3px solid transparent;
+  color: $color-texto-nav;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.9375rem;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+
+  i {
+    color: $color-icono-nav;
+    font-size: 1.05rem;
+    transition: color 0.15s ease;
+  }
+
+  &:hover {
+    background-color: #eef1f4;
+    color: #252a31;
+  }
+}
+
+.app-sidebar__link--active,
+.app-drawer__link--active {
+  background-color: $color-vino-tint;
+  color: $color-vino-oscuro;
+  border-left-color: $color-vino;
+  font-weight: 600;
+
+  i {
+    color: $color-vino;
+  }
+
+  &:hover {
+    background-color: $color-vino-tint;
+  }
+}
+
+.app-drawer {
+  position: fixed;
+
+  top: $header-altura;
+  bottom: 0;
+  left: 0;
+  width: min(80vw, 20rem);
+  background-color: #f8f9fb;
+  color: $color-texto-nav;
+  border-right: 1px solid $color-borde;
+  box-shadow: 0.25rem 0 1rem rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  padding: 1rem 0.75rem;
+  transform: translateX(-100%);
+  transition: transform 0.2s ease;
+  z-index: 1050;
+  overflow-y: auto;
+}
+
+.app-drawer--abierto {
+  transform: translateX(0);
+}
+
+.app-drawer__backdrop {
+  position: fixed;
+
+  top: $header-altura;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(15, 23, 42, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 1040;
+}
+
+.app-drawer__backdrop--visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.app-shell__main-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background-color: $color-workspace;
+}
+
+.app-main {
+  flex: 1;
+
+  padding: 1rem;
+}
+
+.app-footer {
+  padding: 0.875rem 1.75rem;
+  text-align: center;
+  color: #6c757d;
+  font-size: 0.8125rem;
+  background-color: $color-superficie;
+  border-top: 1px solid $color-borde;
+}
+
+@media (max-width: $breakpoint-desktop - 1) {
+  .app-sidebar {
+    display: none;
+  }
+
+  .app-header__toggle-desktop {
+    display: none;
+  }
+
+  .app-header__toggle-mobile {
+    display: inline-block;
+  }
+
+  .app-main {
+    padding: 0.75rem;
+  }
+}
+
+@media (min-width: $breakpoint-desktop) {
+  .app-drawer,
+  .app-drawer__backdrop {
+    display: none;
+  }
+
+  .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+  }
+
+  .app-sidebar {
+    position: sticky;
+    top: $header-altura;
+    max-height: calc(100dvh - #{$header-altura});
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-sidebar,
+  .app-drawer,
+  .app-drawer__backdrop {
+    transition: none;
+  }
+}

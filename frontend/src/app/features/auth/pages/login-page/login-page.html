@@ -1,0 +1,51 @@
+<div class="login-page container d-flex justify-content-center align-items-center">
+  <div class="card login-card">
+    <div class="card-body">
+      <div class="login-card__logo">
+        <img src="/assets/img/congreso_logo_horizontal-p-2000.png" alt="Logotipo institucional" />
+      </div>
+
+      <h1 class="h4 text-center mb-4">Iniciar sesión</h1>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+        <div class="mb-3">
+          <label for="usuario" class="form-label">Usuario</label>
+          <input
+            id="usuario"
+            type="text"
+            class="form-control"
+            [class.is-invalid]="form.controls.usuario.invalid && form.controls.usuario.touched"
+            formControlName="usuario"
+            autocomplete="username"
+          />
+          @if (form.controls.usuario.invalid && form.controls.usuario.touched) {
+            <p class="invalid-feedback" role="alert">El usuario es obligatorio.</p>
+          }
+        </div>
+
+        <div class="mb-3">
+          <label for="password" class="form-label">Contraseña</label>
+          <input
+            id="password"
+            type="password"
+            class="form-control"
+            [class.is-invalid]="form.controls.password.invalid && form.controls.password.touched"
+            formControlName="password"
+            autocomplete="current-password"
+          />
+          @if (form.controls.password.invalid && form.controls.password.touched) {
+            <p class="invalid-feedback" role="alert">La contraseña es obligatoria.</p>
+          }
+        </div>
+
+        @if (loginFallido) {
+          <p class="text-danger" role="alert">
+            No fue posible iniciar sesión en el entorno de desarrollo.
+          </p>
+        }
+
+        <button type="submit" class="btn btn-vino w-100">Entrar</button>
+      </form>
+    </div>
+  </div>
+</div>

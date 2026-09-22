@@ -1,24 +1,33 @@
-import { IsString, IsOptional, IsIn } from 'class-validator';
+import {
+  ArrayNotEmpty,
+  ArrayUnique,
+  IsArray,
+  IsNotEmpty,
+  ValidateIf,
+  IsString,
+} from 'class-validator';
 
 export class UpdateMensajeDto {
+  @ValidateIf((_object: unknown, value: unknown) => value !== undefined)
   @IsString()
-  @IsOptional()
+  @IsNotEmpty()
   readonly titulo?: string;
 
+  @ValidateIf((_object: unknown, value: unknown) => value !== undefined)
   @IsString()
-  @IsOptional()
+  @IsNotEmpty()
   readonly descripcion?: string;
 
-  @IsString()
-  @IsOptional()
-  readonly destinatarios?: string;
+  @ValidateIf((_object: unknown, value: unknown) => value !== undefined)
+  @IsArray()
+  @ArrayNotEmpty()
+  @ArrayUnique()
+  @IsString({ each: true })
+  readonly destinatarioIds?: string[];
 
-  @IsString()
-  @IsOptional()
-  readonly documento?: string;
-
-  @IsString()
-  @IsIn(['Enviando', 'Nuevo', 'Visto', 'Respondido', 'Cancelado', 'Eliminado', 'Enviado', 'Pendiente'])
-  @IsOptional()
-  readonly estado?: 'Enviando' | 'Nuevo' | 'Visto' | 'Respondido' | 'Cancelado' | 'Eliminado' | 'Enviado' | 'Pendiente';
+  @ValidateIf((_object: unknown, value: unknown) => value !== undefined)
+  @IsArray()
+  @ArrayUnique()
+  @IsString({ each: true })
+  readonly archivoIds?: string[];
 }

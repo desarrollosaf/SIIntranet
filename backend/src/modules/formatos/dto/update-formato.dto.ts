@@ -1,28 +1,23 @@
-import { IsString, IsOptional, IsIn } from 'class-validator';
+import { IsNotEmpty, ValidateIf, IsString } from 'class-validator';
 
 export class UpdateFormatoDto {
+  @ValidateIf((_object: unknown, value: unknown) => value !== undefined)
   @IsString()
-  @IsOptional()
+  @IsNotEmpty()
   readonly nombre?: string;
 
+  @ValidateIf((_object: unknown, value: unknown) => value !== undefined)
   @IsString()
-  @IsOptional()
+  @IsNotEmpty()
   readonly descripcion?: string;
 
+  @ValidateIf((_object: unknown, value: unknown) => value !== undefined)
   @IsString()
-  @IsOptional()
+  @IsNotEmpty()
   readonly categoria?: string;
 
+  @ValidateIf((_object: unknown, value: unknown) => value !== undefined)
   @IsString()
-  @IsOptional()
-  readonly archivo?: string;
-
-  @IsString()
-  @IsOptional()
-  readonly tipoArchivo?: string;
-
-  @IsString()
-  @IsIn(['Activo', 'Inactivo'])
-  @IsOptional()
-  readonly estado?: 'Activo' | 'Inactivo';
+  @IsNotEmpty()
+  readonly archivoId?: string;
 }

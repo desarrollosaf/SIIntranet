@@ -1,32 +1,18 @@
-import { IsString, IsEmail, IsOptional, IsIn, IsBoolean } from 'class-validator';
+import { IsIn, IsNotEmpty, ValidateIf, IsString } from 'class-validator';
+import type { UserRole } from '../../../common/types/user-role.type';
 
 export class UpdateUsuarioDto {
   @IsString()
-  @IsOptional()
+  @IsNotEmpty()
+  @ValidateIf((_object: unknown, value: unknown) => value !== undefined)
   readonly nombre?: string;
 
   @IsString()
-  @IsOptional()
+  @IsNotEmpty()
+  @ValidateIf((_object: unknown, value: unknown) => value !== undefined)
   readonly usuario?: string;
 
-  @IsEmail()
-  @IsOptional()
-  readonly correo?: string;
-
-  @IsString()
-  @IsOptional()
-  readonly area?: string;
-
-  @IsString()
-  @IsOptional()
-  readonly rol?: string;
-
-  @IsString()
-  @IsIn(['Activo', 'Inactivo'])
-  @IsOptional()
-  readonly estado?: 'Activo' | 'Inactivo';
-
-  @IsBoolean()
-  @IsOptional()
-  readonly requiereCambioPassword?: boolean;
+  @IsIn(['Usuario', 'Administrador'])
+  @ValidateIf((_object: unknown, value: unknown) => value !== undefined)
+  readonly rol?: UserRole;
 }

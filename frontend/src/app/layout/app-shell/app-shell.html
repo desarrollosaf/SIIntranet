@@ -1,0 +1,173 @@
+<div class="app-shell">
+  <header class="app-header">
+    <div class="app-header__start">
+      <button
+        type="button"
+        class="btn btn-outline-secondary btn-sm app-header__toggle-desktop"
+        [attr.aria-expanded]="!sidebarColapsado()"
+        aria-controls="app-sidebar"
+        [attr.aria-label]="sidebarColapsado() ? 'Mostrar navegación' : 'Ocultar navegación'"
+        (click)="alternarSidebar()"
+      >
+        <i class="bi bi-list" aria-hidden="true"></i>
+      </button>
+
+      <button
+        #botonMenu
+        type="button"
+        class="btn btn-outline-secondary btn-sm app-header__toggle-mobile app-mobile-header__toggle"
+        [attr.aria-expanded]="menuAbierto()"
+        aria-controls="app-drawer"
+        [attr.aria-label]="menuAbierto() ? 'Cerrar menú' : 'Abrir menú'"
+        (click)="alternarMenu()"
+      >
+        <i class="bi bi-list" aria-hidden="true"></i>
+      </button>
+
+      <div class="app-header__brand">
+        <img
+          src="/assets/img/congreso_logo_horizontal-p-2000.png"
+          alt="Logotipo institucional"
+          class="app-header__logo"
+        />
+        <span class="app-header__title">SIIntranet</span>
+      </div>
+    </div>
+
+    <div class="app-header__account">
+      <button
+        #botonCuenta
+        type="button"
+        class="app-header__account-btn"
+        [attr.aria-expanded]="menuUsuarioAbierto()"
+        aria-controls="app-menu-cuenta"
+        aria-haspopup="menu"
+        [attr.aria-label]="'Cuenta de ' + (currentUser()?.nombre ?? 'usuario')"
+        (click)="alternarMenuUsuario()"
+      >
+        {{ iniciales() }}
+      </button>
+
+      <div
+        id="app-menu-cuenta"
+        #panelCuenta
+        class="app-header__account-panel"
+        [class.app-header__account-panel--abierto]="menuUsuarioAbierto()"
+        [attr.inert]="menuUsuarioAbierto() ? null : ''"
+        role="menu"
+      >
+        @if (currentUser(); as usuario) {
+          <div class="app-header__account-info">
+            <span class="app-header__account-nombre">{{ usuario.nombre }}</span>
+            <span class="app-header__account-usuario">{{ usuario.usuario }}</span>
+            <span class="app-header__account-rol">{{ usuario.rol }}</span>
+          </div>
+        }
+        <button
+          type="button"
+          role="menuitem"
+          class="app-header__account-logout"
+          (click)="onLogout()"
+        >
+          <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+          Cerrar sesión
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-body">
+    <nav
+      id="app-sidebar"
+      class="app-sidebar"
+      [class.app-sidebar--colapsado]="sidebarColapsado()"
+      [attr.inert]="sidebarColapsado() ? '' : null"
+      aria-label="Navegación principal"
+    >
+      <span class="app-nav__heading">Navegación</span>
+      @for (item of navPrincipal(); track item.path) {
+        <a
+          [routerLink]="item.path"
+          class="app-sidebar__link"
+          [class.app-sidebar__link--active]="esActivo(item)"
+          [attr.aria-current]="esActivo(item) ? 'page' : null"
+        >
+          <i class="bi {{ item.icon }}" aria-hidden="true"></i>
+          <span>{{ item.label }}</span>
+        </a>
+      }
+
+      @if (navAdministracion().length > 0) {
+        <span class="app-nav__heading">Administración</span>
+        @for (item of navAdministracion(); track item.path) {
+          <a
+            [routerLink]="item.path"
+            class="app-sidebar__link"
+            [class.app-sidebar__link--active]="esActivo(item)"
+            [attr.aria-current]="esActivo(item) ? 'page' : null"
+          >
+            <i class="bi {{ item.icon }}" aria-hidden="true"></i>
+            <span>{{ item.label }}</span>
+          </a>
+        }
+      }
+    </nav>
+
+    <div class="app-shell__main-wrapper" [attr.inert]="menuAbierto() ? '' : null">
+      <main class="app-main">
+        <router-outlet />
+      </main>
+
+      <footer class="app-footer">
+        <p class="mb-0">
+          Poder Legislativo del Estado de México — Secretaría de Administración y Finanzas
+        </p>
+      </footer>
+    </div>
+  </div>
+
+  <div
+    class="app-drawer__backdrop"
+    [class.app-drawer__backdrop--visible]="menuAbierto()"
+    [attr.inert]="menuAbierto() ? null : ''"
+    (click)="cerrarMenu()"
+  ></div>
+
+  <nav
+    id="app-drawer"
+    class="app-drawer"
+    [class.app-drawer--abierto]="menuAbierto()"
+    [attr.inert]="menuAbierto() ? null : ''"
+    aria-label="Menú de navegación"
+  >
+    <span class="app-nav__heading">Navegación</span>
+    @for (item of navPrincipal(); track item.path) {
+      <a
+        [routerLink]="item.path"
+        class="app-drawer__link"
+        [class.app-drawer__link--active]="esActivo(item)"
+        [attr.aria-current]="esActivo(item) ? 'page' : null"
+        (click)="cerrarMenu()"
+      >
+        <i class="bi {{ item.icon }}" aria-hidden="true"></i>
+        <span>{{ item.label }}</span>
+      </a>
+    }
+
+    @if (navAdministracion().length > 0) {
+      <span class="app-nav__heading">Administración</span>
+      @for (item of navAdministracion(); track item.path) {
+        <a
+          [routerLink]="item.path"
+          class="app-drawer__link"
+          [class.app-drawer__link--active]="esActivo(item)"
+          [attr.aria-current]="esActivo(item) ? 'page' : null"
+          (click)="cerrarMenu()"
+        >
+          <i class="bi {{ item.icon }}" aria-hidden="true"></i>
+          <span>{{ item.label }}</span>
+        </a>
+      }
+    }
+  </nav>
+</div>

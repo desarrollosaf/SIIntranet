@@ -1,4 +1,11 @@
-import { IsNotEmpty, IsString, IsOptional, IsIn } from 'class-validator';
+import {
+  ArrayNotEmpty,
+  ArrayUnique,
+  IsArray,
+  IsNotEmpty,
+  ValidateIf,
+  IsString,
+} from 'class-validator';
 
 export class CreateMensajeDto {
   @IsString()
@@ -9,33 +16,20 @@ export class CreateMensajeDto {
   @IsNotEmpty()
   readonly descripcion: string;
 
+  @IsArray()
+  @ArrayNotEmpty()
+  @ArrayUnique()
+  @IsString({ each: true })
+  readonly destinatarioIds: string[];
+
+  @ValidateIf((_object: unknown, value: unknown) => value !== undefined)
+  @IsArray()
+  @ArrayUnique()
+  @IsString({ each: true })
+  readonly archivoIds?: string[];
+
+  @ValidateIf((_object: unknown, value: unknown) => value !== undefined)
   @IsString()
   @IsNotEmpty()
-  readonly remitente: string;
-
-  @IsString()
-  @IsNotEmpty()
-  readonly destinatarios: string;
-
-  @IsString()
-  @IsNotEmpty()
-  readonly documento: string;
-
-  @IsString()
-  @IsOptional()
-  readonly fecha?: string;
-
-  @IsString()
-  @IsOptional()
-  readonly hora?: string;
-
-  @IsString()
-  @IsIn(['Enviando', 'Nuevo', 'Visto', 'Respondido', 'Cancelado', 'Eliminado', 'Enviado', 'Pendiente'])
-  @IsOptional()
-  readonly estado?: 'Enviando' | 'Nuevo' | 'Visto' | 'Respondido' | 'Cancelado' | 'Eliminado' | 'Enviado' | 'Pendiente';
-
-  @IsString()
-  @IsIn(['recibido', 'enviado'])
-  @IsOptional()
-  readonly tipoMensaje?: 'recibido' | 'enviado';
+  readonly respuestaAId?: string;
 }
