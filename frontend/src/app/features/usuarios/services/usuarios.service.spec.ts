@@ -38,14 +38,6 @@ describe('UsuariosService', () => {
     req.flush([usuarioEjemplo]);
   });
 
-  it('obtenerPorId() hace GET a /usuarios/:id', () => {
-    service.obtenerPorId('dev-usuario-1').subscribe();
-
-    const req = httpMock.expectOne(`${API_BASE_URL}/usuarios/dev-usuario-1`);
-    expect(req.request.method).toBe('GET');
-    req.flush(usuarioEjemplo);
-  });
-
   it('actualizar() hace PATCH a /usuarios/:id con el body correcto', () => {
     const datos = { nombre: 'Nuevo nombre' };
 

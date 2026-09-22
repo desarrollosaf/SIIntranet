@@ -47,7 +47,9 @@
                 <a
                   [routerLink]="['/mensajes', mensaje.id]"
                   class="inicio__fila-mensaje"
-                  [class.inicio__fila-mensaje--nuevo]="mensaje.contenidoDisponible && mensaje.estadoLectura === 'Nuevo'"
+                  [class.inicio__fila-mensaje--nuevo]="
+                    mensaje.contenidoDisponible && mensaje.estadoLectura === 'Nuevo'
+                  "
                 >
                   <span class="inicio__fila-mensaje-info">
                     @if (mensaje.contenidoDisponible) {
@@ -81,7 +83,12 @@
         @for (enlace of enlaces; track enlace.nombre) {
           <li>
             @if (enlace.url) {
-              <a [href]="enlace.url" target="_blank" rel="noopener noreferrer" class="inicio__fila-enlace">
+              <a
+                [href]="enlace.url"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inicio__fila-enlace"
+              >
                 <span class="inicio__fila-enlace-nombre">{{ enlace.nombre }}</span>
               </a>
             } @else {

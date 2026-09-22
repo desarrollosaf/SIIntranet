@@ -13,29 +13,13 @@ import { extname, join } from 'node:path';
 import { Archivo } from './models/archivo.model';
 
 interface TipoPermitido {
-  /** Lo que debe detectar FileTypeValidator por contenido (magic number). */
   mimeContenido: RegExp;
-  /** Lo que el cliente debe declarar en el Content-Type de la parte multipart. */
+
   mimeDeclarado: RegExp;
-  /** Lo que se guarda en Archivo.mimeType — nunca file.mimetype tal cual. */
+
   mimeCanonico: string;
 }
 
-/**
- * Whitelist de D17 (tipos permitidos). Un archivo solo se acepta si las TRES
- * señales coinciden simultáneamente: extensión permitida, MIME declarado por
- * el cliente compatible con esa extensión, Y contenido real (magic number)
- * compatible. No se confía en `file.mimetype` como fuente final — es una
- * exigencia más, no la validación en sí.
- *
- * Los formatos binarios legacy de Office (.doc/.xls/.ppt) comparten el mismo
- * contenedor "Compound File Binary" (OLE) — file-type solo puede confirmar
- * que el contenido es un CFB real, no distinguir Word/Excel/PowerPoint entre
- * sí (verificado empíricamente: los tres resuelven a `application/x-cfb`).
- * Por eso, para estos tres, la señal que sí distingue el tipo exacto es el
- * MIME declarado (`mimeDeclarado`) combinado con la extensión — el contenido
- * solo confirma que es un CFB genuino, no un ejecutable/script disfrazado.
- */
 const TIPOS_PERMITIDOS: Record<string, TipoPermitido> = {
   '.pdf': {
     mimeContenido: /^application\/pdf$/,
@@ -95,7 +79,6 @@ export function sanearNombreParaDescarga(nombreOriginal: string): string {
   const saneado = nombreOriginal
     .replace(/[\\/]/g, '_')
     .replace(/[\r\n]/g, '')
-    // Intencional: elimina caracteres de control antes de usarlo en Content-Disposition.
     // eslint-disable-next-line no-control-regex
     .replace(/[\x00-\x1f]/g, '')
     .trim();
@@ -136,8 +119,7 @@ export class ArchivosService {
     }
 
     const id = randomUUID();
-    // Nombre interno independiente del input del cliente: nunca se construye
-    // una ruta a partir de file.originalname.
+
     const nombreAlmacenado = `${randomUUID()}${extension}`;
 
     await mkdir(this.storageDir, { recursive: true });
@@ -147,9 +129,7 @@ export class ArchivosService {
       id,
       nombreOriginal: file.originalname,
       nombreAlmacenado,
-      // MIME canónico de nuestra whitelist, NUNCA file.mimetype tal cual —
-      // ya validado arriba, pero el valor guardado es el nuestro, no el que
-      // declaró el cliente.
+
       mimeType: tipo.mimeCanonico,
       tamano: file.size,
       fechaSubida: new Date().toISOString(),
@@ -164,7 +144,6 @@ export class ArchivosService {
     return { ...this.buscarAutorizado(id, actorId) };
   }
 
-  // Promise por consistencia con guardar()/obtenerParaUsoInterno(); se consume con await.
   // eslint-disable-next-line @typescript-eslint/require-await
   async obtenerParaDescarga(
     id: string,
@@ -176,16 +155,6 @@ export class ArchivosService {
     return { archivo: { ...archivo }, rutaFisica };
   }
 
-  /**
-   * Acceso interno, SIN autorización propia — a diferencia de
-   * obtenerPorId()/obtenerParaDescarga(), este método NO aplica la regla
-   * uploader-only. Solo debe usarse desde otro dominio backend (nunca desde
-   * un controller expuesto por HTTP) DESPUÉS de que ese dominio haya
-   * resuelto su propia política de acceso (p. ej. Mensajería verificando
-   * que el actor es remitente/destinatario del mensaje que referencia este
-   * archivo antes de llamar aquí).
-   */
-  // Misma razón que obtenerParaDescarga(): Promise por consistencia, se consume con await.
   // eslint-disable-next-line @typescript-eslint/require-await
   async obtenerParaUsoInterno(id: string): Promise<{ archivo: Archivo; rutaFisica: string }> {
     const archivo = this.archivos.get(id);
@@ -209,13 +178,6 @@ export class ArchivosService {
     return rutaFisica;
   }
 
-  /**
-   * Los endpoints directos de Archivos solo permiten acceso al usuario que
-   * realizó la subida. Mensajes y Formatos resuelven su propia autorización
-   * (remitente/destinatarios de un mensaje, consulta libre de un formato
-   * publicado) y acceden vía obtenerParaUsoInterno(), sin pasar por esta
-   * regla.
-   */
   private buscarAutorizado(id: string, actorId: string): Archivo {
     const archivo = this.archivos.get(id);
 

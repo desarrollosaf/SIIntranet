@@ -46,9 +46,6 @@ export class ArchivosController {
   ): Promise<StreamableFile> {
     const { archivo, rutaFisica } = await this.archivosService.obtenerParaDescarga(id, actor.id);
 
-    // res.attachment() delega en el paquete `content-disposition` (el mismo
-    // que usa Express internamente), que escapa/codifica el nombre de forma
-    // segura frente a inyección de cabeceras — no se construye el header a mano.
     res.attachment(sanearNombreParaDescarga(archivo.nombreOriginal));
     res.setHeader('Content-Type', archivo.mimeType);
 

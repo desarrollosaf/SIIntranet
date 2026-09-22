@@ -2,17 +2,22 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
-import { existsSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { ArchivosService } from '../src/modules/archivos/archivos.service';
 import { join } from 'node:path';
 import { AppModule } from './../src/app.module';
 
 const PDF_BUFFER = Buffer.from('%PDF-1.4\n1 0 obj\n<<>>\nendobj\n%%EOF');
-const STORAGE_DIR = join(process.cwd(), 'storage', 'archivos');
+const STORAGE_DIR = mkdtempSync(join(tmpdir(), 'siintranet-archivos-e2e-'));
 
 async function crearApp(): Promise<INestApplication<App>> {
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [AppModule],
-  }).compile();
+  })
+    .overrideProvider(ArchivosService)
+    .useFactory({ factory: () => new ArchivosService(STORAGE_DIR) })
+    .compile();
 
   const app = moduleFixture.createNestApplication<App>();
   app.setGlobalPrefix('api');
@@ -141,8 +146,7 @@ describe('Archivos (e2e)', () => {
       expect(typeof cabecera).toBe('string');
       expect(cabecera).not.toMatch(/[\r\n]/);
       expect(cabecera.startsWith('attachment')).toBe(true);
-      // Debe seguir siendo exactamente una cabecera Content-Disposition, sin
-      // que el nombre haya podido inyectar una segunda cabecera HTTP.
+
       expect(Object.keys(descarga.headers).filter((h) => h === 'content-disposition')).toHaveLength(
         1,
       );
@@ -182,9 +186,6 @@ describe('Archivos (e2e)', () => {
         .attach('archivo', PDF_BUFFER, 'documento.pdf');
       idArchivoDeUsuario1 = subida.body.id;
 
-      // Misma instancia de app (mismo ArchivosService, mismo Map en memoria):
-      // ConfigService no cachea, así que DevIdentityMiddleware resuelve el
-      // nuevo DEV_USER_ID en la siguiente petición sin recrear la app.
       process.env.DEV_USER_ID = 'dev-usuario-2';
     });
 

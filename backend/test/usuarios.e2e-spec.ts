@@ -164,8 +164,6 @@ describe('Usuarios + identidad de desarrollo (e2e)', () => {
     it('último Administrador activo → Inactivo se rechaza incluso tras haber tenido más de uno → 409', async () => {
       const server = app.getHttpServer();
 
-      // Promueve a un segundo Administrador y vuelve a dejarlo Inactivo —
-      // dev-usuario-1 queda otra vez como único Administrador activo.
       await request(server)
         .patch('/api/usuarios/dev-usuario-2')
         .send({ rol: 'Administrador' })
@@ -230,5 +228,71 @@ describe('Usuarios + identidad de desarrollo (e2e)', () => {
     it('rechaza el arranque con una combinación peligrosa', async () => {
       await expect(crearApp()).rejects.toThrow();
     });
+  });
+});
+
+describe('Usuarios: integridad de peticiones parciales', () => {
+  let app: INestApplication<App>;
+  const envOriginal = { ...process.env };
+  beforeEach(async () => {
+    process.env.NODE_ENV = 'development';
+    process.env.AUTH_MODE = 'development';
+    process.env.DEV_USER_ID = 'dev-usuario-1';
+    app = await crearApp();
+  });
+  afterEach(async () => {
+    await app.close();
+    process.env = { ...envOriginal };
+  });
+  it('modificar solo el nombre conserva usuario y rol del último administrador', async () => {
+    const respuesta = await request(app.getHttpServer())
+      .patch('/api/usuarios/dev-usuario-1')
+      .send({ nombre: 'Nuevo nombre' })
+      .expect(200);
+    expect(respuesta.body).toMatchObject({
+      nombre: 'Nuevo nombre',
+      usuario: 'usuario.prueba.uno',
+      rol: 'Administrador',
+      estado: 'Activo',
+    });
+    await request(app.getHttpServer())
+      .patch('/api/usuarios/dev-usuario-2/estado')
+      .send({ estado: 'Inactivo' })
+      .expect(200);
+  });
+  it.each(['nombre', 'usuario', 'rol'])(
+    'rechaza null en %s sin modificar el usuario',
+    async (campo) => {
+      const anterior = await request(app.getHttpServer())
+        .get('/api/usuarios/dev-usuario-1')
+        .expect(200);
+      await request(app.getHttpServer())
+        .patch('/api/usuarios/dev-usuario-1')
+        .send({ [campo]: null })
+        .expect(400);
+      const posterior = await request(app.getHttpServer())
+        .get('/api/usuarios/dev-usuario-1')
+        .expect(200);
+      expect(posterior.body).toEqual(anterior.body);
+    },
+  );
+  it('rechaza usuarios duplicados sin aplicar otros campos', async () => {
+    await request(app.getHttpServer())
+      .patch('/api/usuarios/dev-usuario-2')
+      .send({ usuario: 'usuario.prueba.uno', nombre: 'No guardar' })
+      .expect(409);
+    const usuario = await request(app.getHttpServer())
+      .get('/api/usuarios/dev-usuario-2')
+      .expect(200);
+    expect(usuario.body.nombre).toBe('Usuario de Prueba Dos');
+  });
+  it('una cuenta desactivada no puede recuperar identidad ni acceder a mensajes', async () => {
+    await request(app.getHttpServer())
+      .patch('/api/usuarios/dev-usuario-2/estado')
+      .send({ estado: 'Inactivo' })
+      .expect(200);
+    process.env.DEV_USER_ID = 'dev-usuario-2';
+    await request(app.getHttpServer()).get('/api/auth/me').expect(401);
+    await request(app.getHttpServer()).get('/api/mensajes/recibidos').expect(401);
   });
 });

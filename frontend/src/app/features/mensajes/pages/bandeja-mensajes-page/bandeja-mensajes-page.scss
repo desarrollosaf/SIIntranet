@@ -7,7 +7,7 @@ $color-borde: var(--color-borde);
 }
 
 .bandeja-page__wrapper {
-  max-width: 62.5rem; // ~1000px, mismo criterio que Mensaje nuevo/Inicio
+  max-width: 62.5rem;
   margin-inline: auto;
 }
 
@@ -19,8 +19,6 @@ $color-borde: var(--color-borde);
   margin-bottom: 1.5rem;
 }
 
-// ===== Selector Recibidos/Enviados: segmented control con acento vino,
-// sin azul/verde Bootstrap =====
 .bandeja-page__selector {
   display: inline-flex;
   gap: 0.25rem;
@@ -67,8 +65,6 @@ $color-borde: var(--color-borde);
   }
 }
 
-// ===== Lista: UNA superficie agrupada, filas separadas por divisor
-// horizontal — no cards independientes por mensaje =====
 .bandeja-page__lista {
   display: flex;
   flex-direction: column;
@@ -120,16 +116,10 @@ $color-borde: var(--color-borde);
   overflow-wrap: anywhere;
 }
 
-// Sin barra ni fondo azul: el mensaje Nuevo se distingue por mayor peso
-// tipográfico + el badge de texto ya presente en la fila.
 .bandeja-page__fila-titulo--nuevo {
   font-weight: 700;
 }
 
-// Badge de estado de lectura propio: reemplaza el `badge text-bg-primary`
-// de Bootstrap (azul) por un tratamiento vino sobrio para "Nuevo". "Visto"
-// conserva un tratamiento neutro equivalente al `text-bg-light` anterior —
-// nunca depende solo del color, el texto del estado siempre está presente.
 .bandeja-page__badge-lectura {
   display: inline-flex;
   align-items: center;

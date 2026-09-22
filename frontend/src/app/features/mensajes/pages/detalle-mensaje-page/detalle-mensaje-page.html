@@ -14,7 +14,10 @@
 
     @if (!cargando() && !error() && detalle(); as mensaje) {
       <div class="detalle-mensaje-page__layout">
-        <section class="detalle-mensaje-page__panel detalle-mensaje-page__panel--contenido" aria-label="Contenido del mensaje">
+        <section
+          class="detalle-mensaje-page__panel detalle-mensaje-page__panel--contenido"
+          aria-label="Contenido del mensaje"
+        >
           @if (!mensaje.contenidoDisponible) {
             <p class="fst-italic text-muted mb-0">
               @if (esRecibido(mensaje)) {
@@ -35,7 +38,10 @@
                   @for (archivoId of mensaje.archivoIds; track archivoId; let i = $index) {
                     <li class="detalle-mensaje-page__adjunto">
                       <span>Adjunto {{ i + 1 }}</span>
-                      <a [href]="urlDescarga(mensaje.id, archivoId)" class="detalle-mensaje-page__accion-discreta">
+                      <a
+                        [href]="urlDescarga(mensaje.id, archivoId)"
+                        class="detalle-mensaje-page__accion-discreta"
+                      >
                         Descargar
                       </a>
                     </li>
@@ -46,7 +52,10 @@
           }
         </section>
 
-        <aside class="detalle-mensaje-page__panel detalle-mensaje-page__panel--info" aria-label="Información del mensaje">
+        <aside
+          class="detalle-mensaje-page__panel detalle-mensaje-page__panel--info"
+          aria-label="Información del mensaje"
+        >
           <h2 class="detalle-mensaje-page__subtitulo">Información</h2>
 
           @if (esRecibido(mensaje)) {
@@ -85,11 +94,17 @@
           <div class="detalle-mensaje-page__acciones">
             @if (esRecibido(mensaje)) {
               @if (mensaje.estado === 'Enviado' && mensaje.contenidoDisponible) {
-                <a [routerLink]="['/mensajes', mensaje.id, 'responder']" class="btn btn-vino">Responder</a>
+                <a [routerLink]="['/mensajes', mensaje.id, 'responder']" class="btn btn-vino"
+                  >Responder</a
+                >
               }
             } @else {
               @if (esEditable(mensaje)) {
-                <a [routerLink]="['/mensajes', mensaje.id, 'editar']" class="btn btn-outline-secondary">Editar</a>
+                <a
+                  [routerLink]="['/mensajes', mensaje.id, 'editar']"
+                  class="btn btn-outline-secondary"
+                  >Editar</a
+                >
                 <button
                   type="button"
                   class="btn btn-outline-secondary"

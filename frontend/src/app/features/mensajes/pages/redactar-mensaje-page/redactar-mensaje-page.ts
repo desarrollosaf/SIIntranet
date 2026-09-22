@@ -5,15 +5,10 @@ import { firstValueFrom } from 'rxjs';
 import { UsuariosService } from '../../../usuarios/services/usuarios.service';
 import { Usuario } from '../../../usuarios/models/usuario.model';
 import { ArchivosService } from '../../../archivos/services/archivos.service';
-import { Archivo } from '../../../archivos/models/archivo.model';
+import { SeleccionArchivo, subirAdjuntosPendientes } from '../../adjuntos';
 import { MensajesService } from '../../services/mensajes.service';
 import { esMensajeRecibido } from '../../models/mensaje.model';
 import { PageHero } from '../../../../shared/components/page-hero/page-hero';
-
-interface SeleccionArchivo {
-  file: File;
-  archivoSubido?: Archivo;
-}
 
 @Component({
   selector: 'app-redactar-mensaje-page',
@@ -69,24 +64,6 @@ export class RedactarMensajePage {
     this.cargarUsuarios();
   }
 
-  protected onDestinatarioToggle(usuarioId: string, event: Event): void {
-    if (this.enviando() || this.esRemitenteOriginal(usuarioId)) {
-      return;
-    }
-
-    const marcado = (event.target as HTMLInputElement).checked;
-    const actuales = this.form.controls.destinatarioIds.value;
-
-    const nuevos = marcado
-      ? actuales.includes(usuarioId)
-        ? actuales
-        : [...actuales, usuarioId]
-      : actuales.filter((id) => id !== usuarioId);
-
-    this.form.controls.destinatarioIds.setValue(nuevos);
-    this.form.controls.destinatarioIds.markAsTouched();
-  }
-
   protected estaSeleccionado(usuarioId: string): boolean {
     return this.form.controls.destinatarioIds.value.includes(usuarioId);
   }
@@ -95,10 +72,6 @@ export class RedactarMensajePage {
     return this.modoRespuesta() && usuarioId === this.remitenteOriginalId();
   }
 
-  // Selector de destinatarios: onDestinatarioToggle/estaSeleccionado/
-  // esRemitenteOriginal arriba siguen siendo la fuente de verdad del control
-  // reactivo `destinatarioIds`; los métodos siguientes son otra forma de
-  // mutar ese mismo control (búsqueda + lista), no un mecanismo paralelo.
   protected readonly terminoBusqueda = signal('');
 
   protected readonly usuariosFiltrados = computed<Usuario[]>(() => {
@@ -119,10 +92,6 @@ export class RedactarMensajePage {
     this.terminoBusqueda.set((event.target as HTMLInputElement).value);
   }
 
-  // La lista "disponibles" excluye a quienes ya están en Seleccionados, para
-  // no duplicar la misma persona en dos listas a la vez. No es un signal
-  // (depende de destinatarioIds.value, no reactivo) — mismo patrón que
-  // destinatariosSeleccionados().
   protected usuariosDisponibles(): Usuario[] {
     return this.usuariosFiltrados().filter((usuario) => !this.estaSeleccionado(usuario.id));
   }
@@ -135,8 +104,6 @@ export class RedactarMensajePage {
     this.terminoBusqueda().trim() ? 'Seleccionar resultados' : 'Seleccionar todos',
   );
 
-  // Deriva de destinatarioIds (no es un signal) leído en cada ciclo de
-  // detección de cambios — mismo patrón ya usado por estaSeleccionado().
   protected destinatariosSeleccionados(): Usuario[] {
     const idsSeleccionados = this.form.controls.destinatarioIds.value;
     const usuariosPorId = new Map(this.usuarios().map((usuario) => [usuario.id, usuario]));
@@ -198,16 +165,17 @@ export class RedactarMensajePage {
       return;
     }
 
-    // El remitente original (modo respuesta) es obligatorio: limpiar no
-    // debe poder retirarlo, igual que quitarDestinatario() ya lo protege
-    // individualmente.
     const remitenteId = this.remitenteOriginalId();
     this.form.controls.destinatarioIds.setValue(remitenteId ? [remitenteId] : []);
     this.form.controls.destinatarioIds.markAsTouched();
   }
 
   protected textoContadorArchivos(): string {
-    return this.conCantidad(this.seleccionArchivos().length, 'archivo seleccionado', 'archivos seleccionados');
+    return this.conCantidad(
+      this.seleccionArchivos().length,
+      'archivo seleccionado',
+      'archivos seleccionados',
+    );
   }
 
   protected resumenEnvio(): string {
@@ -261,11 +229,7 @@ export class RedactarMensajePage {
   }
 
   protected async onSubmit(): Promise<void> {
-    if (
-      this.form.invalid ||
-      this.enviando() ||
-      (this.modoRespuesta() && !this.puedeResponder())
-    ) {
+    if (this.form.invalid || this.enviando() || (this.modoRespuesta() && !this.puedeResponder())) {
       this.form.markAllAsTouched();
       return;
     }
@@ -327,7 +291,11 @@ export class RedactarMensajePage {
 
     this.mensajesService.obtenerDetalle(id).subscribe({
       next: (original) => {
-        if (!esMensajeRecibido(original) || original.estado !== 'Enviado' || !original.contenidoDisponible) {
+        if (
+          !esMensajeRecibido(original) ||
+          original.estado !== 'Enviado' ||
+          !original.contenidoDisponible
+        ) {
           this.errorOriginal.set('Este mensaje no admite respuestas.');
           this.cargandoOriginal.set(false);
           return;
@@ -352,19 +320,9 @@ export class RedactarMensajePage {
     }
   }
 
-  private async subirPendientes(): Promise<void> {
-    const seleccion = this.seleccionArchivos();
-
-    for (let indice = 0; indice < seleccion.length; indice++) {
-      if (seleccion[indice].archivoSubido) {
-        continue;
-      }
-
-      const archivoSubido = await firstValueFrom(this.archivosService.subir(seleccion[indice].file));
-
-      this.seleccionArchivos.update((actual) =>
-        actual.map((item, i) => (i === indice ? { ...item, archivoSubido } : item)),
-      );
-    }
+  private subirPendientes(): Promise<void> {
+    return subirAdjuntosPendientes(this.seleccionArchivos, (file) =>
+      firstValueFrom(this.archivosService.subir(file)),
+    );
   }
 }

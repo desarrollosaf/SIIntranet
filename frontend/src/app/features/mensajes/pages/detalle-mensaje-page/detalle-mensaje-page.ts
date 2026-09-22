@@ -2,6 +2,7 @@ import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
+import { Subscription } from 'rxjs';
 import { MensajesService } from '../../services/mensajes.service';
 import { esMensajeRecibido, MensajeDetalle, MensajeEnviado } from '../../models/mensaje.model';
 import { PageHero } from '../../../../shared/components/page-hero/page-hero';
@@ -21,6 +22,8 @@ export class DetalleMensajePage {
   private readonly route = inject(ActivatedRoute);
   private readonly mensajesService = inject(MensajesService);
   private readonly destroyRef = inject(DestroyRef);
+  private carga?: Subscription;
+  private lectura?: Subscription;
 
   protected readonly cargando = signal(true);
   protected readonly error = signal<string | null>(null);
@@ -32,19 +35,8 @@ export class DetalleMensajePage {
 
   protected readonly esRecibido = esMensajeRecibido;
 
-  // Un mensaje enviado por el propio usuario a sí mismo puede abrirse desde
-  // Recibidos, pero el backend siempre lo resuelve como MensajeEnviado
-  // (decide por remitenteId===actorId, no por bandeja de origen) — inferir
-  // el regreso solo por el tipo devuelto mostraba "Volver a enviados" aunque
-  // se haya abierto desde Recibidos. Bandeja propaga `?origen=recibidos|
-  // enviados` en el enlace de cada fila; ese origen manda cuando existe y es
-  // válido.
   private readonly origen = this.route.snapshot.queryParamMap.get('origen');
 
-  // Navegación de regreso contextual. Sin `origen` válido en la URL (entrada
-  // directa, enlace externo, valor inesperado), conserva el fallback
-  // anterior: inferir por el tipo real del mensaje devuelto por el backend,
-  // con Recibidos como destino por defecto mientras carga/hay error.
   protected readonly volver = computed<InfoVolver>(() => {
     if (this.origen === 'recibidos') {
       return { texto: 'Volver a recibidos', ruta: '/mensajes/recibidos' };
@@ -82,7 +74,10 @@ export class DetalleMensajePage {
   }
 
   protected esEditable(mensaje: MensajeEnviado): boolean {
-    return mensaje.estado === 'Enviado' && mensaje.destinatarios.every((d) => d.estadoLectura === 'Nuevo');
+    return (
+      mensaje.estado === 'Enviado' &&
+      mensaje.destinatarios.every((d) => d.estadoLectura === 'Nuevo')
+    );
   }
 
   protected onCancelar(mensajeId: string): void {
@@ -137,21 +132,28 @@ export class DetalleMensajePage {
   }
 
   private cargarDetalle(id: string): void {
+    this.carga?.unsubscribe();
+    this.lectura?.unsubscribe();
     this.cargando.set(true);
     this.error.set(null);
     this.avisoVisto.set(null);
+    this.detalle.set(null);
+    this.errorAccion.set(null);
 
-    this.mensajesService.obtenerDetalle(id).subscribe({
-      next: (detalle) => {
-        this.detalle.set(detalle);
-        this.cargando.set(false);
-        this.marcarVistoSiCorresponde(id, detalle);
-      },
-      error: () => {
-        this.error.set('No fue posible cargar el mensaje.');
-        this.cargando.set(false);
-      },
-    });
+    this.carga = this.mensajesService
+      .obtenerDetalle(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (detalle) => {
+          this.detalle.set(detalle);
+          this.cargando.set(false);
+          this.marcarVistoSiCorresponde(id, detalle);
+        },
+        error: () => {
+          this.error.set('No fue posible cargar el mensaje.');
+          this.cargando.set(false);
+        },
+      });
   }
 
   private marcarVistoSiCorresponde(id: string, detalle: MensajeDetalle): void {
@@ -164,15 +166,20 @@ export class DetalleMensajePage {
       return;
     }
 
-    this.mensajesService.marcarVisto(id).subscribe({
-      next: () => {
-        this.detalle.update((actual) =>
-          actual && esMensajeRecibido(actual) ? { ...actual, estadoLectura: 'Visto' } : actual,
-        );
-      },
-      error: () => {
-        this.avisoVisto.set('No fue posible actualizar el estado de lectura de este mensaje.');
-      },
-    });
+    this.lectura = this.mensajesService
+      .marcarVisto(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.detalle.update((actual) =>
+            actual?.id === id && esMensajeRecibido(actual)
+              ? { ...actual, estadoLectura: 'Visto' }
+              : actual,
+          );
+        },
+        error: () => {
+          this.avisoVisto.set('No fue posible actualizar el estado de lectura de este mensaje.');
+        },
+      });
   }
 }

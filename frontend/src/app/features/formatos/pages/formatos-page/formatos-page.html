@@ -33,7 +33,10 @@
           <p class="text-muted">No se encontraron formatos que coincidan con tu búsqueda.</p>
         } @else {
           @for (grupo of grupos(); track grupo.categoria; let i = $index) {
-            <section class="formatos-page__categoria" [attr.aria-labelledby]="'formatos-categoria-' + i">
+            <section
+              class="formatos-page__categoria"
+              [attr.aria-labelledby]="'formatos-categoria-' + i"
+            >
               <div class="formatos-page__categoria-encabezado">
                 <h2 [id]="'formatos-categoria-' + i" class="formatos-page__categoria-titulo">
                   {{ grupo.categoria }}
@@ -50,11 +53,14 @@
                       <span class="formatos-page__fila-nombre">{{ formato.nombre }}</span>
 
                       @if (formato.descripcion) {
-                        <span class="formatos-page__fila-descripcion">{{ formato.descripcion }}</span>
+                        <span class="formatos-page__fila-descripcion">{{
+                          formato.descripcion
+                        }}</span>
                       }
 
                       <span class="formatos-page__fila-meta">
-                        {{ formato.archivo.nombreOriginal }} · {{ tamanoLegible(formato.archivo.tamano) }} ·
+                        {{ formato.archivo.nombreOriginal }} ·
+                        {{ tamanoLegible(formato.archivo.tamano) }} ·
                         {{ formato.fechaCreacion | date: 'mediumDate' }}
                       </span>
                     </div>

@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { of, throwError } from 'rxjs';
+import { of, throwError, Subject } from 'rxjs';
 import { vi } from 'vitest';
 
 import { DetalleMensajePage } from './detalle-mensaje-page';
@@ -26,13 +26,10 @@ describe('DetalleMensajePage', () => {
     archivoIds: ['archivo-1', 'archivo-2'],
   };
 
-  // Configura el módulo de test e inyecta MensajesService SIN instanciar
-  // todavía el componente — su constructor dispara la carga inicial de
-  // inmediato, así que los spies deben existir antes de crear el fixture.
-  // `origen` simula el query param `?origen=recibidos|enviados` que Bandeja
-  // agrega al enlace de cada fila; sin argumento, se comporta como una
-  // entrada directa sin query param.
-  function configurar(origen?: string): void {
+  function configurar(
+    origen?: string,
+    parametros = of(convertToParamMap({ id: 'mensaje-1' })),
+  ): void {
     TestBed.configureTestingModule({
       imports: [DetalleMensajePage],
       providers: [
@@ -42,7 +39,7 @@ describe('DetalleMensajePage', () => {
         {
           provide: ActivatedRoute,
           useValue: {
-            paramMap: of(convertToParamMap({ id: 'mensaje-1' })),
+            paramMap: parametros,
             snapshot: { queryParamMap: convertToParamMap(origen ? { origen } : {}) },
           },
         },
@@ -58,10 +55,11 @@ describe('DetalleMensajePage', () => {
 
   it('carga el detalle del mensaje', () => {
     configurar();
-    // Sin marcarVisto mockeado con éxito para no mutar el estado leído aquí
-    // (ese efecto se prueba por separado más abajo).
+
     vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(of(recibidoNuevo));
-    vi.spyOn(mensajesService, 'marcarVisto').mockReturnValue(throwError(() => new Error('no relevante')));
+    vi.spyOn(mensajesService, 'marcarVisto').mockReturnValue(
+      throwError(() => new Error('no relevante')),
+    );
     crearFixture();
 
     fixture.detectChanges();
@@ -179,7 +177,13 @@ describe('DetalleMensajePage', () => {
       estado: 'Enviado',
       contenidoDisponible: true,
       destinatarios: [
-        { usuarioId: 'dev-usuario-2', nombre: 'Dos', usuario: 'dos', estadoLectura: 'Nuevo', estadoRespuesta: 'Pendiente' },
+        {
+          usuarioId: 'dev-usuario-2',
+          nombre: 'Dos',
+          usuario: 'dos',
+          estadoLectura: 'Nuevo',
+          estadoRespuesta: 'Pendiente',
+        },
       ],
       titulo: 'Asunto',
       descripcion: 'Contenido',
@@ -189,7 +193,13 @@ describe('DetalleMensajePage', () => {
     const enviadoConVisto: MensajeEnviado = {
       ...enviadoEditable,
       destinatarios: [
-        { usuarioId: 'dev-usuario-2', nombre: 'Dos', usuario: 'dos', estadoLectura: 'Visto', estadoRespuesta: 'Pendiente' },
+        {
+          usuarioId: 'dev-usuario-2',
+          nombre: 'Dos',
+          usuario: 'dos',
+          estadoLectura: 'Visto',
+          estadoRespuesta: 'Pendiente',
+        },
       ],
     };
 
@@ -201,7 +211,13 @@ describe('DetalleMensajePage', () => {
       estado: 'Eliminado',
       contenidoDisponible: false,
       destinatarios: [
-        { usuarioId: 'dev-usuario-2', nombre: 'Dos', usuario: 'dos', estadoLectura: 'Nuevo', estadoRespuesta: 'Pendiente' },
+        {
+          usuarioId: 'dev-usuario-2',
+          nombre: 'Dos',
+          usuario: 'dos',
+          estadoLectura: 'Nuevo',
+          estadoRespuesta: 'Pendiente',
+        },
       ],
     };
 
@@ -214,7 +230,9 @@ describe('DetalleMensajePage', () => {
 
     function enlacePorTexto(texto: string): HTMLAnchorElement | undefined {
       const compiled = fixture.nativeElement as HTMLElement;
-      return Array.from(compiled.querySelectorAll('a')).find((a) => a.textContent?.trim() === texto);
+      return Array.from(compiled.querySelectorAll('a')).find(
+        (a) => a.textContent?.trim() === texto,
+      );
     }
 
     it('Responder está disponible para un recibido Enviado con contenido disponible', () => {
@@ -339,7 +357,9 @@ describe('DetalleMensajePage', () => {
 
       botonPorTexto('Cancelar')!.click();
 
-      expect(fixture.componentInstance['errorAccion']()).toBe('No fue posible cancelar el mensaje.');
+      expect(fixture.componentInstance['errorAccion']()).toBe(
+        'No fue posible cancelar el mensaje.',
+      );
       expect(fixture.componentInstance['detalle']()).toEqual(enviadoEditable);
       expect(fixture.componentInstance['procesandoAccion']()).toBe(false);
     });
@@ -383,8 +403,20 @@ describe('DetalleMensajePage', () => {
       estado: 'Enviado',
       contenidoDisponible: true,
       destinatarios: [
-        { usuarioId: 'dev-usuario-2', nombre: 'Dos', usuario: 'dos', estadoLectura: 'Visto', estadoRespuesta: 'Respondido' },
-        { usuarioId: 'dev-usuario-3', nombre: 'Tres', usuario: 'tres', estadoLectura: 'Nuevo', estadoRespuesta: 'Pendiente' },
+        {
+          usuarioId: 'dev-usuario-2',
+          nombre: 'Dos',
+          usuario: 'dos',
+          estadoLectura: 'Visto',
+          estadoRespuesta: 'Respondido',
+        },
+        {
+          usuarioId: 'dev-usuario-3',
+          nombre: 'Tres',
+          usuario: 'tres',
+          estadoLectura: 'Nuevo',
+          estadoRespuesta: 'Pendiente',
+        },
       ],
       titulo: 'Asunto',
       descripcion: 'Contenido',
@@ -441,7 +473,6 @@ describe('DetalleMensajePage', () => {
       vi.spyOn(mensajesService, 'marcarVisto').mockReturnValue(of({}));
       crearFixture();
 
-      // Sin detectChanges todavía: el signal `detalle` sigue en null.
       expect(fixture.componentInstance['volver']()).toEqual({
         texto: 'Volver a recibidos',
         ruta: '/mensajes/recibidos',
@@ -451,8 +482,7 @@ describe('DetalleMensajePage', () => {
     describe('origen de navegación tiene prioridad sobre el tipo devuelto', () => {
       it('un mensaje enviado a sí mismo (backend devuelve MensajeEnviado) abierto con ?origen=recibidos vuelve a Recibidos', () => {
         configurar('recibidos');
-        // El backend resuelve como "enviado" porque remitenteId===actorId,
-        // sin importar que el usuario lo haya abierto desde Recibidos.
+
         vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(of(enviadoConDosDestinatarios));
         crearFixture();
 
@@ -562,8 +592,7 @@ describe('DetalleMensajePage', () => {
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.textContent).toContain('Mensaje eliminado por el remitente.');
       expect(compiled.textContent).not.toContain('undefined');
-      // El remitente sigue expuesto por el contrato incluso con
-      // contenidoDisponible=false — el panel de información no se oculta.
+
       expect(compiled.textContent).toContain('Usuario Uno');
       expect(compiled.textContent).toContain('Lectura: Visto');
     });
@@ -576,7 +605,13 @@ describe('DetalleMensajePage', () => {
         estado: 'Eliminado',
         contenidoDisponible: false,
         destinatarios: [
-          { usuarioId: 'dev-usuario-2', nombre: 'Dos', usuario: 'dos', estadoLectura: 'Visto', estadoRespuesta: 'Pendiente' },
+          {
+            usuarioId: 'dev-usuario-2',
+            nombre: 'Dos',
+            usuario: 'dos',
+            estadoLectura: 'Visto',
+            estadoRespuesta: 'Pendiente',
+          },
         ],
       };
       vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(of(eliminado));
@@ -590,5 +625,20 @@ describe('DetalleMensajePage', () => {
       expect(compiled.textContent).toContain('Eliminado');
       expect(compiled.textContent).toContain('Dos');
     });
+  });
+  it('descarta la respuesta tardía de una ruta anterior', () => {
+    const parametros = new Subject<ReturnType<typeof convertToParamMap>>();
+    configurar(undefined, parametros);
+    const anterior = new Subject<MensajeRecibido>();
+    const actual = new Subject<MensajeRecibido>();
+    vi.spyOn(mensajesService, 'obtenerDetalle').mockImplementation((id) =>
+      id === 'anterior' ? anterior : actual,
+    );
+    crearFixture();
+    parametros.next(convertToParamMap({ id: 'anterior' }));
+    parametros.next(convertToParamMap({ id: 'actual' }));
+    actual.next({ ...recibidoNuevo, id: 'actual', estadoLectura: 'Visto' });
+    anterior.next({ ...recibidoNuevo, id: 'anterior', estadoLectura: 'Visto' });
+    expect(fixture.componentInstance['detalle']()?.id).toBe('actual');
   });
 });

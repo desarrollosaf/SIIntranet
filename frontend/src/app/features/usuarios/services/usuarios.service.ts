@@ -16,10 +16,6 @@ export class UsuariosService {
     return this.http.get<Usuario[]>(`${API_BASE_URL}/usuarios`);
   }
 
-  obtenerPorId(id: string): Observable<Usuario> {
-    return this.http.get<Usuario>(`${API_BASE_URL}/usuarios/${id}`);
-  }
-
   actualizar(id: string, datos: DatosActualizables): Observable<Usuario> {
     return this.http.patch<Usuario>(`${API_BASE_URL}/usuarios/${id}`, datos);
   }

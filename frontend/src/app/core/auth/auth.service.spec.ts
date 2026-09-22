@@ -84,10 +84,9 @@ describe('AuthService', () => {
   it('un error HTTP no crea sesión', async () => {
     const promesa = firstValueFrom(service.login('cualquiera', 'cualquiera'));
 
-    httpMock.expectOne(`${API_BASE_URL}/auth/me`).flush(
-      { message: 'Unauthorized' },
-      { status: 401, statusText: 'Unauthorized' },
-    );
+    httpMock
+      .expectOne(`${API_BASE_URL}/auth/me`)
+      .flush({ message: 'Unauthorized' }, { status: 401, statusText: 'Unauthorized' });
 
     expect(await promesa).toBe(false);
     expect(service.currentUser()).toBeNull();
@@ -108,10 +107,9 @@ describe('AuthService', () => {
     expect(service.currentUser()).toEqual(respuestaAdmin);
 
     const segundaPromesa = firstValueFrom(service.login('cualquiera', 'cualquiera'));
-    httpMock.expectOne(`${API_BASE_URL}/auth/me`).flush(
-      { message: 'Unauthorized' },
-      { status: 401, statusText: 'Unauthorized' },
-    );
+    httpMock
+      .expectOne(`${API_BASE_URL}/auth/me`)
+      .flush({ message: 'Unauthorized' }, { status: 401, statusText: 'Unauthorized' });
 
     expect(await segundaPromesa).toBe(false);
     expect(service.currentUser()).toBeNull();

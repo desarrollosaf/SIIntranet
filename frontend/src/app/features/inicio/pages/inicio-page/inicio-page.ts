@@ -87,9 +87,6 @@ export class InicioPage {
       });
   }
 
-  // No se garantiza orden en GET /mensajes/recibidos (backend/src/modules/
-  // mensajes/mensajes.service.ts no aplica sort) — se ordena aquí sobre una
-  // copia, sin mutar el arreglo recibido.
   private ordenarPorFechaDescendente(mensajes: MensajeRecibido[]): MensajeRecibido[] {
     return [...mensajes].sort(
       (a, b) => new Date(b.fechaCreacion).getTime() - new Date(a.fechaCreacion).getTime(),

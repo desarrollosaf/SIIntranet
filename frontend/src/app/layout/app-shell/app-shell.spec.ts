@@ -9,9 +9,6 @@ import { AppShell } from './app-shell';
 import { AuthService } from '../../core/auth/auth.service';
 import { CurrentUser } from '../../core/models/current-user.model';
 
-// Ruta comodín que permite navegar a cualquier URL en las pruebas (incluida
-// la simulación de rutas internas de mensajería) sin registrar cada página
-// real — solo necesitamos que Router dispare NavigationEnd.
 @Component({ selector: 'app-dummy-test-page', template: '' })
 class DummyTestPage {}
 
@@ -152,7 +149,9 @@ describe('AppShell', () => {
 
       const grupos = component['navItemsVisibles']();
       expect(grupos.find((i) => i.label === 'Inicio')!.esActivo(router.url)).toBe(true);
-      expect(grupos.find((i) => i.label === 'Bandeja de entrada')!.esActivo(router.url)).toBe(false);
+      expect(grupos.find((i) => i.label === 'Bandeja de entrada')!.esActivo(router.url)).toBe(
+        false,
+      );
     });
 
     it('Mensaje nuevo está activo solo en /mensajes/redactar', () => {
@@ -207,14 +206,18 @@ describe('AppShell', () => {
     it('el botón de menú existe en el DOM', () => {
       fixture.detectChanges();
 
-      const boton = (fixture.nativeElement as HTMLElement).querySelector('.app-mobile-header__toggle');
+      const boton = (fixture.nativeElement as HTMLElement).querySelector(
+        '.app-mobile-header__toggle',
+      );
       expect(boton).toBeTruthy();
     });
 
     it('el botón inicia con aria-expanded="false"', () => {
       fixture.detectChanges();
 
-      const boton = (fixture.nativeElement as HTMLElement).querySelector('.app-mobile-header__toggle');
+      const boton = (fixture.nativeElement as HTMLElement).querySelector(
+        '.app-mobile-header__toggle',
+      );
       expect(boton?.getAttribute('aria-expanded')).toBe('false');
     });
 
@@ -234,7 +237,9 @@ describe('AppShell', () => {
       component['alternarMenu']();
       fixture.detectChanges();
 
-      const boton = (fixture.nativeElement as HTMLElement).querySelector('.app-mobile-header__toggle');
+      const boton = (fixture.nativeElement as HTMLElement).querySelector(
+        '.app-mobile-header__toggle',
+      );
       const drawer = (fixture.nativeElement as HTMLElement).querySelector('#app-drawer');
 
       expect(boton?.getAttribute('aria-expanded')).toBe('true');
@@ -258,8 +263,8 @@ describe('AppShell', () => {
       )!;
       const spyFocus = vi.spyOn(boton, 'focus');
 
-      component['alternarMenu'](); // abre
-      component['cerrarMenu'](); // cierra
+      component['alternarMenu']();
+      component['cerrarMenu']();
 
       expect(spyFocus).toHaveBeenCalled();
     });
@@ -267,7 +272,9 @@ describe('AppShell', () => {
     it('Administración respeta el rol también dentro del drawer', () => {
       fixture.detectChanges();
 
-      const drawer = (fixture.nativeElement as HTMLElement).querySelector('#app-drawer') as HTMLElement;
+      const drawer = (fixture.nativeElement as HTMLElement).querySelector(
+        '#app-drawer',
+      ) as HTMLElement;
       expect(drawer.textContent).not.toContain('Administración');
     });
 
@@ -322,7 +329,9 @@ describe('AppShell', () => {
       component['alternarMenu']();
       fixture.detectChanges();
 
-      const mainWrapper = (fixture.nativeElement as HTMLElement).querySelector('.app-shell__main-wrapper');
+      const mainWrapper = (fixture.nativeElement as HTMLElement).querySelector(
+        '.app-shell__main-wrapper',
+      );
       expect(mainWrapper?.hasAttribute('inert')).toBe(true);
     });
   });
@@ -337,14 +346,18 @@ describe('AppShell', () => {
     it('el botón de escritorio existe en el DOM', () => {
       fixture.detectChanges();
 
-      const boton = (fixture.nativeElement as HTMLElement).querySelector('.app-header__toggle-desktop');
+      const boton = (fixture.nativeElement as HTMLElement).querySelector(
+        '.app-header__toggle-desktop',
+      );
       expect(boton).toBeTruthy();
     });
 
     it('el botón de escritorio inicia con aria-expanded="true"', () => {
       fixture.detectChanges();
 
-      const boton = (fixture.nativeElement as HTMLElement).querySelector('.app-header__toggle-desktop');
+      const boton = (fixture.nativeElement as HTMLElement).querySelector(
+        '.app-header__toggle-desktop',
+      );
       expect(boton?.getAttribute('aria-expanded')).toBe('true');
     });
 
@@ -364,7 +377,9 @@ describe('AppShell', () => {
       component['alternarSidebar']();
       fixture.detectChanges();
 
-      const boton = (fixture.nativeElement as HTMLElement).querySelector('.app-header__toggle-desktop');
+      const boton = (fixture.nativeElement as HTMLElement).querySelector(
+        '.app-header__toggle-desktop',
+      );
       const sidebar = (fixture.nativeElement as HTMLElement).querySelector('#app-sidebar');
 
       expect(boton?.getAttribute('aria-expanded')).toBe('false');
@@ -391,7 +406,7 @@ describe('AppShell', () => {
     it('colapsar/expandir el sidebar no altera la navegación ni el contenido funcional', () => {
       fixture.detectChanges();
 
-      component['alternarSidebar'](); // colapsa
+      component['alternarSidebar']();
       fixture.detectChanges();
 
       const textos = textosDeEnlaces();
@@ -418,7 +433,9 @@ describe('AppShell', () => {
     it('el botón de cuenta existe y muestra las iniciales', () => {
       fixture.detectChanges();
 
-      const boton = (fixture.nativeElement as HTMLElement).querySelector('.app-header__account-btn');
+      const boton = (fixture.nativeElement as HTMLElement).querySelector(
+        '.app-header__account-btn',
+      );
       expect(boton).toBeTruthy();
       expect(boton?.textContent?.trim()).toBe(component['iniciales']());
     });
@@ -426,7 +443,9 @@ describe('AppShell', () => {
     it('el botón de cuenta inicia con aria-expanded="false"', () => {
       fixture.detectChanges();
 
-      const boton = (fixture.nativeElement as HTMLElement).querySelector('.app-header__account-btn');
+      const boton = (fixture.nativeElement as HTMLElement).querySelector(
+        '.app-header__account-btn',
+      );
       expect(boton?.getAttribute('aria-expanded')).toBe('false');
     });
 
@@ -446,7 +465,9 @@ describe('AppShell', () => {
       component['alternarMenuUsuario']();
       fixture.detectChanges();
 
-      const boton = (fixture.nativeElement as HTMLElement).querySelector('.app-header__account-btn');
+      const boton = (fixture.nativeElement as HTMLElement).querySelector(
+        '.app-header__account-btn',
+      );
       const panel = (fixture.nativeElement as HTMLElement).querySelector('#app-menu-cuenta');
 
       expect(boton?.getAttribute('aria-expanded')).toBe('true');
@@ -465,7 +486,9 @@ describe('AppShell', () => {
       component['alternarMenuUsuario']();
       fixture.detectChanges();
 
-      const panel = (fixture.nativeElement as HTMLElement).querySelector('#app-menu-cuenta') as HTMLElement;
+      const panel = (fixture.nativeElement as HTMLElement).querySelector(
+        '#app-menu-cuenta',
+      ) as HTMLElement;
       expect(panel.textContent).toContain('Usuario de Prueba Uno');
       expect(panel.textContent).toContain('usuario.prueba.uno');
       expect(panel.textContent).toContain('Administrador');
@@ -478,7 +501,9 @@ describe('AppShell', () => {
       component['alternarMenuUsuario']();
       fixture.detectChanges();
 
-      const panel = (fixture.nativeElement as HTMLElement).querySelector('#app-menu-cuenta') as HTMLElement;
+      const panel = (fixture.nativeElement as HTMLElement).querySelector(
+        '#app-menu-cuenta',
+      ) as HTMLElement;
       expect(panel.querySelector('.app-header__account-info')).toBeNull();
     });
 
@@ -515,7 +540,9 @@ describe('AppShell', () => {
     it('el drawer ya no duplica el bloque de cuenta', () => {
       fixture.detectChanges();
 
-      const drawer = (fixture.nativeElement as HTMLElement).querySelector('#app-drawer') as HTMLElement;
+      const drawer = (fixture.nativeElement as HTMLElement).querySelector(
+        '#app-drawer',
+      ) as HTMLElement;
       expect(drawer.textContent).not.toContain('Cerrar sesión');
       expect(drawer.querySelector('.app-header__account-logout')).toBeNull();
     });
@@ -599,5 +626,21 @@ describe('AppShell', () => {
 
       expect(component['iniciales']()).toBe('U');
     });
+  });
+  it('restaura la interacción al pasar de menú móvil abierto a escritorio', async () => {
+    const ancho = window.innerWidth;
+    component['alternarMenu']();
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1200 });
+    try {
+      window.dispatchEvent(new Event('resize'));
+      await fixture.whenStable();
+      expect(component['menuAbierto']()).toBe(false);
+      expect(document.body.style.overflow).toBe('');
+      expect(
+        fixture.nativeElement.querySelector('.app-shell__main-wrapper').hasAttribute('inert'),
+      ).toBe(false);
+    } finally {
+      Object.defineProperty(window, 'innerWidth', { configurable: true, value: ancho });
+    }
   });
 });

@@ -31,10 +31,6 @@ describe('InicioPage', () => {
     };
   }
 
-  // Configura el módulo de test e inyecta los servicios SIN instanciar
-  // todavía el componente — su constructor dispara la carga inicial de
-  // mensajes de inmediato, así que los spies deben existir antes de crear
-  // el fixture (mismo patrón que BandejaMensajesPage).
   function configurar(rol: UserRole = 'Usuario'): void {
     TestBed.configureTestingModule({
       imports: [InicioPage],
@@ -151,8 +147,7 @@ describe('InicioPage', () => {
 
     it('muestra "Cargando mensajes…" solo en la sección de mensajes mientras accesos y enlaces siguen visibles', () => {
       configurar();
-      // Subject que nunca emite: permite inspeccionar el estado de carga
-      // antes de que la suscripción se resuelva.
+
       const emisor = new Subject<MensajeRecibido[]>();
       vi.spyOn(mensajesService, 'recibidos').mockReturnValue(emisor.asObservable());
       crearFixture();
@@ -190,7 +185,10 @@ describe('InicioPage', () => {
     it('ordena por fechaCreacion descendente antes de tomar los recientes', () => {
       configurar();
       const antiguo = mensaje({ id: 'antiguo', fechaCreacion: new Date(2026, 0, 1).toISOString() });
-      const reciente = mensaje({ id: 'reciente', fechaCreacion: new Date(2026, 0, 10).toISOString() });
+      const reciente = mensaje({
+        id: 'reciente',
+        fechaCreacion: new Date(2026, 0, 10).toISOString(),
+      });
       const intermedio = mensaje({
         id: 'intermedio',
         fechaCreacion: new Date(2026, 0, 5).toISOString(),
@@ -240,7 +238,9 @@ describe('InicioPage', () => {
 
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.querySelector('.inicio__fila-mensaje--nuevo')).not.toBeNull();
-      expect(compiled.querySelector('.inicio__fila-mensaje--nuevo')?.textContent).toContain('Nuevo');
+      expect(compiled.querySelector('.inicio__fila-mensaje--nuevo')?.textContent).toContain(
+        'Nuevo',
+      );
     });
 
     it('un mensaje Visto muestra el badge correspondiente', () => {

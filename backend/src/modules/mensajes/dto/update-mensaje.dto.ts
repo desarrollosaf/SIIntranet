@@ -3,29 +3,29 @@ import {
   ArrayUnique,
   IsArray,
   IsNotEmpty,
-  IsOptional,
+  ValidateIf,
   IsString,
 } from 'class-validator';
 
 export class UpdateMensajeDto {
-  @IsOptional()
+  @ValidateIf((_object: unknown, value: unknown) => value !== undefined)
   @IsString()
   @IsNotEmpty()
   readonly titulo?: string;
 
-  @IsOptional()
+  @ValidateIf((_object: unknown, value: unknown) => value !== undefined)
   @IsString()
   @IsNotEmpty()
   readonly descripcion?: string;
 
-  @IsOptional()
+  @ValidateIf((_object: unknown, value: unknown) => value !== undefined)
   @IsArray()
   @ArrayNotEmpty()
   @ArrayUnique()
   @IsString({ each: true })
   readonly destinatarioIds?: string[];
 
-  @IsOptional()
+  @ValidateIf((_object: unknown, value: unknown) => value !== undefined)
   @IsArray()
   @ArrayUnique()
   @IsString({ each: true })

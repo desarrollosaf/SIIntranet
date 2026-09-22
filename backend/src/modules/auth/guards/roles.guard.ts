@@ -9,12 +9,6 @@ interface RequestWithUser extends Request {
   user?: AuthenticatedUser;
 }
 
-/**
- * Autorización, no autenticación: compara el rol de una identidad ya
- * aceptada contra los roles declarados en el endpoint. Si no hay identidad,
- * el problema es de autenticación (401), no de permisos (403) — por eso
- * lanza UnauthorizedException en vez de devolver false en ese caso.
- */
 @Injectable()
 export class RolesGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}

@@ -1,4 +1,4 @@
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { DevIdentityMiddleware } from './dev-identity.middleware';
 import { UsuariosService } from '../../usuarios/usuarios.service';
 import { ConfigService } from '@nestjs/config';
@@ -76,6 +76,19 @@ describe('DevIdentityMiddleware', () => {
     middleware.use(req, {} as unknown as Response, next);
 
     expect(next).toHaveBeenCalledWith(expect.any(NotFoundException));
+    expect(req.user).toBeUndefined();
+  });
+  it('rechaza la cuenta inactiva y elimina cualquier identidad previa', () => {
+    const middleware = new DevIdentityMiddleware(
+      crearConfigService('dev-usuario-3'),
+      usuariosService,
+    );
+    const req = {
+      user: { id: 'anterior', usuario: 'anterior', rol: 'Administrador' },
+    } as RequestWithUser;
+    const next = jest.fn();
+    middleware.use(req, {} as Response, next);
+    expect(next).toHaveBeenCalledWith(expect.any(UnauthorizedException));
     expect(req.user).toBeUndefined();
   });
 });

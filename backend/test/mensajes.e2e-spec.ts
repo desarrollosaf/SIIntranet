@@ -2,12 +2,15 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
-import { existsSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { ArchivosService } from '../src/modules/archivos/archivos.service';
 import { join } from 'node:path';
 import { AppModule } from './../src/app.module';
+import { UsuariosService } from '../src/modules/usuarios/usuarios.service';
 
 const PDF_BUFFER = Buffer.from('%PDF-1.4\n1 0 obj\n<<>>\nendobj\n%%EOF');
-const STORAGE_DIR = join(process.cwd(), 'storage', 'archivos');
+const STORAGE_DIR = mkdtempSync(join(tmpdir(), 'siintranet-mensajes-e2e-'));
 
 const USUARIO_1 = 'dev-usuario-1';
 const USUARIO_2 = 'dev-usuario-2';
@@ -16,7 +19,10 @@ const USUARIO_3 = 'dev-usuario-3';
 async function crearApp(): Promise<INestApplication<App>> {
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [AppModule],
-  }).compile();
+  })
+    .overrideProvider(ArchivosService)
+    .useFactory({ factory: () => new ArchivosService(STORAGE_DIR) })
+    .compile();
 
   const app = moduleFixture.createNestApplication<App>();
   app.setGlobalPrefix('api');
@@ -40,6 +46,7 @@ describe('Mensajería (e2e)', () => {
     process.env.AUTH_MODE = 'development';
     comoActor(USUARIO_1);
     app = await crearApp();
+    app.get(UsuariosService).cambiarEstado(USUARIO_3, 'Activo', USUARIO_1);
   });
 
   afterAll(async () => {
@@ -350,5 +357,80 @@ describe('Mensajería (e2e)', () => {
         .send({ titulo: 'x', descripcion: 'x', destinatarioIds: [USUARIO_2, USUARIO_2] })
         .expect(400);
     });
+  });
+  describe('regresiones de estados y validación', () => {
+    it('responder sin PATCH visto bloquea la edición y cancelación del original', async () => {
+      comoActor(USUARIO_1);
+      const original = await request(app.getHttpServer())
+        .post('/api/mensajes')
+        .send({ titulo: 'Original', descripcion: 'Contenido', destinatarioIds: [USUARIO_2] })
+        .expect(201);
+      comoActor(USUARIO_2);
+      await request(app.getHttpServer())
+        .post('/api/mensajes')
+        .send({
+          titulo: 'Respuesta',
+          descripcion: 'Contenido',
+          destinatarioIds: [USUARIO_1],
+          respuestaAId: original.body.id,
+        })
+        .expect(201);
+      const detalle = await request(app.getHttpServer())
+        .get('/api/mensajes/' + original.body.id)
+        .expect(200);
+      expect(detalle.body).toMatchObject({ estadoLectura: 'Visto', estadoRespuesta: 'Respondido' });
+      comoActor(USUARIO_1);
+      await request(app.getHttpServer())
+        .patch('/api/mensajes/' + original.body.id)
+        .send({ titulo: 'Cambio' })
+        .expect(409);
+      await request(app.getHttpServer())
+        .patch('/api/mensajes/' + original.body.id + '/cancelar')
+        .expect(409);
+    });
+    it('eliminar un cancelado mantiene su retirada y conserva los destinatarios para el remitente', async () => {
+      comoActor(USUARIO_1);
+      const creado = await request(app.getHttpServer())
+        .post('/api/mensajes')
+        .send({ titulo: 'Cancelar', descripcion: 'Contenido', destinatarioIds: [USUARIO_2] })
+        .expect(201);
+      await request(app.getHttpServer())
+        .patch('/api/mensajes/' + creado.body.id + '/cancelar')
+        .expect(200);
+      await request(app.getHttpServer())
+        .patch('/api/mensajes/' + creado.body.id + '/eliminar')
+        .expect(200);
+      const propio = await request(app.getHttpServer())
+        .get('/api/mensajes/' + creado.body.id)
+        .expect(200);
+      expect(propio.body.destinatarios).toHaveLength(1);
+      comoActor(USUARIO_2);
+      const recibidos = await request(app.getHttpServer())
+        .get('/api/mensajes/recibidos')
+        .expect(200);
+      expect(recibidos.body.some((m: { id: string }) => m.id === creado.body.id)).toBe(false);
+      await request(app.getHttpServer())
+        .get('/api/mensajes/' + creado.body.id)
+        .expect(403);
+    });
+    it.each(['titulo', 'descripcion', 'destinatarioIds', 'archivoIds'])(
+      'rechaza null en %s sin mutaciones',
+      async (campo) => {
+        comoActor(USUARIO_1);
+        const creado = await request(app.getHttpServer())
+          .post('/api/mensajes')
+          .send({ titulo: 'Original', descripcion: 'Contenido', destinatarioIds: [USUARIO_2] })
+          .expect(201);
+        await request(app.getHttpServer())
+          .patch('/api/mensajes/' + creado.body.id)
+          .send({ [campo]: null })
+          .expect(400);
+        const detalle = await request(app.getHttpServer())
+          .get('/api/mensajes/' + creado.body.id)
+          .expect(200);
+        expect(detalle.body.titulo).toBe('Original');
+        expect(detalle.body.destinatarios).toHaveLength(1);
+      },
+    );
   });
 });

@@ -7,7 +7,7 @@ $color-borde: var(--color-borde);
 }
 
 .inicio__wrapper {
-  max-width: 62.5rem; // ~1000px, mismo criterio que Bandeja/Formatos/Usuarios
+  max-width: 62.5rem;
   margin-inline: auto;
 }
 
@@ -17,8 +17,6 @@ $color-borde: var(--color-borde);
   color: #495057;
 }
 
-// Secuencia vertical simple: título + contenido, separados por espacio, sin
-// panel exterior envolviendo cada sección.
 .inicio__seccion {
   margin-bottom: 2rem;
 }
@@ -61,8 +59,6 @@ $color-borde: var(--color-borde);
   text-decoration: underline;
 }
 
-// Accesos rápidos: la card individual es la única "caja" de esta sección —
-// no hay contenedor adicional envolviendo el grid.
 .inicio__accesos-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -126,9 +122,6 @@ $color-borde: var(--color-borde);
   color: #6c757d;
 }
 
-// Mensajes recientes y Enlaces institucionales comparten este mismo patrón:
-// UNA lista agrupada (una sola sombra de bloque), filas separadas por
-// divisores horizontales — nunca cards ni sombras por fila.
 .inicio__lista {
   display: flex;
   flex-direction: column;
@@ -179,16 +172,10 @@ $color-borde: var(--color-borde);
   overflow-wrap: anywhere;
 }
 
-// Sin barra ni sombra: el mensaje Nuevo se distingue por el badge de texto
-// y, de forma sobria, por un mayor peso tipográfico del título.
 .inicio__fila-mensaje--nuevo .inicio__fila-mensaje-titulo {
   font-weight: 700;
 }
 
-// Badge de estado de lectura propio: reemplaza el `badge text-bg-primary`
-// de Bootstrap (azul) por un tratamiento vino sobrio para "Nuevo". "Visto"
-// conserva un tratamiento neutro equivalente al `text-bg-light` anterior —
-// nunca depende solo del color, el texto del estado siempre está presente.
 .inicio__badge-lectura {
   display: inline-flex;
   align-items: center;

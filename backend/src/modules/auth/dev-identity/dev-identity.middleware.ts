@@ -1,4 +1,4 @@
-import { Injectable, NestMiddleware } from '@nestjs/common';
+import { Injectable, NestMiddleware, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NextFunction, Request, Response } from 'express';
 import { UsuariosService } from '../../usuarios/usuarios.service';
@@ -8,13 +8,6 @@ interface RequestWithUser extends Request {
   user?: AuthenticatedUser;
 }
 
-/**
- * Identidad exclusiva de desarrollo, temporal y sustituible cuando D08 se
- * resuelva. Solo se registra si AppModule decide activarla (NODE_ENV=
- * development Y AUTH_MODE=development, ver app.module.ts). El cliente nunca
- * elige DEV_USER_ID ni el rol resultante — ambos vienen exclusivamente de la
- * configuración del servidor.
- */
 @Injectable()
 export class DevIdentityMiddleware implements NestMiddleware {
   constructor(
@@ -22,7 +15,8 @@ export class DevIdentityMiddleware implements NestMiddleware {
     private readonly usuariosService: UsuariosService,
   ) {}
 
-  use(req: RequestWithUser, res: Response, next: NextFunction): void {
+  use(req: RequestWithUser, _res: Response, next: NextFunction): void {
+    delete req.user;
     try {
       const devUserId = this.configService.get<string>('DEV_USER_ID');
 
@@ -33,6 +27,10 @@ export class DevIdentityMiddleware implements NestMiddleware {
       }
 
       const usuario = this.usuariosService.obtenerPorId(devUserId);
+
+      if (usuario.estado !== 'Activo') {
+        throw new UnauthorizedException('La cuenta está inactiva.');
+      }
 
       req.user = {
         id: usuario.id,

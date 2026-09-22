@@ -5,15 +5,10 @@ import { firstValueFrom } from 'rxjs';
 import { UsuariosService } from '../../../usuarios/services/usuarios.service';
 import { Usuario } from '../../../usuarios/models/usuario.model';
 import { ArchivosService } from '../../../archivos/services/archivos.service';
-import { Archivo } from '../../../archivos/models/archivo.model';
+import { SeleccionArchivo, subirAdjuntosPendientes } from '../../adjuntos';
 import { MensajesService } from '../../services/mensajes.service';
 import { esMensajeRecibido } from '../../models/mensaje.model';
 import { PageHero } from '../../../../shared/components/page-hero/page-hero';
-
-interface SeleccionArchivo {
-  file: File;
-  archivoSubido?: Archivo;
-}
 
 @Component({
   selector: 'app-editar-mensaje-page',
@@ -55,11 +50,6 @@ export class EditarMensajePage {
     this.cargarUsuarios();
   }
 
-  // Selector de destinatarios: misma filosofía UX que en Mensaje nuevo
-  // (buscador local + disponibles/seleccionados, sin llamadas nuevas al
-  // backend por tecla). A diferencia de Redactar (modo respuesta), aquí no
-  // hay un destinatario obligatorio que proteger de quitarDestinatario/
-  // limpiarSeleccion.
   protected readonly terminoBusqueda = signal('');
 
   protected readonly usuariosFiltrados = computed<Usuario[]>(() => {
@@ -84,8 +74,6 @@ export class EditarMensajePage {
     return this.form.controls.destinatarioIds.value.includes(usuarioId);
   }
 
-  // La lista "disponibles" excluye a quienes ya están en Seleccionados, para
-  // no duplicar la misma persona en dos listas a la vez.
   protected usuariosDisponibles(): Usuario[] {
     return this.usuariosFiltrados().filter((usuario) => !this.estaSeleccionado(usuario.id));
   }
@@ -273,7 +261,8 @@ export class EditarMensajePage {
         }
 
         const esEditable =
-          detalle.estado === 'Enviado' && detalle.destinatarios.every((d) => d.estadoLectura === 'Nuevo');
+          detalle.estado === 'Enviado' &&
+          detalle.destinatarios.every((d) => d.estadoLectura === 'Nuevo');
 
         if (!esEditable) {
           this.error.set('Este mensaje ya no puede editarse.');
@@ -313,19 +302,9 @@ export class EditarMensajePage {
     });
   }
 
-  private async subirPendientes(): Promise<void> {
-    const seleccion = this.seleccionArchivos();
-
-    for (let indice = 0; indice < seleccion.length; indice++) {
-      if (seleccion[indice].archivoSubido) {
-        continue;
-      }
-
-      const archivoSubido = await firstValueFrom(this.archivosService.subir(seleccion[indice].file));
-
-      this.seleccionArchivos.update((actual) =>
-        actual.map((item, i) => (i === indice ? { ...item, archivoSubido } : item)),
-      );
-    }
+  private subirPendientes(): Promise<void> {
+    return subirAdjuntosPendientes(this.seleccionArchivos, (file) =>
+      firstValueFrom(this.archivosService.subir(file)),
+    );
   }
 }

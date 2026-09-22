@@ -123,9 +123,6 @@ describe('UsuariosService', () => {
       expect(activado.estado).toBe('Activo');
     });
 
-    // Repite el caso ya cubierto por 'actualizar() modifica únicamente los
-    // datos permitidos' arriba, con el único Administrador, para confirmar
-    // que no dispara ninguna de las reglas de integridad.
     it('actualizar() cambia nombre/usuario del único Administrador sin disparar las reglas de integridad', () => {
       const actualizado = service.actualizar('dev-usuario-1', { nombre: 'Nombre actualizado' });
 

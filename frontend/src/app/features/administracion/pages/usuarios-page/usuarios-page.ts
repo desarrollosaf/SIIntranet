@@ -1,4 +1,12 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  OnInit,
+  afterEveryRender,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UsuariosService } from '../../../usuarios/services/usuarios.service';
 import { Usuario } from '../../../usuarios/models/usuario.model';
@@ -16,6 +24,17 @@ type FiltroEstado = 'Todos' | Usuario['estado'];
 export class UsuariosPage implements OnInit {
   private readonly usuariosService = inject(UsuariosService);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+  private focoPendiente: string | null = null;
+
+  constructor() {
+    afterEveryRender(() => {
+      if (this.focoPendiente) {
+        this.elementRef.nativeElement.querySelector<HTMLElement>(this.focoPendiente)?.focus();
+        this.focoPendiente = null;
+      }
+    });
+  }
 
   protected readonly usuarios = signal<Usuario[]>([]);
   protected readonly cargando = signal(true);
@@ -29,18 +48,9 @@ export class UsuariosPage implements OnInit {
   protected readonly errorEdicion = signal<string | null>(null);
   protected readonly guardando = signal(false);
 
-  // Error de cambiarEstado() asociado a una fila concreta — independiente
-  // de `error` (carga inicial) para que un fallo puntual de Activar/
-  // Desactivar nunca oculte el listado/buscador/filtros. Solo puede haber
-  // un error de este tipo visible a la vez: iniciar cualquier nueva
-  // operación de cambio de estado lo limpia primero, así no queda mostrado
-  // bajo una fila distinta a la de la operación más reciente.
   protected readonly errorCambioEstadoId = signal<string | null>(null);
   protected readonly errorCambioEstado = signal<string | null>(null);
 
-  // Set de ids con una petición de cambio de estado en curso — permite
-  // deshabilitar únicamente el botón de la fila afectada sin bloquear el
-  // resto de la página ni el resto de las filas.
   protected readonly idsEnCambioEstado = signal<ReadonlySet<string>>(new Set());
 
   protected readonly form = this.formBuilder.nonNullable.group({
@@ -49,8 +59,6 @@ export class UsuariosPage implements OnInit {
     rol: this.formBuilder.nonNullable.control<Usuario['rol']>('Usuario', Validators.required),
   });
 
-  // Filtro completamente local sobre los usuarios ya cargados — nunca muta
-  // this.usuarios() ni dispara una nueva petición al backend.
   protected readonly usuariosFiltrados = computed<Usuario[]>(() => {
     const termino = this.normalizarTexto(this.terminoBusqueda());
     const rol = this.filtroRol();
@@ -91,6 +99,8 @@ export class UsuariosPage implements OnInit {
   }
 
   protected iniciarEdicion(usuario: Usuario): void {
+    if (this.guardando()) return;
+    this.focoPendiente = '#edicion-nombre';
     this.usuarioEnEdicionId.set(usuario.id);
     this.errorEdicion.set(null);
     this.form.setValue({
@@ -101,6 +111,7 @@ export class UsuariosPage implements OnInit {
   }
 
   protected cancelarEdicion(): void {
+    this.focoPendiente = `[data-usuario-id="${this.usuarioEnEdicionId()}"] .usuarios-page__accion`;
     this.usuarioEnEdicionId.set(null);
     this.errorEdicion.set(null);
   }
@@ -118,7 +129,7 @@ export class UsuariosPage implements OnInit {
     this.usuariosService.actualizar(id, datos).subscribe({
       next: (usuarioActualizado) => {
         this.usuarios.update((lista) => lista.map((u) => (u.id === id ? usuarioActualizado : u)));
-        this.usuarioEnEdicionId.set(null);
+        this.cancelarEdicion();
         this.guardando.set(false);
       },
       error: () => {

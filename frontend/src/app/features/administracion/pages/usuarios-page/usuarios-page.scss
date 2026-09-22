@@ -1,5 +1,4 @@
 $color-vino: var(--color-institucional);
-$color-vino-oscuro: var(--color-institucional-hover);
 $color-vino-tint: var(--color-institucional-tint);
 $color-borde: var(--color-borde);
 
@@ -8,11 +7,10 @@ $color-borde: var(--color-borde);
 }
 
 .usuarios-page__wrapper {
-  max-width: 62.5rem; // ~1000px, mismo criterio que Inicio/Bandeja/Formatos
+  max-width: 62.5rem;
   margin-inline: auto;
 }
 
-// ===== Barra de herramientas: buscador + filtros + resumen =====
 .usuarios-page__herramientas {
   display: flex;
   flex-wrap: wrap;
@@ -26,10 +24,6 @@ $color-borde: var(--color-borde);
   max-width: 20rem;
 }
 
-// Ancho intrínseco (auto): los navegadores dimensionan un <select> nativo
-// al contenido de su opción más ancha, no solo la seleccionada — evita
-// truncamiento ("Todos los estados") sin fijar un ancho rígido ni saltos
-// de tamaño al cambiar de opción.
 .usuarios-page__filtro {
   flex: 0 0 auto;
 }
@@ -45,8 +39,6 @@ $color-borde: var(--color-borde);
   color: #868e96;
 }
 
-// ===== Lista: UNA superficie agrupada, filas separadas por divisor
-// horizontal — mismo patrón aprobado en Bandeja/Formatos, no tabla rayada =====
 .usuarios-page__lista {
   display: flex;
   flex-direction: column;
@@ -91,8 +83,6 @@ $color-borde: var(--color-borde);
   overflow-wrap: anywhere;
 }
 
-// Rol y Estado forman un mismo grupo visual — en mobile intentan permanecer
-// en la misma línea; si algún texto fuera más largo, envuelve naturalmente.
 .usuarios-page__badges {
   display: flex;
   flex-wrap: wrap;
@@ -100,9 +90,6 @@ $color-borde: var(--color-borde);
   gap: 0.5rem;
 }
 
-// ===== Badges discretos: neutros por defecto, un único acento por
-// dimensión (vino para Administrador, verde sobrio para Activo) — sin
-// explosión de colores =====
 .usuarios-page__badge {
   display: inline-flex;
   align-items: center;
@@ -132,8 +119,6 @@ $color-borde: var(--color-borde);
   justify-self: end;
 }
 
-// Botones de texto discretos, sin icono ni chrome — el texto ya es
-// suficientemente claro (Editar/Activar/Desactivar).
 .usuarios-page__accion {
   padding: 0;
   border: none;
@@ -160,16 +145,12 @@ $color-borde: var(--color-borde);
   text-decoration: none;
 }
 
-// Error de Activar/Desactivar: asociado visualmente a su fila (no a la
-// página completa) — el listado/buscador/filtros nunca se ocultan por esto.
 .usuarios-page__error-fila {
   margin: 0;
   padding: 0 1.125rem 0.875rem;
   font-size: 0.8125rem;
 }
 
-// ===== Edición inline: asociada visualmente a la fila, no una card aparte
-// al final de la lista =====
 .usuarios-page__edicion {
   padding: 1rem 1.125rem 1.25rem;
   border-top: 1px dashed $color-borde;
@@ -179,43 +160,6 @@ $color-borde: var(--color-borde);
 .usuarios-page__edicion-acciones {
   display: flex;
   gap: 0.5rem;
-}
-
-// ===== Acento vino institucional en botones, en vez del azul genérico =====
-.btn-vino {
-  background-color: $color-vino;
-  border-color: $color-vino;
-  color: #ffffff;
-}
-
-.btn-vino:hover,
-.btn-vino:focus-visible {
-  background-color: $color-vino-oscuro;
-  border-color: $color-vino-oscuro;
-  color: #ffffff;
-}
-
-.btn-vino:disabled {
-  background-color: $color-vino;
-  border-color: $color-vino;
-  opacity: 0.65;
-}
-
-.btn-outline-vino {
-  background-color: transparent;
-  border: 1px solid $color-vino;
-  color: $color-vino;
-}
-
-.btn-outline-vino:hover,
-.btn-outline-vino:focus-visible {
-  background-color: $color-vino-tint;
-  color: $color-vino-oscuro;
-}
-
-.btn-outline-vino:disabled {
-  color: $color-vino;
-  opacity: 0.5;
 }
 
 @media (max-width: 768px) {

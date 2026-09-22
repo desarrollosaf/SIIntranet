@@ -1,5 +1,4 @@
 $color-vino: var(--color-institucional);
-$color-vino-oscuro: var(--color-institucional-hover);
 $color-borde: var(--color-borde);
 
 .detalle-mensaje-page {
@@ -7,7 +6,7 @@ $color-borde: var(--color-borde);
 }
 
 .detalle-mensaje-page__wrapper {
-  max-width: 62.5rem; // ~1000px, mismo criterio que Mensaje nuevo/Bandeja
+  max-width: 62.5rem;
   margin-inline: auto;
 }
 
@@ -29,8 +28,6 @@ $color-borde: var(--color-borde);
   outline-offset: 2px;
 }
 
-// Dos superficies: contenido principal (2fr) e información (1fr) — una sola
-// columna en móvil, en ese mismo orden de documento.
 .detalle-mensaje-page__layout {
   display: grid;
   grid-template-columns: 1fr;
@@ -115,8 +112,6 @@ $color-borde: var(--color-borde);
   overflow-wrap: anywhere;
 }
 
-// Texto discreto para "Descargar", en vez de un botón outline-primary
-// genérico por cada adjunto.
 .detalle-mensaje-page__accion-discreta {
   flex-shrink: 0;
   font-size: 0.8125rem;
@@ -162,22 +157,6 @@ $color-borde: var(--color-borde);
   margin-top: 1.25rem;
   padding-top: 1.25rem;
   border-top: 1px solid $color-borde;
-}
-
-// ===== Única acción vino: Responder. Editar/Cancelar quedan neutrales
-// (btn-outline-secondary de Bootstrap) y Eliminar es la única destructiva
-// (btn-outline-danger). =====
-.btn-vino {
-  background-color: $color-vino;
-  border-color: $color-vino;
-  color: #ffffff;
-}
-
-.btn-vino:hover,
-.btn-vino:focus-visible {
-  background-color: $color-vino-oscuro;
-  border-color: $color-vino-oscuro;
-  color: #ffffff;
 }
 
 @media (max-width: 576px) {

@@ -2,10 +2,7 @@
   <div class="card login-card">
     <div class="card-body">
       <div class="login-card__logo">
-        <img
-          src="/assets/img/congreso_logo_horizontal-p-2000.png"
-          alt="Logotipo institucional"
-        />
+        <img src="/assets/img/congreso_logo_horizontal-p-2000.png" alt="Logotipo institucional" />
       </div>
 
       <h1 class="h4 text-center mb-4">Iniciar sesión</h1>
@@ -42,7 +39,9 @@
         </div>
 
         @if (loginFallido) {
-          <p class="text-danger" role="alert">No fue posible iniciar sesión en el entorno de desarrollo.</p>
+          <p class="text-danger" role="alert">
+            No fue posible iniciar sesión en el entorno de desarrollo.
+          </p>
         }
 
         <button type="submit" class="btn btn-primary w-100">Entrar</button>

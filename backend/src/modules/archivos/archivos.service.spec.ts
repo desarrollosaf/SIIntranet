@@ -127,9 +127,6 @@ const PPTX_BUFFER = buildStoredZip([
   ['ppt/presentation.xml', '<xml/>'],
 ]);
 
-// Contenedor OLE/CFB genuino — mismo binario para .doc/.xls/.ppt legacy,
-// ver comentario en archivos.service.ts sobre por qué file-type no puede
-// distinguirlos entre sí por contenido.
 const CFB_BUFFER = Buffer.concat([
   Buffer.from([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1]),
   Buffer.alloc(512 - 8),

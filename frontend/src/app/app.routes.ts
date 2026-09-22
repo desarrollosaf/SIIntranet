@@ -7,9 +7,7 @@ export const routes: Routes = [
   {
     path: 'login',
     loadComponent: () =>
-      import('./features/auth/pages/login-page/login-page').then(
-        (m) => m.LoginPage,
-      ),
+      import('./features/auth/pages/login-page/login-page').then((m) => m.LoginPage),
   },
   {
     path: '',
@@ -19,9 +17,7 @@ export const routes: Routes = [
       {
         path: 'inicio',
         loadComponent: () =>
-          import('./features/inicio/pages/inicio-page/inicio-page').then(
-            (m) => m.InicioPage,
-          ),
+          import('./features/inicio/pages/inicio-page/inicio-page').then((m) => m.InicioPage),
       },
       {
         path: 'formatos',

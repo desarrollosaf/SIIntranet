@@ -1,6 +1,4 @@
 $color-vino: var(--color-institucional);
-$color-vino-oscuro: var(--color-institucional-hover);
-$color-vino-tint: var(--color-institucional-tint);
 $color-borde: var(--color-borde);
 
 .editar-mensaje-page {
@@ -8,7 +6,7 @@ $color-borde: var(--color-borde);
 }
 
 .editar-mensaje-page__wrapper {
-  max-width: 62.5rem; // ~1000px, mismo criterio que Mensaje nuevo/Bandeja/Detalle
+  max-width: 62.5rem;
   margin-inline: auto;
 }
 
@@ -30,9 +28,6 @@ $color-borde: var(--color-borde);
   outline-offset: 2px;
 }
 
-// Dos superficies principales: columna de composición (contenido + adjuntos,
-// que también integra el resumen/guardado como su footer) y columna de
-// destinatarios — mismo criterio ya aprobado en Mensaje nuevo.
 .editar-mensaje-page__layout {
   display: grid;
   grid-template-columns: 1fr;
@@ -97,7 +92,6 @@ $color-borde: var(--color-borde);
   color: #495057;
 }
 
-// ===== Buscador =====
 .editar-mensaje-page__buscador {
   position: relative;
 }
@@ -115,7 +109,6 @@ $color-borde: var(--color-borde);
   padding-left: 2.25rem;
 }
 
-// ===== Cabeceras compactas: contador/acción a la izquierda y derecha =====
 .editar-mensaje-page__resultados-header,
 .editar-mensaje-page__seleccionados-header {
   display: flex;
@@ -131,9 +124,6 @@ $color-borde: var(--color-borde);
   color: #868e96;
 }
 
-// Botón de texto discreto, sin icono, para acciones secundarias del panel
-// (Seleccionar todos/resultados, Limpiar) — menor peso visual que las
-// acciones "Seleccionar"/"Quitar" por fila.
 .editar-mensaje-page__accion-discreta {
   padding: 0;
   border: none;
@@ -154,7 +144,6 @@ $color-borde: var(--color-borde);
   text-decoration: none;
 }
 
-// ===== Resultados y seleccionados: filas compactas, no cards apiladas =====
 .editar-mensaje-page__resultados-lista,
 .editar-mensaje-page__seleccionados-lista {
   display: flex;
@@ -219,7 +208,6 @@ $color-borde: var(--color-borde);
   color: #495057;
 }
 
-// ===== Adjuntos existentes =====
 .editar-mensaje-page__adjuntos-existentes {
   margin-bottom: 1.25rem;
 }
@@ -242,7 +230,6 @@ $color-borde: var(--color-borde);
   overflow-wrap: anywhere;
 }
 
-// ===== Nuevos adjuntos =====
 .editar-mensaje-page__adjuntos-boton {
   display: inline-flex;
   align-items: center;
@@ -266,9 +253,6 @@ $color-borde: var(--color-borde);
   margin: 0;
 }
 
-// Fila en dos líneas SIEMPRE (no solo en mobile): nombre arriba (envuelve
-// libremente), tamaño + Quitar abajo. Evita que el tamaño se corte carácter
-// por carácter y que "Quitar" comprima el nombre.
 .editar-mensaje-page__archivo {
   display: flex;
   flex-direction: column;
@@ -302,7 +286,6 @@ $color-borde: var(--color-borde);
   white-space: nowrap;
 }
 
-// ===== Resumen + guardado: footer del bloque Adjuntos, no una card aparte =====
 .editar-mensaje-page__envio {
   display: flex;
   flex-direction: column;
@@ -320,43 +303,6 @@ $color-borde: var(--color-borde);
 
 .editar-mensaje-page__guardar {
   align-self: flex-start;
-}
-
-// ===== Acento vino institucional en botones, en vez del azul genérico =====
-.btn-vino {
-  background-color: $color-vino;
-  border-color: $color-vino;
-  color: #ffffff;
-}
-
-.btn-vino:hover,
-.btn-vino:focus-visible {
-  background-color: $color-vino-oscuro;
-  border-color: $color-vino-oscuro;
-  color: #ffffff;
-}
-
-.btn-vino:disabled {
-  background-color: $color-vino;
-  border-color: $color-vino;
-  opacity: 0.65;
-}
-
-.btn-outline-vino {
-  background-color: transparent;
-  border: 1px solid $color-vino;
-  color: $color-vino;
-}
-
-.btn-outline-vino:hover,
-.btn-outline-vino:focus-visible {
-  background-color: $color-vino-tint;
-  color: $color-vino-oscuro;
-}
-
-.btn-outline-vino:disabled {
-  color: $color-vino;
-  opacity: 0.5;
 }
 
 @media (max-width: 576px) {

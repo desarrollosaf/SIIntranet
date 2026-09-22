@@ -34,10 +34,6 @@ describe('RedactarMensajePage', () => {
     return { target: { files, value: '' } } as unknown as Event;
   }
 
-  function eventoCheckbox(checked: boolean): Event {
-    return { target: { checked } } as unknown as Event;
-  }
-
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [RedactarMensajePage],
@@ -71,21 +67,21 @@ describe('RedactarMensajePage', () => {
     expect(compiled.querySelector('h1')?.textContent?.trim()).toBe('Mensaje nuevo');
   });
 
-  describe('selección de destinatarios mediante checkboxes', () => {
-    it('marcar un checkbox añade el id del usuario', () => {
+  describe('selección de destinatarios mediante botones', () => {
+    it('seleccionar un usuario añade el id del usuario', () => {
       fixture.detectChanges();
 
-      component['onDestinatarioToggle']('dev-usuario-1', eventoCheckbox(true));
+      component['agregarDestinatario']('dev-usuario-1');
 
       expect(component['form'].controls.destinatarioIds.value).toEqual(['dev-usuario-1']);
       expect(component['estaSeleccionado']('dev-usuario-1')).toBe(true);
     });
 
-    it('marcar un segundo checkbox conserva ambos ids', () => {
+    it('seleccionar un segundo usuario conserva ambos ids', () => {
       fixture.detectChanges();
 
-      component['onDestinatarioToggle']('dev-usuario-1', eventoCheckbox(true));
-      component['onDestinatarioToggle']('dev-usuario-2', eventoCheckbox(true));
+      component['agregarDestinatario']('dev-usuario-1');
+      component['agregarDestinatario']('dev-usuario-2');
 
       expect(component['form'].controls.destinatarioIds.value).toEqual([
         'dev-usuario-1',
@@ -93,22 +89,22 @@ describe('RedactarMensajePage', () => {
       ]);
     });
 
-    it('desmarcar un checkbox retira únicamente ese id', () => {
+    it('desseleccionar un usuario retira únicamente ese id', () => {
       fixture.detectChanges();
 
-      component['onDestinatarioToggle']('dev-usuario-1', eventoCheckbox(true));
-      component['onDestinatarioToggle']('dev-usuario-2', eventoCheckbox(true));
-      component['onDestinatarioToggle']('dev-usuario-1', eventoCheckbox(false));
+      component['agregarDestinatario']('dev-usuario-1');
+      component['agregarDestinatario']('dev-usuario-2');
+      component['quitarDestinatario']('dev-usuario-1');
 
       expect(component['form'].controls.destinatarioIds.value).toEqual(['dev-usuario-2']);
       expect(component['estaSeleccionado']('dev-usuario-1')).toBe(false);
     });
 
-    it('marcar el mismo checkbox dos veces no produce ids duplicados', () => {
+    it('seleccionar el mismo usuario dos veces no produce ids duplicados', () => {
       fixture.detectChanges();
 
-      component['onDestinatarioToggle']('dev-usuario-1', eventoCheckbox(true));
-      component['onDestinatarioToggle']('dev-usuario-1', eventoCheckbox(true));
+      component['agregarDestinatario']('dev-usuario-1');
+      component['agregarDestinatario']('dev-usuario-1');
 
       expect(component['form'].controls.destinatarioIds.value).toEqual(['dev-usuario-1']);
     });
@@ -125,12 +121,12 @@ describe('RedactarMensajePage', () => {
       expect(component['form'].controls.destinatarioIds.touched).toBe(true);
     });
 
-    it('el flujo de envío conserva los destinatarioIds seleccionados mediante checkboxes', async () => {
+    it('el flujo de envío conserva los destinatarioIds seleccionados mediante botones', async () => {
       fixture.detectChanges();
       component['form'].controls.titulo.setValue('Asunto');
       component['form'].controls.descripcion.setValue('Contenido');
-      component['onDestinatarioToggle']('dev-usuario-1', eventoCheckbox(true));
-      component['onDestinatarioToggle']('dev-usuario-2', eventoCheckbox(true));
+      component['agregarDestinatario']('dev-usuario-1');
+      component['agregarDestinatario']('dev-usuario-2');
       vi.spyOn(mensajesService, 'crear').mockReturnValue(of({} as any));
 
       await component['onSubmit']();
@@ -182,7 +178,9 @@ describe('RedactarMensajePage', () => {
     const archivo = new File(['contenido'], 'documento.pdf', { type: 'application/pdf' });
     component['onArchivosSeleccionados'](eventoConArchivos([archivo]));
 
-    vi.spyOn(archivosService, 'subir').mockReturnValue(of(archivoRespuesta('archivo-1', 'documento.pdf')));
+    vi.spyOn(archivosService, 'subir').mockReturnValue(
+      of(archivoRespuesta('archivo-1', 'documento.pdf')),
+    );
     vi.spyOn(mensajesService, 'crear').mockReturnValue(of({} as any));
 
     await component['onSubmit']();
@@ -249,12 +247,16 @@ describe('RedactarMensajePage', () => {
     const archivo = new File(['contenido'], 'documento.pdf', { type: 'application/pdf' });
     component['onArchivosSeleccionados'](eventoConArchivos([archivo]));
 
-    vi.spyOn(archivosService, 'subir').mockReturnValue(of(archivoRespuesta('archivo-1', 'documento.pdf')));
+    vi.spyOn(archivosService, 'subir').mockReturnValue(
+      of(archivoRespuesta('archivo-1', 'documento.pdf')),
+    );
     vi.spyOn(mensajesService, 'crear').mockReturnValue(throwError(() => new Error('falla')));
 
     await component['onSubmit']();
 
-    expect(component['error']()).toBe('No fue posible enviar el mensaje. Puedes intentarlo de nuevo.');
+    expect(component['error']()).toBe(
+      'No fue posible enviar el mensaje. Puedes intentarlo de nuevo.',
+    );
     expect(component['seleccionArchivos']()[0].archivoSubido).toEqual(
       archivoRespuesta('archivo-1', 'documento.pdf'),
     );
@@ -275,12 +277,10 @@ describe('RedactarMensajePage', () => {
       .spyOn(archivosService, 'subir')
       .mockReturnValue(of(archivoRespuesta('archivo-1', 'documento.pdf')));
 
-    // Primer intento falla al crear el mensaje.
     vi.spyOn(mensajesService, 'crear').mockReturnValueOnce(throwError(() => new Error('falla')));
     await component['onSubmit']();
     expect(spySubir).toHaveBeenCalledTimes(1);
 
-    // Segundo intento: el archivo ya tiene archivoSubido, no debe volver a subirse.
     vi.spyOn(mensajesService, 'crear').mockReturnValue(of({} as any));
     await component['onSubmit']();
 
@@ -313,13 +313,13 @@ describe('RedactarMensajePage', () => {
       expect(component['seleccionArchivos']().length).toBe(1);
     });
 
-    it('con enviando=true, onDestinatarioToggle no modifica destinatarioIds', () => {
+    it('con enviando=true, la selección no modifica destinatarioIds', () => {
       fixture.detectChanges();
-      component['onDestinatarioToggle']('dev-usuario-1', eventoCheckbox(true));
+      component['agregarDestinatario']('dev-usuario-1');
       component['enviando'].set(true);
 
-      component['onDestinatarioToggle']('dev-usuario-1', eventoCheckbox(false));
-      component['onDestinatarioToggle']('dev-usuario-2', eventoCheckbox(true));
+      component['quitarDestinatario']('dev-usuario-1');
+      component['agregarDestinatario']('dev-usuario-2');
 
       expect(component['form'].controls.destinatarioIds.value).toEqual(['dev-usuario-1']);
     });
@@ -349,7 +349,13 @@ describe('RedactarMensajePage — selector de destinatarios con búsqueda', () =
       rol: 'Usuario',
       estado: 'Activo',
     },
-    { id: 'u-3', nombre: 'Otra Persona', usuario: 'otra.persona', rol: 'Usuario', estado: 'Activo' },
+    {
+      id: 'u-3',
+      nombre: 'Otra Persona',
+      usuario: 'otra.persona',
+      rol: 'Usuario',
+      estado: 'Activo',
+    },
   ];
 
   function eventoBusqueda(valor: string): Event {
@@ -439,7 +445,10 @@ describe('RedactarMensajePage — selector de destinatarios con búsqueda', () =
 
       component['agregarDestinatario']('u-1');
 
-      expect(component['usuariosDisponibles']()).toEqual([usuariosBusqueda[1], usuariosBusqueda[2]]);
+      expect(component['usuariosDisponibles']()).toEqual([
+        usuariosBusqueda[1],
+        usuariosBusqueda[2],
+      ]);
     });
 
     it('al quitar un seleccionado, vuelve a disponibles si coincide con el filtro actual', () => {
@@ -472,7 +481,9 @@ describe('RedactarMensajePage — selector de destinatarios con búsqueda', () =
       fixture.detectChanges();
 
       const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.textContent).toContain('Todos los destinatarios visibles están seleccionados.');
+      expect(compiled.textContent).toContain(
+        'Todos los destinatarios visibles están seleccionados.',
+      );
       expect(compiled.textContent).not.toContain('No se encontraron destinatarios.');
     });
 
@@ -483,7 +494,9 @@ describe('RedactarMensajePage — selector de destinatarios con búsqueda', () =
 
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.textContent).toContain('No se encontraron destinatarios.');
-      expect(compiled.textContent).not.toContain('Todos los destinatarios visibles están seleccionados.');
+      expect(compiled.textContent).not.toContain(
+        'Todos los destinatarios visibles están seleccionados.',
+      );
     });
 
     it('un usuario ya seleccionado no aparece dos veces en el DOM (disponibles + seleccionados)', () => {
@@ -491,7 +504,9 @@ describe('RedactarMensajePage — selector de destinatarios con búsqueda', () =
       fixture.detectChanges();
 
       const compiled = fixture.nativeElement as HTMLElement;
-      const apariciones = compiled.querySelectorAll('.redactar-mensaje-page__resultado, .redactar-mensaje-page__seleccionado');
+      const apariciones = compiled.querySelectorAll(
+        '.redactar-mensaje-page__resultado, .redactar-mensaje-page__seleccionado',
+      );
       const nombres = Array.from(apariciones)
         .map((el) => el.textContent ?? '')
         .filter((texto) => texto.includes('Usuario de Prueba Uno'));
@@ -507,7 +522,10 @@ describe('RedactarMensajePage — selector de destinatarios con búsqueda', () =
     component['agregarDestinatario']('u-2');
 
     expect(component['totalDestinatariosSeleccionados']()).toBe(2);
-    expect(component['destinatariosSeleccionados']()).toEqual([usuariosBusqueda[0], usuariosBusqueda[1]]);
+    expect(component['destinatariosSeleccionados']()).toEqual([
+      usuariosBusqueda[0],
+      usuariosBusqueda[1],
+    ]);
   });
 
   it('seleccionarResultadosFiltrados agrega todos los usuarios cuando no hay término de búsqueda', () => {
@@ -557,7 +575,13 @@ describe('RedactarMensajePage — selector de destinatarios con búsqueda', () =
 
   describe('adjuntos — contador y resumen', () => {
     function archivoRespuesta(id: string, nombre: string): Archivo {
-      return { id, nombreOriginal: nombre, mimeType: 'application/pdf', tamano: 10, fechaSubida: '' };
+      return {
+        id,
+        nombreOriginal: nombre,
+        mimeType: 'application/pdf',
+        tamano: 10,
+        fechaSubida: '',
+      };
     }
 
     function eventoConArchivos(files: File[]): Event {
@@ -661,10 +685,6 @@ describe('RedactarMensajePage — modo respuesta', () => {
     return { target: { files, value: '' } } as unknown as Event;
   }
 
-  function eventoCheckbox(checked: boolean): Event {
-    return { target: { checked } } as unknown as Event;
-  }
-
   function configurar(): void {
     TestBed.configureTestingModule({
       imports: [RedactarMensajePage],
@@ -733,7 +753,7 @@ describe('RedactarMensajePage — modo respuesta', () => {
     crearFixture();
     fixture.detectChanges();
 
-    component['onDestinatarioToggle']('dev-usuario-1', eventoCheckbox(false));
+    component['quitarDestinatario']('dev-usuario-1');
 
     expect(component['form'].controls.destinatarioIds.value).toEqual(['dev-usuario-1']);
   });
@@ -744,10 +764,13 @@ describe('RedactarMensajePage — modo respuesta', () => {
     crearFixture();
     fixture.detectChanges();
 
-    component['onDestinatarioToggle']('dev-usuario-2', eventoCheckbox(true));
-    expect(component['form'].controls.destinatarioIds.value).toEqual(['dev-usuario-1', 'dev-usuario-2']);
+    component['agregarDestinatario']('dev-usuario-2');
+    expect(component['form'].controls.destinatarioIds.value).toEqual([
+      'dev-usuario-1',
+      'dev-usuario-2',
+    ]);
 
-    component['onDestinatarioToggle']('dev-usuario-2', eventoCheckbox(false));
+    component['quitarDestinatario']('dev-usuario-2');
     expect(component['form'].controls.destinatarioIds.value).toEqual(['dev-usuario-1']);
   });
 
@@ -764,13 +787,18 @@ describe('RedactarMensajePage — modo respuesta', () => {
     await component['onSubmit']();
 
     expect(mensajesService.crear).toHaveBeenCalledWith(
-      expect.objectContaining({ respuestaAId: 'mensaje-original', destinatarioIds: ['dev-usuario-1'] }),
+      expect.objectContaining({
+        respuestaAId: 'mensaje-original',
+        destinatarioIds: ['dev-usuario-1'],
+      }),
     );
   });
 
   it('un error cargando el original bloquea el envío', async () => {
     configurar();
-    vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(throwError(() => new Error('falla')));
+    vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(
+      throwError(() => new Error('falla')),
+    );
     crearFixture();
     fixture.detectChanges();
 
@@ -822,7 +850,13 @@ describe('RedactarMensajePage — modo respuesta', () => {
     component['onArchivosSeleccionados'](eventoConArchivos([archivo]));
 
     const spySubir = vi.spyOn(archivosService, 'subir').mockReturnValue(
-      of({ id: 'archivo-1', nombreOriginal: 'documento.pdf', mimeType: 'application/pdf', tamano: 10, fechaSubida: '' }),
+      of({
+        id: 'archivo-1',
+        nombreOriginal: 'documento.pdf',
+        mimeType: 'application/pdf',
+        tamano: 10,
+        fechaSubida: '',
+      }),
     );
 
     vi.spyOn(mensajesService, 'crear').mockReturnValueOnce(throwError(() => new Error('falla')));

@@ -2,12 +2,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
-import { existsSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { ArchivosService } from '../src/modules/archivos/archivos.service';
 import { join } from 'node:path';
 import { AppModule } from './../src/app.module';
 
 const PDF_BUFFER = Buffer.from('%PDF-1.4\n1 0 obj\n<<>>\nendobj\n%%EOF');
-const STORAGE_DIR = join(process.cwd(), 'storage', 'archivos');
+const STORAGE_DIR = mkdtempSync(join(tmpdir(), 'siintranet-formatos-e2e-'));
 
 const ADMINISTRADOR = 'dev-usuario-1';
 const USUARIO = 'dev-usuario-2';
@@ -15,7 +17,10 @@ const USUARIO = 'dev-usuario-2';
 async function crearApp(): Promise<INestApplication<App>> {
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [AppModule],
-  }).compile();
+  })
+    .overrideProvider(ArchivosService)
+    .useFactory({ factory: () => new ArchivosService(STORAGE_DIR) })
+    .compile();
 
   const app = moduleFixture.createNestApplication<App>();
   app.setGlobalPrefix('api');
@@ -80,6 +85,30 @@ describe('Formatos (e2e)', () => {
         rmSync(STORAGE_DIR, { recursive: true, force: true });
       }
     });
+
+    it.each(['nombre', 'descripcion', 'categoria', 'archivoId'])(
+      'rechaza null en %s sin alterar el formato',
+      async (campo) => {
+        comoActor(ADMINISTRADOR);
+        const archivoId = await subirArchivo(app);
+        const creado = await request(app.getHttpServer())
+          .post('/api/formatos')
+          .send({ nombre: 'Original', descripcion: 'Contenido', categoria: 'General', archivoId })
+          .expect(201);
+        await request(app.getHttpServer())
+          .patch('/api/formatos/' + creado.body.id)
+          .send({ [campo]: null })
+          .expect(400);
+        const actual = await request(app.getHttpServer())
+          .get('/api/formatos/' + creado.body.id)
+          .expect(200);
+        expect(actual.body).toEqual(creado.body);
+        await request(app.getHttpServer())
+          .patch('/api/formatos/' + creado.body.id + '/estado')
+          .send({ estado: 'Inactivo' })
+          .expect(200);
+      },
+    );
 
     describe('Administrador: alta, lectura, actualización, estado y descarga', () => {
       let archivoId: string;
@@ -323,8 +352,6 @@ describe('Formatos (e2e)', () => {
       let formatoId: string;
 
       beforeAll(async () => {
-        // El archivo pertenece al Administrador (quien lo subió y publicó el
-        // Formato); Usuario no es su uploader.
         comoActor(ADMINISTRADOR);
         archivoId = await subirArchivo(app, 'uploader-vs-formatos.pdf');
         const creado = await request(app.getHttpServer()).post('/api/formatos').send({

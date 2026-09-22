@@ -14,11 +14,6 @@ interface ArchivoPublico {
   fechaSubida: string;
 }
 
-/**
- * Forma expuesta por HTTP. Compuesta al vuelo a partir de Formato + Archivo
- * — nunca persistida así (ver Formato). NO incluye archivo.nombreAlmacenado
- * ni archivo.subidoPor: son detalles internos de Archivos.
- */
 export interface FormatoPublico {
   id: string;
   nombre: string;
@@ -36,9 +31,6 @@ export class FormatosService {
   constructor(private readonly archivosService: ArchivosService) {}
 
   async crear(dto: CreateFormatoDto, actorId: string): Promise<FormatoPublico> {
-    // Todo lo que puede fallar (uploader-only + disponibilidad física) se
-    // resuelve ANTES de tocar el Map — si cualquiera de los dos pasos
-    // lanza, ningún Formato queda registrado.
     this.archivosService.obtenerPorId(dto.archivoId, actorId);
     const { archivo } = await this.archivosService.obtenerParaUsoInterno(dto.archivoId);
 
@@ -77,10 +69,6 @@ export class FormatosService {
     const formato = this.buscarInterno(id);
     const archivoIdFinal = dto.archivoId ?? formato.archivoId;
 
-    // Validar TODO lo externo (uploader-only del nuevo archivo, si se
-    // propone, y disponibilidad física del que quedará vigente) ANTES de
-    // mutar cualquier campo — así un archivo ajeno o físicamente no
-    // disponible no deja el Formato a medio actualizar.
     if (dto.archivoId !== undefined) {
       this.archivosService.obtenerPorId(dto.archivoId, actorId);
     }
@@ -129,11 +117,6 @@ export class FormatosService {
     return formato;
   }
 
-  /**
-   * Lectura pública (13B): un Formato Inactivo se trata como inexistente
-   * para cualquier consumidor de solo lectura, incluso Administrador — no
-   * hay todavía un listado/vista administrativa de inactivos (§10/13A).
-   */
   private buscarActivoInterno(id: string): Formato {
     const formato = this.buscarInterno(id);
 
@@ -144,11 +127,6 @@ export class FormatosService {
     return formato;
   }
 
-  /**
-   * Proyección pura, sin I/O: recibe el Archivo ya resuelto por el llamador
-   * (antes de cualquier mutación) para que ninguna operación asíncrona
-   * pueda fallar después de que el Map ya haya sido modificado.
-   */
   private aRespuestaPublica(formato: Formato, archivo: Archivo): FormatoPublico {
     return {
       id: formato.id,

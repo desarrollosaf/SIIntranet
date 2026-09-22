@@ -14,12 +14,19 @@
       <p class="text-danger" role="alert">{{ errorUsuarios() }}</p>
     }
 
-    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="redactar-mensaje-page__layout">
+    <form
+      [formGroup]="form"
+      (ngSubmit)="onSubmit()"
+      novalidate
+      class="redactar-mensaje-page__layout"
+    >
       <section
         class="redactar-mensaje-page__panel redactar-mensaje-page__panel--contenido"
         aria-labelledby="contenido-titulo"
       >
-        <h2 id="contenido-titulo" class="redactar-mensaje-page__panel-titulo">Contenido del mensaje</h2>
+        <h2 id="contenido-titulo" class="redactar-mensaje-page__panel-titulo">
+          Contenido del mensaje
+        </h2>
 
         <div class="mb-3">
           <label for="titulo" class="form-label">Título</label>
@@ -42,7 +49,9 @@
             id="descripcion"
             class="form-control"
             rows="6"
-            [class.is-invalid]="form.controls.descripcion.invalid && form.controls.descripcion.touched"
+            [class.is-invalid]="
+              form.controls.descripcion.invalid && form.controls.descripcion.touched
+            "
             [readonly]="enviando()"
             formControlName="descripcion"
           ></textarea>
@@ -60,7 +69,9 @@
 
         <div class="redactar-mensaje-page__buscador">
           <i class="bi bi-search" aria-hidden="true"></i>
-          <label for="buscador-destinatarios" class="visually-hidden">Buscar por nombre o usuario</label>
+          <label for="buscador-destinatarios" class="visually-hidden"
+            >Buscar por nombre o usuario</label
+          >
           <input
             id="buscador-destinatarios"
             type="search"
@@ -76,7 +87,9 @@
           <p>Cargando usuarios…</p>
         } @else {
           <div class="redactar-mensaje-page__resultados-header">
-            <span class="redactar-mensaje-page__contador-disponibles">{{ textoDisponibles() }}</span>
+            <span class="redactar-mensaje-page__contador-disponibles">{{
+              textoDisponibles()
+            }}</span>
             <button
               type="button"
               class="redactar-mensaje-page__accion-discreta"
@@ -96,8 +109,12 @@
               @for (usuario of usuariosDisponibles(); track usuario.id) {
                 <li class="redactar-mensaje-page__resultado">
                   <span class="redactar-mensaje-page__resultado-info">
-                    <span class="redactar-mensaje-page__resultado-nombre">{{ usuario.nombre }}</span>
-                    <span class="redactar-mensaje-page__resultado-usuario">{{ usuario.usuario }}</span>
+                    <span class="redactar-mensaje-page__resultado-nombre">{{
+                      usuario.nombre
+                    }}</span>
+                    <span class="redactar-mensaje-page__resultado-usuario">{{
+                      usuario.usuario
+                    }}</span>
                   </span>
                   <button
                     type="button"
@@ -143,7 +160,9 @@
                           <span class="badge text-bg-light ms-1">Remitente original</span>
                         }
                       </span>
-                      <span class="redactar-mensaje-page__seleccionado-usuario">{{ usuario.usuario }}</span>
+                      <span class="redactar-mensaje-page__seleccionado-usuario">{{
+                        usuario.usuario
+                      }}</span>
                     </span>
                     @if (!esRemitenteOriginal(usuario.id)) {
                       <button
@@ -164,7 +183,9 @@
         }
 
         @if (form.controls.destinatarioIds.invalid && form.controls.destinatarioIds.touched) {
-          <p class="invalid-feedback d-block mb-0" role="alert">Selecciona al menos un destinatario.</p>
+          <p class="invalid-feedback d-block mb-0" role="alert">
+            Selecciona al menos un destinatario.
+          </p>
         }
       </section>
 
@@ -189,16 +210,24 @@
         />
 
         @if (seleccionArchivos().length === 0) {
-          <p class="text-muted redactar-mensaje-page__adjuntos-vacio">Ningún archivo seleccionado.</p>
+          <p class="text-muted redactar-mensaje-page__adjuntos-vacio">
+            Ningún archivo seleccionado.
+          </p>
         } @else {
           <p class="redactar-mensaje-page__contador">{{ textoContadorArchivos() }}</p>
           <ul class="list-unstyled redactar-mensaje-page__archivos">
-            @for (item of seleccionArchivos(); track item.file.name + '-' + $index; let i = $index) {
+            @for (
+              item of seleccionArchivos();
+              track item.file.name + '-' + $index;
+              let i = $index
+            ) {
               <li class="redactar-mensaje-page__archivo">
                 <span class="redactar-mensaje-page__archivo-nombre">{{ item.file.name }}</span>
                 <div class="redactar-mensaje-page__archivo-pie">
                   <span class="redactar-mensaje-page__archivo-meta">
-                    <span class="redactar-mensaje-page__archivo-tamano">{{ tamanoLegible(item.file.size) }}</span>
+                    <span class="redactar-mensaje-page__archivo-tamano">{{
+                      tamanoLegible(item.file.size)
+                    }}</span>
                     @if (item.archivoSubido) {
                       <span class="badge text-bg-success">Subido</span>
                     }

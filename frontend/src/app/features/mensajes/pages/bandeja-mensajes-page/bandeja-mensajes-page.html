@@ -108,10 +108,13 @@
                   @if (mensaje.contenidoDisponible) {
                     <span class="bandeja-page__fila-titulo">{{ mensaje.titulo }}</span>
                   } @else {
-                    <span class="bandeja-page__fila-titulo fst-italic text-muted">Mensaje eliminado</span>
+                    <span class="bandeja-page__fila-titulo fst-italic text-muted"
+                      >Mensaje eliminado</span
+                    >
                   }
                   <span class="bandeja-page__fila-meta">
-                    Para: {{ nombresDestinatarios(mensaje) }} · {{ mensaje.fechaCreacion | date: 'short' }}
+                    Para: {{ nombresDestinatarios(mensaje) }} ·
+                    {{ mensaje.fechaCreacion | date: 'short' }}
                   </span>
                 </span>
                 <span class="bandeja-page__fila-estados">

@@ -46,9 +46,6 @@ describe('BandejaMensajesPage', () => {
     archivoIds: [],
   };
 
-  // Configura el módulo de test e inyecta MensajesService SIN instanciar
-  // todavía el componente — su constructor dispara la carga inicial de
-  // inmediato, así que los spies deben existir antes de crear el fixture.
   function configurar(tipoInicial: 'recibidos' | 'enviados' = 'recibidos'): void {
     routeData = new BehaviorSubject<{ tipo?: string }>({ tipo: tipoInicial });
 
@@ -216,13 +213,6 @@ describe('BandejaMensajesPage', () => {
     expect(textos).not.toContain('Redactar');
   });
 
-  // Detalle no puede confiar solo en el tipo de mensaje devuelto por el
-  // backend para decidir a dónde "volver" (un mensaje enviado a uno mismo se
-  // resuelve como MensajeEnviado aunque se abra desde Recibidos) — Bandeja
-  // debe propagar el origen real de la navegación como query param en el
-  // RouterLink de cada fila. Se verifica el href real calculado por Angular
-  // Router tras change detection, no el marcado `[queryParams]` del
-  // template.
   describe('propagación de origen a Detalle', () => {
     it('en Recibidos, la fila navega al detalle del mensaje con ?origen=recibidos', () => {
       configurar('recibidos');
@@ -232,7 +222,9 @@ describe('BandejaMensajesPage', () => {
       fixture.detectChanges();
 
       const compiled = fixture.nativeElement as HTMLElement;
-      const fila = compiled.querySelector<HTMLAnchorElement>('a.bandeja-page__fila[href*="mensaje-1"]');
+      const fila = compiled.querySelector<HTMLAnchorElement>(
+        'a.bandeja-page__fila[href*="mensaje-1"]',
+      );
       expect(fila).not.toBeNull();
       expect(fila!.getAttribute('href')).toBe('/mensajes/mensaje-1?origen=recibidos');
     });
@@ -245,7 +237,9 @@ describe('BandejaMensajesPage', () => {
       fixture.detectChanges();
 
       const compiled = fixture.nativeElement as HTMLElement;
-      const fila = compiled.querySelector<HTMLAnchorElement>('a.bandeja-page__fila[href*="mensaje-2"]');
+      const fila = compiled.querySelector<HTMLAnchorElement>(
+        'a.bandeja-page__fila[href*="mensaje-2"]',
+      );
       expect(fila).not.toBeNull();
       expect(fila!.getAttribute('href')).toBe('/mensajes/mensaje-2?origen=enviados');
     });
@@ -298,7 +292,11 @@ describe('BandejaMensajesPage', () => {
   describe('búsqueda local — Recibidos', () => {
     const uno: MensajeRecibido = {
       id: 'r-1',
-      remitente: { id: 'dev-usuario-1', nombre: 'Usuario de Prueba Uno', usuario: 'usuario.prueba.uno' },
+      remitente: {
+        id: 'dev-usuario-1',
+        nombre: 'Usuario de Prueba Uno',
+        usuario: 'usuario.prueba.uno',
+      },
       fechaCreacion: new Date(2026, 0, 3).toISOString(),
       estado: 'Enviado',
       contenidoDisponible: true,
@@ -398,7 +396,13 @@ describe('BandejaMensajesPage', () => {
       estado: 'Enviado',
       contenidoDisponible: true,
       destinatarios: [
-        { usuarioId: 'u-1', nombre: 'Usuario de Prueba Uno', usuario: 'usuario.prueba.uno', estadoLectura: 'Nuevo', estadoRespuesta: 'Pendiente' },
+        {
+          usuarioId: 'u-1',
+          nombre: 'Usuario de Prueba Uno',
+          usuario: 'usuario.prueba.uno',
+          estadoLectura: 'Nuevo',
+          estadoRespuesta: 'Pendiente',
+        },
       ],
       titulo: 'Circular institucional',
       descripcion: 'Contenido',
@@ -411,7 +415,13 @@ describe('BandejaMensajesPage', () => {
       estado: 'Enviado',
       contenidoDisponible: true,
       destinatarios: [
-        { usuarioId: 'u-2', nombre: 'Otra Persona', usuario: 'otra.persona', estadoLectura: 'Nuevo', estadoRespuesta: 'Pendiente' },
+        {
+          usuarioId: 'u-2',
+          nombre: 'Otra Persona',
+          usuario: 'otra.persona',
+          estadoLectura: 'Nuevo',
+          estadoRespuesta: 'Pendiente',
+        },
       ],
       titulo: 'Aviso general',
       descripcion: 'Contenido',
@@ -457,8 +467,20 @@ describe('BandejaMensajesPage', () => {
         ...uno,
         id: 'e-3',
         destinatarios: [
-          { usuarioId: 'u-1', nombre: 'Primero', usuario: 'primero', estadoLectura: 'Nuevo', estadoRespuesta: 'Pendiente' },
-          { usuarioId: 'u-2', nombre: 'Segundo Buscable', usuario: 'segundo', estadoLectura: 'Nuevo', estadoRespuesta: 'Pendiente' },
+          {
+            usuarioId: 'u-1',
+            nombre: 'Primero',
+            usuario: 'primero',
+            estadoLectura: 'Nuevo',
+            estadoRespuesta: 'Pendiente',
+          },
+          {
+            usuarioId: 'u-2',
+            nombre: 'Segundo Buscable',
+            usuario: 'segundo',
+            estadoLectura: 'Nuevo',
+            estadoRespuesta: 'Pendiente',
+          },
         ],
       };
       vi.spyOn(mensajesService, 'enviados').mockReturnValue(of([conVarios]));
@@ -536,10 +558,34 @@ describe('BandejaMensajesPage', () => {
       const conVarios: MensajeEnviado = {
         ...enviado,
         destinatarios: [
-          { usuarioId: 'u-1', nombre: 'Nombre Uno', usuario: 'uno', estadoLectura: 'Nuevo', estadoRespuesta: 'Pendiente' },
-          { usuarioId: 'u-2', nombre: 'Nombre Dos', usuario: 'dos', estadoLectura: 'Nuevo', estadoRespuesta: 'Pendiente' },
-          { usuarioId: 'u-3', nombre: 'Nombre Tres', usuario: 'tres', estadoLectura: 'Nuevo', estadoRespuesta: 'Pendiente' },
-          { usuarioId: 'u-4', nombre: 'Nombre Cuatro', usuario: 'cuatro', estadoLectura: 'Nuevo', estadoRespuesta: 'Pendiente' },
+          {
+            usuarioId: 'u-1',
+            nombre: 'Nombre Uno',
+            usuario: 'uno',
+            estadoLectura: 'Nuevo',
+            estadoRespuesta: 'Pendiente',
+          },
+          {
+            usuarioId: 'u-2',
+            nombre: 'Nombre Dos',
+            usuario: 'dos',
+            estadoLectura: 'Nuevo',
+            estadoRespuesta: 'Pendiente',
+          },
+          {
+            usuarioId: 'u-3',
+            nombre: 'Nombre Tres',
+            usuario: 'tres',
+            estadoLectura: 'Nuevo',
+            estadoRespuesta: 'Pendiente',
+          },
+          {
+            usuarioId: 'u-4',
+            nombre: 'Nombre Cuatro',
+            usuario: 'cuatro',
+            estadoLectura: 'Nuevo',
+            estadoRespuesta: 'Pendiente',
+          },
         ],
       };
 

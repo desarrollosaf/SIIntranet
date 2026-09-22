@@ -37,8 +37,6 @@ describe('FormatosPage', () => {
     };
   }
 
-  // La carga se dispara desde el constructor, así que FormatosService.listar
-  // debe estar espiado antes de crear el fixture.
   function configurar(): void {
     TestBed.configureTestingModule({
       imports: [FormatosPage],
@@ -115,7 +113,6 @@ describe('FormatosPage', () => {
     expect(compiled.querySelector('[role="alert"]')).toBeTruthy();
   });
 
-  // 6 y 7. backend [] → un solo estado vacío global, sin los 11 mensajes repetidos
   it('con backend [] muestra un único estado vacío global y ninguna categoría', () => {
     configurar();
     vi.spyOn(formatosService, 'listar').mockReturnValue(of([]));
@@ -175,7 +172,8 @@ describe('FormatosPage', () => {
     fixture.detectChanges();
 
     const grupos = fixture.componentInstance['grupos']();
-    const indiceOficial = (categoria: string) => APARTADOS_FORMATOS.indexOf(categoria as (typeof APARTADOS_FORMATOS)[number]);
+    const indiceOficial = (categoria: string) =>
+      APARTADOS_FORMATOS.indexOf(categoria as (typeof APARTADOS_FORMATOS)[number]);
 
     const indices = grupos.map((g) => indiceOficial(g.categoria));
     expect(indices).toEqual([...indices].sort((a, b) => a - b));
@@ -309,7 +307,9 @@ describe('FormatosPage', () => {
       buscar('término que no existe en ningún formato');
 
       const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.textContent).toContain('No se encontraron formatos que coincidan con tu búsqueda.');
+      expect(compiled.textContent).toContain(
+        'No se encontraron formatos que coincidan con tu búsqueda.',
+      );
       expect(fixture.componentInstance['grupos']()).toHaveLength(0);
     });
 
@@ -328,7 +328,6 @@ describe('FormatosPage', () => {
     });
   });
 
-  // 20 y 21. contador por categoría — singular
   it('muestra "1 formato" cuando la categoría tiene un solo documento', () => {
     configurar();
     vi.spyOn(formatosService, 'listar').mockReturnValue(
@@ -378,7 +377,11 @@ describe('FormatosPage', () => {
     configurar();
     vi.spyOn(formatosService, 'listar').mockReturnValue(
       of([
-        formato({ id: 'f-1', nombre: 'Solicitud de vacaciones', categoria: 'Dirección de Finanzas' }),
+        formato({
+          id: 'f-1',
+          nombre: 'Solicitud de vacaciones',
+          categoria: 'Dirección de Finanzas',
+        }),
         formato({
           id: 'f-2',
           nombre: 'Constancia laboral',
@@ -430,7 +433,6 @@ describe('FormatosPage', () => {
     });
   });
 
-  // 26 y 27. URL de descarga / anchor real
   it('el enlace de descarga apunta a /api/formatos/:id/descarga mediante un anchor real', () => {
     configurar();
     vi.spyOn(formatosService, 'listar').mockReturnValue(of([formato({ id: 'formato-1' })]));

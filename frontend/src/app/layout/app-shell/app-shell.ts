@@ -21,11 +21,6 @@ interface NavItem {
   readonly esActivo: (url: string) => boolean;
 }
 
-/**
- * Bandeja de entrada cubre todas las rutas de /mensajes/* salvo /redactar
- * (detalle, responder, editar son secundarias de la bandeja, no de
- * Mensaje nuevo) — por eso no se puede resolver con RouterLinkActive simple.
- */
 const NAV_ITEMS: readonly NavItem[] = [
   {
     label: 'Inicio',
@@ -62,11 +57,6 @@ const NAV_ITEMS: readonly NavItem[] = [
 
 const CONECTORES_IGNORADOS = new Set(['de', 'del', 'la', 'las', 'los', 'y']);
 
-/**
- * Iniciales para el botón de cuenta, derivadas exclusivamente de
- * CurrentUser.nombre. Máximo 2 caracteres, resultado estable — no es un
- * contrato formal, solo una presentación visual razonable.
- */
 function obtenerIniciales(nombre: string): string {
   const terminos = nombre
     .trim()
@@ -100,9 +90,6 @@ export class AppShell implements OnDestroy {
 
   protected readonly currentUser = this.authService.currentUser;
 
-  // Tres capas de UI independientes entre sí: sidebar de escritorio (layout
-  // push/collapse, no modal), drawer móvil (overlay modal) y menú de cuenta
-  // (dropdown anclado, no modal).
   protected readonly menuAbierto = signal(false);
   protected readonly sidebarColapsado = signal(false);
   protected readonly menuUsuarioAbierto = signal(false);
@@ -125,9 +112,6 @@ export class AppShell implements OnDestroy {
     return NAV_ITEMS.filter((item) => !item.adminOnly || esAdministrador);
   });
 
-  // Agrupación puramente visual sobre la misma lista ya filtrada por rol —
-  // navItemsVisibles() no cambia de significado ni de uso en el resto del
-  // componente/tests.
   protected readonly navPrincipal = computed<NavItem[]>(() =>
     this.navItemsVisibles().filter((item) => !item.adminOnly),
   );
@@ -156,11 +140,9 @@ export class AppShell implements OnDestroy {
     }
 
     this.menuAbierto.set(true);
-    // El drawer es modal en móvil: evita que el contenido detrás se
-    // desplace mientras está abierto. Se revierte al cerrar/destruir.
+
     document.body.style.overflow = 'hidden';
 
-    // Una sola capa interactiva a la vez.
     this.menuUsuarioAbierto.set(false);
   }
 
@@ -182,7 +164,6 @@ export class AppShell implements OnDestroy {
 
     this.menuUsuarioAbierto.set(true);
 
-    // Una sola capa interactiva a la vez.
     if (this.menuAbierto()) {
       this.menuAbierto.set(false);
       document.body.style.overflow = '';
@@ -202,6 +183,13 @@ export class AppShell implements OnDestroy {
   protected onEscape(): void {
     this.cerrarMenuUsuario();
     this.cerrarMenu();
+  }
+
+  @HostListener('window:resize')
+  protected onResize(): void {
+    if (window.innerWidth >= 992 && this.menuAbierto()) {
+      this.cerrarMenu();
+    }
   }
 
   @HostListener('document:click', ['$event'])

@@ -32,7 +32,13 @@ describe('EditarMensajePage', () => {
     estado: 'Enviado',
     contenidoDisponible: true,
     destinatarios: [
-      { usuarioId: 'dev-usuario-2', nombre: 'Dos', usuario: 'dos', estadoLectura: 'Nuevo', estadoRespuesta: 'Pendiente' },
+      {
+        usuarioId: 'dev-usuario-2',
+        nombre: 'Dos',
+        usuario: 'dos',
+        estadoLectura: 'Nuevo',
+        estadoRespuesta: 'Pendiente',
+      },
     ],
     titulo: 'Asunto original',
     descripcion: 'Contenido original',
@@ -47,8 +53,6 @@ describe('EditarMensajePage', () => {
     return { target: { files, value: '' } } as unknown as Event;
   }
 
-  // La carga del detalle se dispara desde el constructor, así que los spies
-  // sobre MensajesService deben existir antes de crear el fixture.
   function configurar(): void {
     TestBed.configureTestingModule({
       imports: [EditarMensajePage],
@@ -76,8 +80,6 @@ describe('EditarMensajePage', () => {
     component = fixture.componentInstance;
   }
 
-  // ===== PageHero / navegación =====
-
   it('PageHero muestra "Editar mensaje" como único h1', () => {
     configurar();
     vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(of(enviadoEditable));
@@ -102,8 +104,6 @@ describe('EditarMensajePage', () => {
     expect(enlace).not.toBeNull();
     expect(enlace!.getAttribute('href')).toBe('/mensajes/mensaje-1?origen=enviados');
   });
-
-  // ===== Precarga =====
 
   it('carga un MensajeEnviado editable y precarga título, descripción y destinatarios', () => {
     configurar();
@@ -143,11 +143,11 @@ describe('EditarMensajePage', () => {
     expect(component['archivoIdsExistentes']()).toEqual(['archivo-2']);
   });
 
-  // ===== Carga: errores (no deben destruir el resto del formulario) =====
-
   it('un error al cargar el detalle muestra un mensaje de error', () => {
     configurar();
-    vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(throwError(() => new Error('falla')));
+    vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(
+      throwError(() => new Error('falla')),
+    );
     crearFixture();
 
     fixture.detectChanges();
@@ -168,8 +168,6 @@ describe('EditarMensajePage', () => {
     expect(component['editable']()).toBe(true);
     expect(component['form'].controls.titulo.value).toBe('Asunto original');
   });
-
-  // ===== Guardar: flujo funcional =====
 
   it('sin destinatarios seleccionados, el formulario no envía', async () => {
     configurar();
@@ -195,7 +193,9 @@ describe('EditarMensajePage', () => {
     const archivo = new File(['contenido'], 'nuevo.pdf', { type: 'application/pdf' });
     component['onArchivosSeleccionados'](eventoConArchivos([archivo]));
 
-    vi.spyOn(archivosService, 'subir').mockReturnValue(of(archivoRespuesta('archivo-3', 'nuevo.pdf')));
+    vi.spyOn(archivosService, 'subir').mockReturnValue(
+      of(archivoRespuesta('archivo-3', 'nuevo.pdf')),
+    );
     vi.spyOn(mensajesService, 'actualizar').mockReturnValue(of({} as any));
 
     await component['onSubmit']();
@@ -233,7 +233,9 @@ describe('EditarMensajePage', () => {
     await component['onSubmit']();
 
     expect(mensajesService.actualizar).not.toHaveBeenCalled();
-    expect(component['errorGuardar']()).toBe('No fue posible subir uno de los archivos seleccionados.');
+    expect(component['errorGuardar']()).toBe(
+      'No fue posible subir uno de los archivos seleccionados.',
+    );
   });
 
   it('el PATCH usa los ids existentes conservados más los nuevos subidos', async () => {
@@ -247,7 +249,9 @@ describe('EditarMensajePage', () => {
     const archivo = new File(['contenido'], 'nuevo.pdf', { type: 'application/pdf' });
     component['onArchivosSeleccionados'](eventoConArchivos([archivo]));
 
-    vi.spyOn(archivosService, 'subir').mockReturnValue(of(archivoRespuesta('archivo-3', 'nuevo.pdf')));
+    vi.spyOn(archivosService, 'subir').mockReturnValue(
+      of(archivoRespuesta('archivo-3', 'nuevo.pdf')),
+    );
     vi.spyOn(mensajesService, 'actualizar').mockReturnValue(of({} as any));
 
     await component['onSubmit']();
@@ -286,10 +290,14 @@ describe('EditarMensajePage', () => {
       .spyOn(archivosService, 'subir')
       .mockReturnValue(of(archivoRespuesta('archivo-3', 'nuevo.pdf')));
 
-    vi.spyOn(mensajesService, 'actualizar').mockReturnValueOnce(throwError(() => new Error('falla')));
+    vi.spyOn(mensajesService, 'actualizar').mockReturnValueOnce(
+      throwError(() => new Error('falla')),
+    );
     await component['onSubmit']();
 
-    expect(component['errorGuardar']()).toBe('No fue posible guardar los cambios. Puedes intentarlo de nuevo.');
+    expect(component['errorGuardar']()).toBe(
+      'No fue posible guardar los cambios. Puedes intentarlo de nuevo.',
+    );
     expect(component['seleccionArchivos']()[0].archivoSubido?.id).toBe('archivo-3');
     expect(spySubir).toHaveBeenCalledTimes(1);
 
@@ -298,8 +306,6 @@ describe('EditarMensajePage', () => {
 
     expect(spySubir).toHaveBeenCalledTimes(1);
   });
-
-  // ===== Resumen y tamaño legible =====
 
   describe('resumen', () => {
     it('combina destinatarios y adjuntos (existentes + nuevos) con plurales correctos', () => {
@@ -334,14 +340,18 @@ describe('EditarMensajePage', () => {
     });
   });
 
-  // ===== Reglas de editabilidad (NO relajadas) =====
-
   it('un mensaje con algún destinatario Visto no permite edición', () => {
     configurar();
     const conVisto: MensajeEnviado = {
       ...enviadoEditable,
       destinatarios: [
-        { usuarioId: 'dev-usuario-2', nombre: 'Dos', usuario: 'dos', estadoLectura: 'Visto', estadoRespuesta: 'Pendiente' },
+        {
+          usuarioId: 'dev-usuario-2',
+          nombre: 'Dos',
+          usuario: 'dos',
+          estadoLectura: 'Visto',
+          estadoRespuesta: 'Pendiente',
+        },
       ],
     };
     vi.spyOn(mensajesService, 'obtenerDetalle').mockReturnValue(of(conVisto));
@@ -469,18 +479,28 @@ describe('EditarMensajePage — selector de destinatarios con búsqueda', () => 
       rol: 'Usuario',
       estado: 'Activo',
     },
-    { id: 'u-3', nombre: 'Otra Persona', usuario: 'otra.persona', rol: 'Usuario', estado: 'Activo' },
+    {
+      id: 'u-3',
+      nombre: 'Otra Persona',
+      usuario: 'otra.persona',
+      rol: 'Usuario',
+      estado: 'Activo',
+    },
   ];
 
-  // El mensaje ya trae a "Otra Persona" como destinatario — permite probar
-  // que la precarga también respeta la exclusión disponibles/seleccionados.
   const enviadoPrecargado: MensajeEnviado = {
     id: 'mensaje-1',
     fechaCreacion: new Date().toISOString(),
     estado: 'Enviado',
     contenidoDisponible: true,
     destinatarios: [
-      { usuarioId: 'u-3', nombre: 'Otra Persona', usuario: 'otra.persona', estadoLectura: 'Nuevo', estadoRespuesta: 'Pendiente' },
+      {
+        usuarioId: 'u-3',
+        nombre: 'Otra Persona',
+        usuario: 'otra.persona',
+        estadoLectura: 'Nuevo',
+        estadoRespuesta: 'Pendiente',
+      },
     ],
     titulo: 'Asunto',
     descripcion: 'Contenido',
@@ -644,7 +664,9 @@ describe('EditarMensajePage — selector de destinatarios con búsqueda', () => 
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    const botones = Array.from(compiled.querySelectorAll('button')).map((b) => b.textContent?.trim());
+    const botones = Array.from(compiled.querySelectorAll('button')).map((b) =>
+      b.textContent?.trim(),
+    );
     expect(botones).not.toContain('Limpiar');
   });
 

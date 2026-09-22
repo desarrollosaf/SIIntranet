@@ -4,9 +4,6 @@ import { MulterModule } from '@nestjs/platform-express';
 import { ArchivosController } from './archivos.controller';
 import { ArchivosService } from './archivos.service';
 
-// Fallback de desarrollo si ARCHIVOS_MAX_BYTES falta o es inválido — mismo
-// valor sugerido en .env.example (10 MiB), técnico y provisional, no una
-// política institucional (D17: tamaño máximo real pendiente).
 const TAMANO_MAXIMO_FALLBACK_BYTES = 10 * 1024 * 1024;
 
 const logger = new Logger('ArchivosModule');
@@ -30,9 +27,7 @@ function resolverTamanoMaximoBytes(configService: ConfigService): number {
     MulterModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      // Sin `storage` explícito: Multer usa memoryStorage() por defecto,
-      // necesaria para que ArchivosService reciba file.buffer y pueda
-      // validar el contenido real antes de escribir a disco.
+
       useFactory: (configService: ConfigService) => ({
         limits: {
           fileSize: resolverTamanoMaximoBytes(configService),

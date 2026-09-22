@@ -73,12 +73,14 @@ describe('UsuariosPage', () => {
 
   function botonAccionSecundaria(): HTMLButtonElement {
     const compiled = fixture.nativeElement as HTMLElement;
-    const botones = Array.from(compiled.querySelectorAll('.usuarios-page__accion')) as HTMLButtonElement[];
-    return botones.find((b) => b.textContent?.trim() === 'Activar' || b.textContent?.trim() === 'Desactivar')!;
+    const botones = Array.from(
+      compiled.querySelectorAll('.usuarios-page__accion'),
+    ) as HTMLButtonElement[];
+    return botones.find(
+      (b) => b.textContent?.trim() === 'Activar' || b.textContent?.trim() === 'Desactivar',
+    )!;
   }
 
-  // Variante que devuelve TODOS los botones Activar/Desactivar en orden de
-  // aparición — necesaria para distinguir filas cuando hay más de un usuario.
   function botonesAccionSecundaria(): HTMLButtonElement[] {
     const compiled = fixture.nativeElement as HTMLElement;
     return Array.from(compiled.querySelectorAll('.usuarios-page__accion')).filter(
@@ -316,7 +318,9 @@ describe('UsuariosPage', () => {
       buscar('término que no existe');
 
       const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.textContent).toContain('No se encontraron usuarios que coincidan con los filtros.');
+      expect(compiled.textContent).toContain(
+        'No se encontraron usuarios que coincidan con los filtros.',
+      );
       expect(fixture.componentInstance['usuariosFiltrados']()).toHaveLength(0);
     });
 
@@ -395,9 +399,6 @@ describe('UsuariosPage', () => {
       botonesEditar()[0].click();
       fixture.detectChanges();
 
-      // Tras abrir la edición del primer usuario, su botón "Editar" se
-      // oculta — el único "Editar" restante en el DOM es el del segundo
-      // usuario, ahora en el índice 0.
       botonesEditar()[0].click();
       fixture.detectChanges();
 
@@ -486,7 +487,9 @@ describe('UsuariosPage', () => {
       fixture.componentInstance['guardarEdicion']();
       fixture.detectChanges();
 
-      expect(fixture.componentInstance['errorEdicion']()).toBe('No fue posible guardar los cambios.');
+      expect(fixture.componentInstance['errorEdicion']()).toBe(
+        'No fue posible guardar los cambios.',
+      );
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.querySelector('form [role="alert"]')?.textContent).toContain(
         'No fue posible guardar los cambios.',
@@ -534,7 +537,6 @@ describe('UsuariosPage', () => {
       return crearUsuario({ id: 'u2', nombre: 'Bruno Ruiz', estado: 'Inactivo' });
     }
 
-    // 29 y 30. Desactivar solicita confirmación / cancelar confirmación no llama al servicio
     it('Desactivar solicita confirmación y no llama al servicio si se cancela', () => {
       configurar();
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of([usuarioActivo()]));
@@ -585,7 +587,9 @@ describe('UsuariosPage', () => {
     it('un error al cambiar estado muestra un error local sin ocultar el listado ni activar el error general', () => {
       configurar();
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of([usuarioInactivo()]));
-      vi.spyOn(usuariosService, 'cambiarEstado').mockReturnValue(throwError(() => new Error('falla')));
+      vi.spyOn(usuariosService, 'cambiarEstado').mockReturnValue(
+        throwError(() => new Error('falla')),
+      );
       crearFixture();
       fixture.detectChanges();
 
@@ -611,7 +615,9 @@ describe('UsuariosPage', () => {
     it('una segunda llamada a alternarEstado() mientras hay una pendiente no dispara otra petición', () => {
       configurar();
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of([usuarioInactivo()]));
-      const spy = vi.spyOn(usuariosService, 'cambiarEstado').mockReturnValue(new Subject<Usuario>());
+      const spy = vi
+        .spyOn(usuariosService, 'cambiarEstado')
+        .mockReturnValue(new Subject<Usuario>());
       crearFixture();
       fixture.detectChanges();
 
@@ -639,9 +645,6 @@ describe('UsuariosPage', () => {
       ];
     }
 
-    // Backend rechaza la operación (p. ej. auto-desactivación o dejar el
-    // sistema sin Administradores activos) — el usuario debe permanecer
-    // visualmente en su estado anterior, sin actualización local optimista.
     it('si el backend rechaza el cambio de estado, el usuario permanece visualmente en su estado anterior', () => {
       configurar();
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of([usuarioActivo()]));
@@ -660,12 +663,13 @@ describe('UsuariosPage', () => {
       expect(compiled.textContent).toContain('Activo');
     });
 
-    // El error de una fila no debe aparecer bajo otra fila distinta.
     it('el error de cambio de estado de una fila no aparece en otra', () => {
       configurar();
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of(dosUsuariosActivos()));
       vi.spyOn(window, 'confirm').mockReturnValue(true);
-      vi.spyOn(usuariosService, 'cambiarEstado').mockReturnValue(throwError(() => new Error('falla')));
+      vi.spyOn(usuariosService, 'cambiarEstado').mockReturnValue(
+        throwError(() => new Error('falla')),
+      );
       crearFixture();
       fixture.detectChanges();
 
@@ -678,8 +682,6 @@ describe('UsuariosPage', () => {
       expect(items[1].querySelector('[role="alert"]')).toBeNull();
     });
 
-    // Iniciar una nueva operación (sobre cualquier fila) limpia el error
-    // previo — nunca queda mostrado bajo un usuario que ya no corresponde.
     it('iniciar una nueva operación de cambio de estado limpia el error de la fila anterior', () => {
       configurar();
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of(dosUsuariosActivos()));
@@ -699,10 +701,11 @@ describe('UsuariosPage', () => {
 
       expect(fixture.componentInstance['errorCambioEstadoId']()).toBeNull();
       const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.querySelectorAll('.usuarios-page__item')[0].querySelector('[role="alert"]')).toBeNull();
+      expect(
+        compiled.querySelectorAll('.usuarios-page__item')[0].querySelector('[role="alert"]'),
+      ).toBeNull();
     });
 
-    // Una operación exitosa posterior no deja ningún error visible.
     it('una operación de cambio de estado exitosa no deja error visible', () => {
       configurar();
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of([usuarioInactivo()]));
@@ -726,13 +729,14 @@ describe('UsuariosPage', () => {
       expect(compiled.querySelectorAll('[role="alert"]')).toHaveLength(0);
     });
 
-    // errorCambioEstado y errorEdicion nunca se sustituyen entre sí.
     it('errorCambioEstado y errorEdicion son independientes entre sí', () => {
       configurar();
       const usuarios = [crearUsuario({ id: 'u1', nombre: 'Ana Pérez', estado: 'Activo' })];
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of(usuarios));
       vi.spyOn(window, 'confirm').mockReturnValue(true);
-      vi.spyOn(usuariosService, 'cambiarEstado').mockReturnValue(throwError(() => new Error('falla')));
+      vi.spyOn(usuariosService, 'cambiarEstado').mockReturnValue(
+        throwError(() => new Error('falla')),
+      );
       vi.spyOn(usuariosService, 'actualizar').mockReturnValue(throwError(() => new Error('falla')));
       crearFixture();
       fixture.detectChanges();
@@ -748,7 +752,9 @@ describe('UsuariosPage', () => {
       fixture.componentInstance['guardarEdicion']();
       fixture.detectChanges();
 
-      expect(fixture.componentInstance['errorEdicion']()).toBe('No fue posible guardar los cambios.');
+      expect(fixture.componentInstance['errorEdicion']()).toBe(
+        'No fue posible guardar los cambios.',
+      );
       expect(fixture.componentInstance['errorCambioEstado']()).toBe(
         'No fue posible actualizar el estado del usuario.',
       );
@@ -775,7 +781,6 @@ describe('UsuariosPage', () => {
       ];
     }
 
-    // A. sin separador decorativo "·"
     it('no renderiza ningún separador decorativo "·" entre las acciones', () => {
       configurar();
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of(dosUsuarios()));
@@ -790,7 +795,6 @@ describe('UsuariosPage', () => {
       gruposAcciones.forEach((grupo) => expect(grupo.textContent).not.toContain('·'));
     });
 
-    // B. usuario NO editándose muestra sus acciones normales
     it('un usuario que no está siendo editado muestra "Editar" y "Activar"/"Desactivar"', () => {
       configurar();
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of(dosUsuarios()));
@@ -807,7 +811,6 @@ describe('UsuariosPage', () => {
       expect(items[1].textContent).toContain('Activar');
     });
 
-    // C. usuario editándose oculta Editar/Activar/Desactivar y muestra Guardar/Cancelar
     it('la fila en edición oculta Editar y Activar/Desactivar, y muestra Guardar cambios/Cancelar', () => {
       configurar();
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of(dosUsuarios()));
@@ -822,7 +825,11 @@ describe('UsuariosPage', () => {
       const filaEnEdicion = items[0];
 
       expect(filaEnEdicion.querySelector('.usuarios-page__acciones')).toBeNull();
-      expect(Array.from(filaEnEdicion.querySelectorAll('button')).some((b) => b.textContent?.trim() === 'Editar')).toBe(false);
+      expect(
+        Array.from(filaEnEdicion.querySelectorAll('button')).some(
+          (b) => b.textContent?.trim() === 'Editar',
+        ),
+      ).toBe(false);
       expect(
         Array.from(filaEnEdicion.querySelectorAll('button')).some(
           (b) => b.textContent?.trim() === 'Activar' || b.textContent?.trim() === 'Desactivar',
@@ -832,7 +839,6 @@ describe('UsuariosPage', () => {
       expect(filaEnEdicion.textContent).toContain('Cancelar');
     });
 
-    // D. otra fila que no se edita conserva sus acciones normales
     it('una fila distinta a la que se edita conserva sus acciones normales', () => {
       configurar();
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of(dosUsuarios()));
@@ -851,7 +857,6 @@ describe('UsuariosPage', () => {
       expect(filaSinEditar.textContent).toContain('Activar');
     });
 
-    // Editar/Activar/Desactivar reaparecen al cancelar
     it('cancelar la edición restaura las acciones normales de la fila', () => {
       configurar();
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of(dosUsuarios()));
@@ -869,7 +874,6 @@ describe('UsuariosPage', () => {
       expect(items[0].textContent).toContain('Editar');
     });
 
-    // E. Rol y Estado pertenecen al mismo contenedor visual/estructural
     it('los badges de rol y estado pertenecen al mismo contenedor de badges', () => {
       configurar();
       vi.spyOn(usuariosService, 'listar').mockReturnValue(of([dosUsuarios()[0]]));
@@ -886,5 +890,30 @@ describe('UsuariosPage', () => {
       expect(badges[0].textContent?.trim()).toBe('Administrador');
       expect(badges[1].textContent?.trim()).toBe('Activo');
     });
+  });
+  it('mueve el foco al formulario y lo devuelve al botón de edición', async () => {
+    configurar();
+    vi.spyOn(usuariosService, 'listar').mockReturnValue(of([crearUsuario()]));
+    crearFixture();
+    await fixture.whenStable();
+    botonesEditar()[0].click();
+    await fixture.whenStable();
+    expect(document.activeElement?.id).toBe('edicion-nombre');
+    fixture.componentInstance['cancelarEdicion']();
+    await fixture.whenStable();
+    expect(document.activeElement).toBe(botonesEditar()[0]);
+  });
+  it('no permite cambiar de usuario durante un guardado pendiente', async () => {
+    configurar();
+    const usuarios = [crearUsuario(), crearUsuario({ id: 'otro', usuario: 'otro' })];
+    vi.spyOn(usuariosService, 'listar').mockReturnValue(of(usuarios));
+    vi.spyOn(usuariosService, 'actualizar').mockReturnValue(new Subject<Usuario>());
+    crearFixture();
+    await fixture.whenStable();
+    const component = fixture.componentInstance;
+    component['iniciarEdicion'](usuarios[0]);
+    component['guardarEdicion']();
+    component['iniciarEdicion'](usuarios[1]);
+    expect(component['usuarioEnEdicionId']()).toBe(usuarios[0].id);
   });
 });

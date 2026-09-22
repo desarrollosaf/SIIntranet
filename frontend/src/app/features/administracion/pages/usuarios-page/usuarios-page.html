@@ -16,7 +16,9 @@
       } @else {
         <div class="usuarios-page__herramientas">
           <div class="usuarios-page__buscador">
-            <label for="buscador-usuarios" class="visually-hidden">Buscar por nombre o usuario</label>
+            <label for="buscador-usuarios" class="visually-hidden"
+              >Buscar por nombre o usuario</label
+            >
             <input
               id="buscador-usuarios"
               type="search"
@@ -29,7 +31,12 @@
 
           <div class="usuarios-page__filtro">
             <label for="filtro-rol" class="visually-hidden">Filtrar por rol</label>
-            <select id="filtro-rol" class="form-select" [value]="filtroRol()" (change)="onFiltroRol($event)">
+            <select
+              id="filtro-rol"
+              class="form-select"
+              [value]="filtroRol()"
+              (change)="onFiltroRol($event)"
+            >
               <option value="Todos">Todos los roles</option>
               <option value="Usuario">Usuario</option>
               <option value="Administrador">Administrador</option>
@@ -58,10 +65,12 @@
         } @else {
           <ul class="list-unstyled usuarios-page__lista">
             @for (usuario of usuariosFiltrados(); track usuario.id; let i = $index) {
-              <li class="usuarios-page__item">
+              <li class="usuarios-page__item" [attr.data-usuario-id]="usuario.id">
                 <div class="usuarios-page__fila">
                   <div class="usuarios-page__info">
-                    <span class="usuarios-page__nombre" [id]="'usuario-nombre-' + i">{{ usuario.nombre }}</span>
+                    <span class="usuarios-page__nombre" [id]="'usuario-nombre-' + i">{{
+                      usuario.nombre
+                    }}</span>
                     <span class="usuarios-page__usuario">{{ usuario.usuario }}</span>
                   </div>
 
@@ -86,6 +95,7 @@
                       <button
                         type="button"
                         class="usuarios-page__accion"
+                        [disabled]="guardando()"
                         (click)="iniciarEdicion(usuario)"
                       >
                         Editar
@@ -103,7 +113,9 @@
                 </div>
 
                 @if (errorCambioEstadoId() === usuario.id) {
-                  <p class="usuarios-page__error-fila text-danger" role="alert">{{ errorCambioEstado() }}</p>
+                  <p class="usuarios-page__error-fila text-danger" role="alert">
+                    {{ errorCambioEstado() }}
+                  </p>
                 }
 
                 @if (usuarioEnEdicionId() === usuario.id) {
@@ -115,12 +127,24 @@
                   >
                     <div class="mb-3">
                       <label for="edicion-nombre" class="form-label">Nombre</label>
-                      <input id="edicion-nombre" type="text" class="form-control" formControlName="nombre" />
+                      <input
+                        id="edicion-nombre"
+                        type="text"
+                        class="form-control"
+                        formControlName="nombre"
+                        [readonly]="guardando()"
+                      />
                     </div>
 
                     <div class="mb-3">
                       <label for="edicion-usuario" class="form-label">Usuario</label>
-                      <input id="edicion-usuario" type="text" class="form-control" formControlName="usuario" />
+                      <input
+                        id="edicion-usuario"
+                        type="text"
+                        class="form-control"
+                        formControlName="usuario"
+                        [readonly]="guardando()"
+                      />
                     </div>
 
                     <div class="mb-3">
@@ -136,7 +160,11 @@
                     }
 
                     <div class="usuarios-page__edicion-acciones">
-                      <button type="submit" class="btn btn-vino" [disabled]="form.invalid || guardando()">
+                      <button
+                        type="submit"
+                        class="btn btn-vino"
+                        [disabled]="form.invalid || guardando()"
+                      >
                         {{ guardando() ? 'Guardando…' : 'Guardar cambios' }}
                       </button>
                       <button

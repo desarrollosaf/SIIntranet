@@ -16,7 +16,7 @@ import { ArchivosService } from '../archivos/archivos.service';
 @Injectable()
 export class MensajesService {
   private readonly mensajes = new Map<string, Mensaje>();
-  private readonly destinatarios: DestinatarioMensaje[] = [];
+  private readonly destinatarios = new Map<string, Map<string, DestinatarioMensaje>>();
 
   constructor(
     private readonly usuariosService: UsuariosService,
@@ -66,9 +66,10 @@ export class MensajesService {
     };
 
     this.mensajes.set(id, mensaje);
+    this.destinatarios.set(id, new Map());
 
     for (const usuarioId of dto.destinatarioIds) {
-      this.destinatarios.push({
+      this.destinatarios.get(id)!.set(usuarioId, {
         id: randomUUID(),
         mensajeId: id,
         usuarioId,
@@ -77,10 +78,8 @@ export class MensajesService {
       });
     }
 
-    // Solo se marca tras la creación exitosa del mensaje de respuesta — si
-    // cualquier validación anterior falló, esta línea nunca se alcanza y el
-    // original queda intacto.
     if (destinatarioActorEnOriginal) {
+      destinatarioActorEnOriginal.estadoLectura = 'Visto';
       destinatarioActorEnOriginal.estadoRespuesta = 'Respondido';
     }
 
@@ -88,12 +87,11 @@ export class MensajesService {
   }
 
   obtenerRecibidos(actorId: string) {
-    return this.destinatarios
-      .filter((d) => d.usuarioId === actorId)
-      .map((d) => ({ destinatario: d, mensaje: this.mensajes.get(d.mensajeId) }))
+    return [...this.mensajes.values()]
+      .map((mensaje) => ({ mensaje, destinatario: this.destinatarioInterno(mensaje.id, actorId) }))
       .filter(
         (par): par is { destinatario: DestinatarioMensaje; mensaje: Mensaje } =>
-          par.mensaje !== undefined && par.mensaje.estado !== 'Cancelado',
+          par.destinatario !== undefined && !par.mensaje.fechaCancelacion,
       )
       .map(({ mensaje, destinatario }) => this.aVistaRecibido(mensaje, destinatario));
   }
@@ -113,11 +111,10 @@ export class MensajesService {
       throw new ForbiddenException('No tiene acceso a este mensaje.');
     }
 
-    if (!esRemitente && mensaje.estado === 'Cancelado') {
+    if (!esRemitente && mensaje.fechaCancelacion) {
       throw new ForbiddenException('No tiene acceso a este mensaje.');
     }
 
-    // Lectura segura: GET nunca muta estadoLectura (ver PATCH /:id/visto).
     if (esRemitente) {
       return this.aVistaEnviado(mensaje);
     }
@@ -129,9 +126,6 @@ export class MensajesService {
     const mensaje = this.buscarMensajeInterno(id);
     const destinatario = this.destinatarioInterno(id, actorId);
 
-    // Autorización antes que estado: un actor no autorizado no debe poder
-    // distinguir, por el código HTTP, si un mensaje ajeno está Enviado,
-    // Cancelado o Eliminado.
     if (!destinatario) {
       throw new ForbiddenException('Solo un destinatario puede marcar este mensaje como visto.');
     }
@@ -155,9 +149,6 @@ export class MensajesService {
       throw new ConflictException('El mensaje ya no puede editarse.');
     }
 
-    // Validar TODO antes de aplicar ningún cambio: si cualquier
-    // archivoId/destinatarioId propuesto es inválido, el almacenamiento
-    // interno debe quedar exactamente igual que antes de esta llamada.
     if (dto.archivoIds !== undefined) {
       for (const archivoId of dto.archivoIds) {
         this.archivosService.obtenerPorId(archivoId, actorId);
@@ -201,6 +192,7 @@ export class MensajesService {
     }
 
     mensaje.estado = 'Cancelado';
+    mensaje.fechaCancelacion = new Date().toISOString();
     return this.copiarMensaje(mensaje);
   }
 
@@ -224,7 +216,7 @@ export class MensajesService {
       throw new ForbiddenException('No tiene acceso a este mensaje.');
     }
 
-    if (!esRemitente && mensaje.estado === 'Cancelado') {
+    if (!esRemitente && mensaje.fechaCancelacion) {
       throw new ForbiddenException('No tiene acceso a este mensaje.');
     }
 
@@ -236,8 +228,6 @@ export class MensajesService {
       throw new NotFoundException('El archivo no pertenece a este mensaje.');
     }
 
-    // Autorización ya resuelta arriba (remitente/destinatario de este
-    // mensaje concreto) — obtenerParaUsoInterno() no vuelve a autorizar.
     return this.archivosService.obtenerParaUsoInterno(archivoId);
   }
 
@@ -262,11 +252,11 @@ export class MensajesService {
     mensajeId: string,
     usuarioId: string,
   ): DestinatarioMensaje | undefined {
-    return this.destinatarios.find((d) => d.mensajeId === mensajeId && d.usuarioId === usuarioId);
+    return this.destinatarios.get(mensajeId)?.get(usuarioId);
   }
 
   private destinatariosDeInterno(mensajeId: string): DestinatarioMensaje[] {
-    return this.destinatarios.filter((d) => d.mensajeId === mensajeId);
+    return [...(this.destinatarios.get(mensajeId)?.values() ?? [])];
   }
 
   private estaBloqueadoParaModificar(mensaje: Mensaje): boolean {
@@ -277,20 +267,18 @@ export class MensajesService {
   }
 
   private sincronizarDestinatarios(mensajeId: string, nuevosIds: string[]): void {
-    const actuales = this.destinatariosDeInterno(mensajeId);
-    const actualesIds = new Set(actuales.map((d) => d.usuarioId));
+    const actuales = this.destinatarios.get(mensajeId)!;
     const nuevosSet = new Set(nuevosIds);
 
-    for (const destinatario of actuales) {
-      if (!nuevosSet.has(destinatario.usuarioId)) {
-        const indice = this.destinatarios.indexOf(destinatario);
-        this.destinatarios.splice(indice, 1);
+    for (const usuarioId of actuales.keys()) {
+      if (!nuevosSet.has(usuarioId)) {
+        actuales.delete(usuarioId);
       }
     }
 
     for (const usuarioId of nuevosIds) {
-      if (!actualesIds.has(usuarioId)) {
-        this.destinatarios.push({
+      if (!actuales.has(usuarioId)) {
+        actuales.set(usuarioId, {
           id: randomUUID(),
           mensajeId,
           usuarioId,

@@ -6,7 +6,8 @@
       [routerLink]="['/mensajes', mensajeId]"
       [queryParams]="{ origen: 'enviados' }"
       class="editar-mensaje-page__volver"
-    >← Volver al mensaje</a>
+      >← Volver al mensaje</a
+    >
 
     @if (cargando()) {
       <p>Cargando mensaje…</p>
@@ -21,12 +22,19 @@
         <p class="text-danger" role="alert">{{ errorUsuarios() }}</p>
       }
 
-      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="editar-mensaje-page__layout">
+      <form
+        [formGroup]="form"
+        (ngSubmit)="onSubmit()"
+        novalidate
+        class="editar-mensaje-page__layout"
+      >
         <section
           class="editar-mensaje-page__panel editar-mensaje-page__panel--contenido"
           aria-labelledby="contenido-titulo"
         >
-          <h2 id="contenido-titulo" class="editar-mensaje-page__panel-titulo">Contenido del mensaje</h2>
+          <h2 id="contenido-titulo" class="editar-mensaje-page__panel-titulo">
+            Contenido del mensaje
+          </h2>
 
           <div class="mb-3">
             <label for="titulo" class="form-label">Título</label>
@@ -49,7 +57,9 @@
               id="descripcion"
               class="form-control"
               rows="6"
-              [class.is-invalid]="form.controls.descripcion.invalid && form.controls.descripcion.touched"
+              [class.is-invalid]="
+                form.controls.descripcion.invalid && form.controls.descripcion.touched
+              "
               [readonly]="guardando()"
               formControlName="descripcion"
             ></textarea>
@@ -67,7 +77,9 @@
 
           <div class="editar-mensaje-page__buscador">
             <i class="bi bi-search" aria-hidden="true"></i>
-            <label for="buscador-destinatarios" class="visually-hidden">Buscar por nombre o usuario</label>
+            <label for="buscador-destinatarios" class="visually-hidden"
+              >Buscar por nombre o usuario</label
+            >
             <input
               id="buscador-destinatarios"
               type="search"
@@ -83,7 +95,9 @@
             <p>Cargando usuarios…</p>
           } @else {
             <div class="editar-mensaje-page__resultados-header">
-              <span class="editar-mensaje-page__contador-disponibles">{{ textoDisponibles() }}</span>
+              <span class="editar-mensaje-page__contador-disponibles">{{
+                textoDisponibles()
+              }}</span>
               <button
                 type="button"
                 class="editar-mensaje-page__accion-discreta"
@@ -103,8 +117,12 @@
                 @for (usuario of usuariosDisponibles(); track usuario.id) {
                   <li class="editar-mensaje-page__resultado">
                     <span class="editar-mensaje-page__resultado-info">
-                      <span class="editar-mensaje-page__resultado-nombre">{{ usuario.nombre }}</span>
-                      <span class="editar-mensaje-page__resultado-usuario">{{ usuario.usuario }}</span>
+                      <span class="editar-mensaje-page__resultado-nombre">{{
+                        usuario.nombre
+                      }}</span>
+                      <span class="editar-mensaje-page__resultado-usuario">{{
+                        usuario.usuario
+                      }}</span>
                     </span>
                     <button
                       type="button"
@@ -144,8 +162,12 @@
                   @for (usuario of destinatariosSeleccionados(); track usuario.id) {
                     <li class="editar-mensaje-page__seleccionado">
                       <span class="editar-mensaje-page__seleccionado-info">
-                        <span class="editar-mensaje-page__seleccionado-nombre">{{ usuario.nombre }}</span>
-                        <span class="editar-mensaje-page__seleccionado-usuario">{{ usuario.usuario }}</span>
+                        <span class="editar-mensaje-page__seleccionado-nombre">{{
+                          usuario.nombre
+                        }}</span>
+                        <span class="editar-mensaje-page__seleccionado-usuario">{{
+                          usuario.usuario
+                        }}</span>
                       </span>
                       <button
                         type="button"
@@ -164,7 +186,9 @@
           }
 
           @if (form.controls.destinatarioIds.invalid && form.controls.destinatarioIds.touched) {
-            <p class="invalid-feedback d-block mb-0" role="alert">Selecciona al menos un destinatario.</p>
+            <p class="invalid-feedback d-block mb-0" role="alert">
+              Selecciona al menos un destinatario.
+            </p>
           }
         </section>
 
@@ -213,16 +237,24 @@
           />
 
           @if (seleccionArchivos().length === 0) {
-            <p class="text-muted editar-mensaje-page__adjuntos-vacio">Ningún archivo nuevo seleccionado.</p>
+            <p class="text-muted editar-mensaje-page__adjuntos-vacio">
+              Ningún archivo nuevo seleccionado.
+            </p>
           } @else {
             <p class="editar-mensaje-page__contador">{{ textoContadorArchivosNuevos() }}</p>
             <ul class="list-unstyled editar-mensaje-page__archivos">
-              @for (item of seleccionArchivos(); track item.file.name + '-' + $index; let i = $index) {
+              @for (
+                item of seleccionArchivos();
+                track item.file.name + '-' + $index;
+                let i = $index
+              ) {
                 <li class="editar-mensaje-page__archivo">
                   <span class="editar-mensaje-page__archivo-nombre">{{ item.file.name }}</span>
                   <div class="editar-mensaje-page__archivo-pie">
                     <span class="editar-mensaje-page__archivo-meta">
-                      <span class="editar-mensaje-page__archivo-tamano">{{ tamanoLegible(item.file.size) }}</span>
+                      <span class="editar-mensaje-page__archivo-tamano">{{
+                        tamanoLegible(item.file.size)
+                      }}</span>
                       @if (item.archivoSubido) {
                         <span class="badge text-bg-success">Subido</span>
                       }
@@ -249,7 +281,11 @@
 
             <p class="editar-mensaje-page__resumen">{{ textoResumen() }}</p>
 
-            <button type="submit" class="btn btn-vino editar-mensaje-page__guardar" [disabled]="guardando()">
+            <button
+              type="submit"
+              class="btn btn-vino editar-mensaje-page__guardar"
+              [disabled]="guardando()"
+            >
               {{ guardando() ? 'Guardando…' : 'Guardar cambios' }}
             </button>
           </div>

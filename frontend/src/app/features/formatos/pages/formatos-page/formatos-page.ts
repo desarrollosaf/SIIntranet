@@ -26,10 +26,10 @@ export class FormatosPage {
 
   protected readonly totalFormatos = computed(() => this.formatos().length);
 
-  protected readonly hayBusqueda = computed(() => this.normalizarTexto(this.terminoBusqueda()).length > 0);
+  protected readonly hayBusqueda = computed(
+    () => this.normalizarTexto(this.terminoBusqueda()).length > 0,
+  );
 
-  // Filtro completamente local sobre los Formato ya obtenidos — sin nueva
-  // petición al backend. Se filtra sobre this.formatos() (nunca se muta).
   protected readonly formatosFiltrados = computed<Formato[]>(() => {
     const termino = this.normalizarTexto(this.terminoBusqueda());
 
@@ -40,12 +40,6 @@ export class FormatosPage {
     return this.formatos().filter((formato) => this.coincide(formato, termino));
   });
 
-  // Los 11 apartados oficiales se usan como orden de referencia, pero solo
-  // se presentan los que tengan al menos un formato (visible tras la
-  // búsqueda); el catálogo en sí no cambia (APARTADOS_FORMATOS no se
-  // modifica), solo se ocultan las categorías sin contenido. Una categoría
-  // del backend que no coincida con ninguna de las 11 se agrupa en una
-  // sección adicional al final, con el nombre real recibido.
   protected readonly grupos = computed<GrupoFormatos[]>(() => {
     const porCategoria = new Map<string, Formato[]>();
     const desconocidas: string[] = [];

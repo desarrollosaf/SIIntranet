@@ -1,7 +1,6 @@
-@import 'bootstrap/scss/bootstrap';
+@use 'bootstrap/scss/bootstrap';
 @import 'bootstrap-icons/font/bootstrap-icons.css';
 
-// Colores provisionales hasta recibir el manual de identidad institucional.
 :root {
   --color-institucional: #6d1a35;
   --color-institucional-hover: #551528;
@@ -16,11 +15,49 @@
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
   background-color: #f5f5f5;
 }
 
 :focus-visible {
   outline: 2px solid #0d6efd;
   outline-offset: 2px;
+}
+
+.btn-vino {
+  background-color: var(--color-institucional);
+  border-color: var(--color-institucional);
+  color: #fff;
+}
+.btn-vino:hover,
+.btn-vino:focus-visible {
+  background-color: var(--color-institucional-hover);
+  border-color: var(--color-institucional-hover);
+  color: #fff;
+}
+.btn-vino:disabled {
+  background-color: var(--color-institucional);
+  border-color: var(--color-institucional);
+  opacity: 0.65;
+}
+.btn-outline-vino {
+  background-color: transparent;
+  border: 1px solid var(--color-institucional);
+  color: var(--color-institucional);
+}
+.btn-outline-vino:hover,
+.btn-outline-vino:focus-visible {
+  background-color: var(--color-institucional-tint);
+  color: var(--color-institucional-hover);
+}
+.btn-outline-vino:disabled {
+  color: var(--color-institucional);
+  opacity: 0.5;
 }

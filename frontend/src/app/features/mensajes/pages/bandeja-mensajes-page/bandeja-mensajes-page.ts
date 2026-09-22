@@ -74,7 +74,10 @@ export class BandejaMensajesPage {
   }
 
   private coincideRecibido(mensaje: MensajeRecibido, termino: string): boolean {
-    if (mensaje.contenidoDisponible && this.normalizarTexto(mensaje.titulo ?? '').includes(termino)) {
+    if (
+      mensaje.contenidoDisponible &&
+      this.normalizarTexto(mensaje.titulo ?? '').includes(termino)
+    ) {
       return true;
     }
 
@@ -85,7 +88,10 @@ export class BandejaMensajesPage {
   }
 
   private coincideEnviado(mensaje: MensajeEnviado, termino: string): boolean {
-    if (mensaje.contenidoDisponible && this.normalizarTexto(mensaje.titulo ?? '').includes(termino)) {
+    if (
+      mensaje.contenidoDisponible &&
+      this.normalizarTexto(mensaje.titulo ?? '').includes(termino)
+    ) {
       return true;
     }
 
@@ -100,9 +106,6 @@ export class BandejaMensajesPage {
     return texto.trim().toLowerCase();
   }
 
-  // El backend no garantiza orden (ver backend/src/modules/mensajes/
-  // mensajes.service.ts, sin sort) — se ordena aquí sobre una copia, sin
-  // mutar el arreglo recibido. Mismo criterio ya aprobado en Inicio.
   private ordenarPorFechaDescendente<T extends { fechaCreacion: string }>(mensajes: T[]): T[] {
     return [...mensajes].sort(
       (a, b) => new Date(b.fechaCreacion).getTime() - new Date(a.fechaCreacion).getTime(),

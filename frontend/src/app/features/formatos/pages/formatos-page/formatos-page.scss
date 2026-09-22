@@ -7,7 +7,7 @@ $color-borde: var(--color-borde);
 }
 
 .formatos-page__wrapper {
-  max-width: 62.5rem; // ~1000px, mismo criterio que Inicio/Bandeja
+  max-width: 62.5rem;
   margin-inline: auto;
 }
 
@@ -32,7 +32,6 @@ $color-borde: var(--color-borde);
   color: #868e96;
 }
 
-// ===== Categoría: título + contador, sin panel ni icono decorativo =====
 .formatos-page__categoria {
   margin-bottom: 2rem;
 }
@@ -64,8 +63,6 @@ $color-borde: var(--color-borde);
   color: #868e96;
 }
 
-// ===== Lista: UNA superficie agrupada, filas separadas por divisor
-// horizontal — no cards independientes por documento =====
 .formatos-page__lista {
   display: flex;
   flex-direction: column;
@@ -119,7 +116,6 @@ $color-borde: var(--color-borde);
   overflow-wrap: anywhere;
 }
 
-// Acción discreta: texto/outline vino, no botón Bootstrap azul.
 .formatos-page__descarga {
   display: inline-flex;
   flex-shrink: 0;

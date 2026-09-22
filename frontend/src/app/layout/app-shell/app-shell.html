@@ -34,8 +34,6 @@
       </div>
     </div>
 
-    <!-- Logo SAF: pendiente de asset oficial. Cuando se reciba, va aquí, a
-         la izquierda del botón de cuenta, sin rediseñar el topbar. -->
     <div class="app-header__account">
       <button
         #botonCuenta
@@ -65,7 +63,12 @@
             <span class="app-header__account-rol">{{ usuario.rol }}</span>
           </div>
         }
-        <button type="button" role="menuitem" class="app-header__account-logout" (click)="onLogout()">
+        <button
+          type="button"
+          role="menuitem"
+          class="app-header__account-logout"
+          (click)="onLogout()"
+        >
           <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
           Cerrar sesión
         </button>
@@ -116,7 +119,9 @@
       </main>
 
       <footer class="app-footer">
-        <p class="mb-0">Poder Legislativo del Estado de México — Secretaría de Administración y Finanzas</p>
+        <p class="mb-0">
+          Poder Legislativo del Estado de México — Secretaría de Administración y Finanzas
+        </p>
       </footer>
     </div>
   </div>
