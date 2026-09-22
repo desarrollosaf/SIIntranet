@@ -51,7 +51,7 @@ $color-borde: var(--color-borde);
 .editar-mensaje-page__panel,
 .editar-mensaje-page__destinatarios-panel {
   padding: 1.25rem 1.375rem;
-  background: #ffffff;
+  background: var(--color-superficie);
   border: 1px solid $color-borde;
   border-radius: 0.875rem;
   box-shadow: var(--sombra-superficie);
@@ -170,6 +170,10 @@ $color-borde: var(--color-borde);
   padding: 0.5rem 0.625rem;
   border: 1px solid $color-borde;
   border-radius: 0.5rem;
+}
+
+.editar-mensaje-page__seleccionado {
+  background-color: var(--color-institucional-tint);
 }
 
 .editar-mensaje-page__resultado-info,

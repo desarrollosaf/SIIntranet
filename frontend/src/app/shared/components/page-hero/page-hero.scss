@@ -1,17 +1,13 @@
-$color-vino: var(--color-institucional);
-$color-vino-tint: var(--color-institucional-tint);
-$color-borde: var(--color-borde);
-
 .page-hero {
   display: flex;
   align-items: center;
   gap: 1rem;
   padding: 1.25rem 1.5rem;
   margin-bottom: 1.5rem;
-  border: 1px solid $color-borde;
-  border-left: 4px solid $color-vino;
+  border: 1px solid var(--color-borde);
+  border-left: 4px solid var(--color-institucional);
   border-radius: 0.875rem;
-  background: linear-gradient(135deg, #ffffff 0%, $color-vino-tint 100%);
+  background-color: var(--color-superficie);
   box-shadow: var(--sombra-superficie);
 }
 
@@ -23,8 +19,9 @@ $color-borde: var(--color-borde);
   width: 3rem;
   height: 3rem;
   border-radius: 0.625rem;
-  background-color: $color-vino;
-  color: #ffffff;
+  background-color: var(--color-institucional-tint);
+  border: 1px solid rgba(109, 26, 53, 0.12);
+  color: var(--color-institucional);
   font-size: 1.35rem;
 }
 
@@ -32,7 +29,7 @@ $color-borde: var(--color-borde);
   margin: 0;
   font-size: 1.75rem;
   font-weight: 700;
-  color: #212529;
+  color: #252a31;
   overflow-wrap: anywhere;
 }
 

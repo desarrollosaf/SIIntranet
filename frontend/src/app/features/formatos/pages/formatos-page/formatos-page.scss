@@ -47,6 +47,8 @@ $color-borde: var(--color-borde);
   justify-content: space-between;
   gap: 0.375rem 0.75rem;
   margin-bottom: 0.75rem;
+  padding-left: 0.75rem;
+  border-left: 3px solid $color-vino;
 }
 
 .formatos-page__categoria-titulo {
@@ -66,7 +68,7 @@ $color-borde: var(--color-borde);
 .formatos-page__lista {
   display: flex;
   flex-direction: column;
-  background: #ffffff;
+  background: var(--color-superficie);
   border: 1px solid $color-borde;
   border-radius: 0.875rem;
   box-shadow: var(--sombra-superficie);

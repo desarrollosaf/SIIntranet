@@ -1,14 +1,14 @@
 $color-vino: var(--color-institucional);
 $color-vino-oscuro: var(--color-institucional-hover);
 
-$color-vino-tint: rgba(109, 26, 53, 0.08);
+$color-vino-tint: var(--color-institucional-tint);
 
-$color-superficie: #ffffff;
+$color-superficie: var(--color-superficie);
 $color-borde: var(--color-borde);
 $color-texto-nav: #495057;
 $color-icono-nav: #868e96;
-$color-heading-grupo: #adb5bd;
-$color-workspace: #f4f6f9;
+$color-heading-grupo: #8b929c;
+$color-workspace: var(--color-fondo);
 
 $sidebar-ancho: 16rem;
 
@@ -37,8 +37,8 @@ $breakpoint-desktop: 992px;
   min-height: $header-altura;
   padding: 0.875rem 1.75rem;
   background-color: $color-superficie;
-  border-bottom: 1px solid $color-borde;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  border-bottom: 2px solid $color-vino;
+  box-shadow: 0 1px 4px rgba(31, 41, 55, 0.06);
 }
 
 .app-header__start {
@@ -50,6 +50,19 @@ $breakpoint-desktop: 992px;
 
 .app-header__toggle-mobile {
   display: none;
+}
+
+.app-header__toggle-desktop,
+.app-header__toggle-mobile {
+  border-color: rgba(109, 26, 53, 0.35);
+  color: $color-vino;
+
+  &:hover,
+  &:focus-visible {
+    background-color: var(--color-institucional-tint);
+    border-color: $color-vino;
+    color: $color-vino-oscuro;
+  }
 }
 
 .app-header__brand {
@@ -163,7 +176,7 @@ $breakpoint-desktop: 992px;
   flex-direction: column;
   gap: 0.125rem;
   padding: 0.75rem;
-  background-color: $color-superficie;
+  background-color: #f8f9fb;
   border-right: 1px solid $color-borde;
   overflow: hidden;
   white-space: nowrap;
@@ -214,7 +227,8 @@ $breakpoint-desktop: 992px;
   }
 
   &:hover {
-    background-color: rgba(0, 0, 0, 0.04);
+    background-color: #eef1f4;
+    color: #252a31;
   }
 }
 
@@ -241,8 +255,9 @@ $breakpoint-desktop: 992px;
   bottom: 0;
   left: 0;
   width: min(80vw, 20rem);
-  background-color: $color-superficie;
+  background-color: #f8f9fb;
   color: $color-texto-nav;
+  border-right: 1px solid $color-borde;
   box-shadow: 0.25rem 0 1rem rgba(0, 0, 0, 0.12);
   display: flex;
   flex-direction: column;
@@ -294,7 +309,7 @@ $breakpoint-desktop: 992px;
 .app-footer {
   padding: 0.875rem 1.75rem;
   text-align: center;
-  color: $color-icono-nav;
+  color: #6c757d;
   font-size: 0.8125rem;
   background-color: $color-superficie;
   border-top: 1px solid $color-borde;

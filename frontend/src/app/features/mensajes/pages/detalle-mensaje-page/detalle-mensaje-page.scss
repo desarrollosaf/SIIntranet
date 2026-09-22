@@ -43,7 +43,7 @@ $color-borde: var(--color-borde);
 
 .detalle-mensaje-page__panel {
   padding: 1.25rem 1.375rem;
-  background: #ffffff;
+  background: var(--color-superficie);
   border: 1px solid $color-borde;
   border-radius: 0.875rem;
   box-shadow: var(--sombra-superficie);
@@ -96,6 +96,7 @@ $color-borde: var(--color-borde);
   padding: 0.625rem 0.875rem;
   border: 1px solid $color-borde;
   border-radius: 0.5rem;
+  background-color: #f6f7f9;
   overflow-wrap: anywhere;
 }
 
@@ -106,6 +107,7 @@ $color-borde: var(--color-borde);
   padding: 0.625rem 0.875rem;
   border: 1px solid $color-borde;
   border-radius: 0.5rem;
+  background-color: var(--color-institucional-tint);
 }
 
 .detalle-mensaje-page__destinatario-nombre {

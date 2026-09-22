@@ -42,7 +42,7 @@ $color-borde: var(--color-borde);
 .usuarios-page__lista {
   display: flex;
   flex-direction: column;
-  background: #ffffff;
+  background: var(--color-superficie);
   border: 1px solid $color-borde;
   border-radius: 0.875rem;
   box-shadow: var(--sombra-superficie);
@@ -154,7 +154,7 @@ $color-borde: var(--color-borde);
 .usuarios-page__edicion {
   padding: 1rem 1.125rem 1.25rem;
   border-top: 1px dashed $color-borde;
-  background: #fafafa;
+  background: var(--color-institucional-tint);
 }
 
 .usuarios-page__edicion-acciones {

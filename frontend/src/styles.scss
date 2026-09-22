@@ -4,9 +4,12 @@
 :root {
   --color-institucional: #6d1a35;
   --color-institucional-hover: #551528;
-  --color-institucional-tint: #fbf3f5;
-  --color-borde: #e9ecef;
-  --sombra-superficie: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --color-institucional-claro: #8c3150;
+  --color-institucional-tint: #f8eef1;
+  --color-superficie: #ffffff;
+  --color-fondo: #f4f6f8;
+  --color-borde: #e1e5ea;
+  --sombra-superficie: 0 0.25rem 0.75rem rgba(31, 41, 55, 0.06);
 }
 
 * {
@@ -23,12 +26,19 @@ body {
     Helvetica,
     Arial,
     sans-serif;
-  background-color: #f5f5f5;
+  color: #252a31;
+  background: var(--color-fondo);
 }
 
 :focus-visible {
-  outline: 2px solid #0d6efd;
+  outline: 2px solid var(--color-institucional-claro);
   outline-offset: 2px;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--color-institucional-claro);
+  box-shadow: 0 0 0 0.2rem rgba(109, 26, 53, 0.14);
 }
 
 .btn-vino {
